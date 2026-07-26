@@ -86,11 +86,15 @@
                 </Border>
             </Grid>
 
-            <ContentControl Content="{Binding RoomRegistrationViewModel}"
-                            Visibility="{Binding IsRoomRegistrationVisible, Converter={StaticResource BoolToVisConverter}}"/>
+            <!-- Room Registration Tab -->
+            <Grid Visibility="{Binding IsRoomRegistrationVisible, Converter={StaticResource BoolToVisConverter}}">
+                <ContentControl Content="{Binding RoomRegistrationViewModel}"/>
+            </Grid>
 
-            <studentViews:StudentInvoiceView DataContext="{Binding InvoiceViewModel}"
-                                            Visibility="{Binding IsInvoiceVisible, Converter={StaticResource BoolToVisConverter}}"/>
+            <!-- Invoice Tab -->
+            <Grid Visibility="{Binding IsInvoiceVisible, Converter={StaticResource BoolToVisConverter}}">
+                <studentViews:StudentInvoiceView DataContext="{Binding InvoiceViewModel}"/>
+            </Grid>
         </Grid>
     </Grid>
 </UserControl>
