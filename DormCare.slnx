@@ -1,2 +1,6 @@
 <Solution>
+  <Project Path="DormCare.Domain/DormCare.Domain.csproj" />
+  <Project Path="DormCare.DataAccess/DormCare.DataAccess.csproj" />
+  <Project Path="DormCare.Business/DormCare.Business.csproj" />
+  <Project Path="DormCare.WPF/DormCare.WPF.csproj" />
 </Solution>

@@ -16,6 +16,7 @@ namespace DormCare.WPF.ViewModels
         private readonly StudentService _studentService;
         private readonly ApplicationService _applicationService;
         private readonly InvoiceService _invoiceService;
+        private readonly PaymentService _paymentService;
         private readonly MaintenanceService _maintenanceService;
         private readonly OccupancyService _occupancyService;
 
@@ -58,6 +59,7 @@ namespace DormCare.WPF.ViewModels
             StudentService studentService,
             ApplicationService applicationService,
             InvoiceService invoiceService,
+            PaymentService paymentService,
             MaintenanceService maintenanceService,
             OccupancyService occupancyService)
         {
@@ -71,6 +73,7 @@ namespace DormCare.WPF.ViewModels
             _studentService = studentService;
             _applicationService = applicationService;
             _invoiceService = invoiceService;
+            _paymentService = paymentService;
             _maintenanceService = maintenanceService;
             _occupancyService = occupancyService;
 
@@ -119,7 +122,7 @@ namespace DormCare.WPF.ViewModels
             NavigateInvoicesCommand = new RelayCommand(() =>
             {
                 ActiveTabName = "Invoices";
-                CurrentView = new InvoiceViewModel(_invoiceService, _dialogService);
+                CurrentView = new InvoiceViewModel(_invoiceService, _paymentService, _studentService, _roomService, _dialogService);
             });
 
             NavigateMaintenanceCommand = new RelayCommand(() =>

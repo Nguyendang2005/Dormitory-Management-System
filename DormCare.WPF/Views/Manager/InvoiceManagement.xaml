@@ -11,59 +11,101 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
         <!-- Header -->
         <DockPanel Grid.Row="0" Margin="0,0,0,16">
             <StackPanel DockPanel.Dock="Left">
-                <TextBlock Text="Quản Lý Hóa Đơn &amp; Điện Nước" FontSize="26" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}"/>
-                <TextBlock Text="Danh sách hóa đơn tiền phòng, tiền điện nước hàng tháng" FontSize="14" Foreground="{StaticResource TextMutedBrush}" Margin="0,4,0,0"/>
+                <TextBlock Text="💳 Hậu — Quản Lý Hóa Đơn &amp; Thanh Toán" FontSize="26" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}"/>
+                <TextBlock Text="Tạo hóa đơn, tính tổng phí, xem chi tiết, cập nhật thanh toán và lọc hóa đơn chưa thanh toán" FontSize="14" Foreground="{StaticResource TextMutedBrush}" Margin="0,4,0,0"/>
             </StackPanel>
             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
-                <Button Content="💳 Xác Nhận Thanh Toán" Style="{StaticResource PrimaryButton}" Command="{Binding PayInvoiceCommand}" Margin="0,0,10,0"/>
+                <Button Content="➕ Tạo Hóa Đơn" Style="{StaticResource PrimaryButton}" Command="{Binding CreateInvoiceCommand}" Margin="0,0,10,0"/>
+                <Button Content="👁️ Xem Chi Tiết" Style="{StaticResource PrimaryButton}" Command="{Binding ViewInvoiceDetailsCommand}" Margin="0,0,10,0"/>
+                <Button Content="💳 Cập Nhật Thanh Toán" Style="{StaticResource PrimaryButton}" Command="{Binding UpdatePaymentCommand}" Margin="0,0,10,0"/>
                 <Button Content="🔄 Tải lại" Style="{StaticResource PrimaryButton}" Command="{Binding RefreshCommand}"/>
             </StackPanel>
         </DockPanel>
 
+        <!-- Stats Summary Grid -->
+        <UniformGrid Grid.Row="1" Columns="4" Margin="0,0,0,16">
+            <Border Style="{StaticResource CardFrame}" Margin="0,0,8,0" Padding="16,12">
+                <StackPanel>
+                    <TextBlock Text="TỔNG SỐ HÓA ĐƠN" FontSize="11" FontWeight="Bold" Foreground="{StaticResource TextMutedBrush}"/>
+                    <TextBlock Text="{Binding TotalInvoiceCount}" FontSize="24" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,4,0,0"/>
+                </StackPanel>
+            </Border>
+            <Border Style="{StaticResource CardFrame}" Margin="4,0,4,0" Padding="16,12">
+                <StackPanel>
+                    <TextBlock Text="TỔNG DOANH THU (VNĐ)" FontSize="11" FontWeight="Bold" Foreground="{StaticResource TextMutedBrush}"/>
+                    <TextBlock Text="{Binding TotalAmountSum, StringFormat='{}{0:N0}'}" FontSize="22" FontWeight="Bold" Foreground="{StaticResource PrimaryHoverBrush}" Margin="0,4,0,0"/>
+                </StackPanel>
+            </Border>
+            <Border Style="{StaticResource CardFrame}" Margin="4,0,4,0" Padding="16,12">
+                <StackPanel>
+                    <TextBlock Text="ĐÃ THU THANH TOÁN (VNĐ)" FontSize="11" FontWeight="Bold" Foreground="{StaticResource TextMutedBrush}"/>
+                    <TextBlock Text="{Binding PaidAmountSum, StringFormat='{}{0:N0}'}" FontSize="22" FontWeight="Bold" Foreground="{StaticResource SuccessBrush}" Margin="0,4,0,0"/>
+                </StackPanel>
+            </Border>
+            <Border Style="{StaticResource CardFrame}" Margin="8,0,0,0" Padding="16,12">
+                <StackPanel>
+                    <TextBlock Text="CÒN NỢ CHƯA THU (VNĐ)" FontSize="11" FontWeight="Bold" Foreground="{StaticResource TextMutedBrush}"/>
+                    <TextBlock Text="{Binding UnpaidAmountSum, StringFormat='{}{0:N0}'}" FontSize="22" FontWeight="Bold" Foreground="#EF4444" Margin="0,4,0,0"/>
+                </StackPanel>
+            </Border>
+        </UniformGrid>
+
         <!-- Search & Filter Bar -->
-        <Border Grid.Row="1" Style="{StaticResource CardFrame}" Margin="0,0,0,16" Padding="16,12">
+        <Border Grid.Row="2" Style="{StaticResource CardFrame}" Margin="0,0,0,16" Padding="16,12">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="2*"/>
-                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1.2*"/>
+                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Grid.Column="0" Margin="0,0,12,0">
-                    <TextBlock Text="🔍 Tìm kiếm hóa đơn (Mã HĐ / Họ tên / Mã SV)" FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,4"/>
+                    <TextBlock Text="🔍 Tìm kiếm hóa đơn (Mã HĐ / Họ tên / Mã SV / Phòng)" FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,4"/>
                     <TextBox Style="{StaticResource ModernTextBox}" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"/>
                 </StackPanel>
 
-                <StackPanel Grid.Column="1">
-                    <TextBlock Text="⚡ Lọc Trạng Thái Thanh Toán" FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,4"/>
+                <StackPanel Grid.Column="1" Margin="0,0,12,0">
+                    <TextBlock Text="⚡ Trạng Thái Thanh Toán" FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,4"/>
                     <ComboBox SelectedValue="{Binding SelectedStatusFilter, Mode=TwoWay}" SelectedValuePath="Tag" Height="38" Background="#0F172A" Foreground="White" BorderBrush="{StaticResource CardBorderBrush}">
                         <ComboBoxItem Content="Tất cả trạng thái" Tag="All" IsSelected="True"/>
-                        <ComboBoxItem Content="Chưa thanh toán (Unpaid)" Tag="Unpaid"/>
-                        <ComboBoxItem Content="Đã thanh toán (Paid)" Tag="Paid"/>
-                        <ComboBoxItem Content="Quá hạn (Overdue)" Tag="Overdue"/>
+                        <ComboBoxItem Content="⚠️ Chưa thanh toán (Unpaid)" Tag="Unpaid"/>
+                        <ComboBoxItem Content="⏳ Thanh toán một phần (PartiallyPaid)" Tag="PartiallyPaid"/>
+                        <ComboBoxItem Content="✅ Đã thanh toán (Paid)" Tag="Paid"/>
+                        <ComboBoxItem Content="🛑 Quá hạn (Overdue)" Tag="Overdue"/>
                     </ComboBox>
+                </StackPanel>
+
+                <!-- Quick Filter Buttons -->
+                <StackPanel Grid.Column="2" VerticalAlignment="Bottom" Orientation="Horizontal">
+                    <Button Content="⚠️ Lọc Chưa Thanh Toán" Style="{StaticResource PrimaryButton}" Height="38" Command="{Binding FilterUnpaidCommand}" Margin="0,0,8,0" Background="#33EF4444" Foreground="#EF4444" BorderBrush="#EF4444"/>
+                    <Button Content="📋 tất Cả" Style="{StaticResource PrimaryButton}" Height="38" Command="{Binding FilterAllCommand}"/>
                 </StackPanel>
             </Grid>
         </Border>
 
         <!-- DataGrid -->
-        <Border Grid.Row="2" Style="{StaticResource CardFrame}">
+        <Border Grid.Row="3" Style="{StaticResource CardFrame}">
             <DataGrid ItemsSource="{Binding Invoices}" SelectedItem="{Binding SelectedInvoice}">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Mã HĐ" Binding="{Binding InvoiceCode}" Width="130" FontWeight="Bold"/>
-                    <DataGridTextColumn Header="Sinh Viên" Binding="{Binding StudentName}" Width="160"/>
-                    <DataGridTextColumn Header="Mã SV" Binding="{Binding StudentCode}" Width="100"/>
-                    <DataGridTextColumn Header="Tháng/Năm" Binding="{Binding Month, StringFormat='{}T{0}'}" Width="90"/>
-                    <DataGridTextColumn Header="Tiền Phòng" Binding="{Binding RoomFee, StringFormat='{}{0:N0}'}" Width="110"/>
-                    <DataGridTextColumn Header="Tiền Điện" Binding="{Binding ElectricityFee, StringFormat='{}{0:N0}'}" Width="100"/>
-                    <DataGridTextColumn Header="Tiền Nước" Binding="{Binding WaterFee, StringFormat='{}{0:N0}'}" Width="100"/>
-                    <DataGridTextColumn Header="Tổng Tiền (VNĐ)" Binding="{Binding TotalAmount, StringFormat='{}{0:N0}'}" Width="140" FontWeight="Bold" Foreground="{StaticResource KinpakuGoldBrush}"/>
-                    <DataGridTextColumn Header="Hạn Thu" Binding="{Binding DueDate, StringFormat='{}{0:dd/MM/yyyy}'}" Width="110"/>
+                    <DataGridTextColumn Header="Sinh Viên" Binding="{Binding StudentName}" Width="150"/>
+                    <DataGridTextColumn Header="Mã SV" Binding="{Binding StudentCode}" Width="95"/>
+                    <DataGridTextColumn Header="Phòng / Tòa" Binding="{Binding RoomNumber, StringFormat='{}P.{0}'}" Width="110"/>
+                    <DataGridTextColumn Header="Kỳ Thu" Binding="{Binding Month, StringFormat='{}Tháng {0}'}" Width="90"/>
+                    <DataGridTextColumn Header="Tiền Phòng" Binding="{Binding RoomFee, StringFormat='{}{0:N0}'}" Width="105"/>
+                    <DataGridTextColumn Header="Tiền Điện" Binding="{Binding ElectricityFee, StringFormat='{}{0:N0}'}" Width="95"/>
+                    <DataGridTextColumn Header="Tiền Nước" Binding="{Binding WaterFee, StringFormat='{}{0:N0}'}" Width="95"/>
+                    <DataGridTextColumn Header="Tổng Tiền (VNĐ)" Binding="{Binding TotalAmount, StringFormat='{}{0:N0}'}" Width="130" FontWeight="Bold" Foreground="{StaticResource KinpakuGoldBrush}"/>
+                    <DataGridTextColumn Header="Đã Nộp" Binding="{Binding TotalPaid, StringFormat='{}{0:N0}'}" Width="105" Foreground="{StaticResource SuccessBrush}"/>
+                    <DataGridTextColumn Header="Dư Nợ" Binding="{Binding RemainingBalance, StringFormat='{}{0:N0}'}" Width="105" Foreground="#F59E0B" FontWeight="Bold"/>
+                    <DataGridTextColumn Header="Hạn Thu" Binding="{Binding DueDate, StringFormat='{}{0:dd/MM/yyyy}'}" Width="105"/>
                     <DataGridTemplateColumn Header="Trạng Thái" Width="130">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
@@ -79,3 +121,4 @@
         </Border>
     </Grid>
 </UserControl>
+
