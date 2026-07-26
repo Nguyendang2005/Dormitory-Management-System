@@ -179,6 +179,64 @@ namespace DormCare.WPF.ViewModels
             TotalAmountSum = _allInvoices.Sum(i => i.TotalAmount);
             PaidAmountSum = _allInvoices.Sum(i => i.TotalPaid);
             UnpaidAmountSum = _allInvoices.Sum(i => i.RemainingBalance);
+
+            OnPropertyChanged(nameof(NearestDueDate));
+            OnPropertyChanged(nameof(HasUnpaidInvoices));
+            OnPropertyChanged(nameof(StudentFullName));
+            OnPropertyChanged(nameof(StudentRoomInfo));
+            OnPropertyChanged(nameof(StatusAlertText));
+        }
+
+        public string NearestDueDate
+        {
+            get
+            {
+                var unpaidInvoices = _allInvoices.Where(i => i.RemainingBalance > 0).OrderBy(i => i.DueDate).ToList();
+                return unpaidInvoices.Any() ? unpaidInvoices.First().DueDate.ToString("dd/MM/yyyy") : "Không có nợ";
+            }
+        }
+
+        public bool HasUnpaidInvoices => UnpaidAmountSum > 0;
+
+        public string StudentRoomInfo
+        {
+            get
+            {
+                var first = _allInvoices.FirstOrDefault();
+                if (first != null)
+                {
+                    return $"Phòng: {first.RoomNumber} | Tòa: {first.BuildingName} | Mã SV: {first.StudentCode}";
+                }
+                return "Phòng KTX";
+            }
+        }
+
+        public string StudentFullName
+        {
+            get
+            {
+                var first = _allInvoices.FirstOrDefault();
+                return first != null ? first.StudentName : "Sinh viên";
+            }
+        }
+
+        public string StatusAlertText
+        {
+            get
+            {
+                if (HasUnpaidInvoices)
+                {
+                    var unpaid = _allInvoices.Where(i => i.RemainingBalance > 0).OrderBy(i => i.DueDate).FirstOrDefault();
+                    if (unpaid != null)
+                    {
+                        var daysLeft = (unpaid.DueDate.Date - DateTime.Today).Days;
+                        if (daysLeft < 0)
+                            return $"🛑 Bạn có hóa đơn {unpaid.InvoiceCode} đã quá hạn {Math.Abs(daysLeft)} ngày. Vui lòng thanh toán sớm!";
+                        return $"⚠️ Hạn thanh toán hóa đơn gần nhất ({unpaid.InvoiceCode}) còn {daysLeft} ngày (Hạn thu: {unpaid.DueDate:dd/MM/yyyy}).";
+                    }
+                }
+                return "🎉 Bạn đã thanh toán đầy đủ tất cả các khoản phí ký túc xá!";
+            }
         }
 
         private void ExecuteCreateInvoice()
