@@ -64,7 +64,7 @@
                 <StackPanel Margin="0,0,0,12">
                     <DockPanel Margin="0,0,0,6">
                         <TextBlock Text="💰 Số Tiền Nộp Thanh Toán (VNĐ) (*)" FontSize="12" Foreground="{StaticResource TextMutedBrush}"/>
-                        <Button DockPanel.Dock="Right" Content="⚡ Thu Đủ Dư Nợ" Style="{StaticResource PrimaryButton}" Height="24" FontSize="11" Padding="8,2" Command="{Binding PayFullCommand}" HorizontalAlignment="Right"/>
+                        <Button DockPanel.Dock="Right" Content="⚡ Trả Đủ Dư Nợ" Style="{StaticResource PrimaryButton}" Height="24" FontSize="11" Padding="8,2" Command="{Binding PayFullCommand}" HorizontalAlignment="Right"/>
                     </DockPanel>
                     <TextBox Style="{StaticResource ModernTextBox}" Text="{Binding AmountToPay, StringFormat='{}{0:0.#}', UpdateSourceTrigger=PropertyChanged}" FontSize="15" FontWeight="Bold" Foreground="{StaticResource SuccessBrush}"/>
                 </StackPanel>

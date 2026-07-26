@@ -204,6 +204,20 @@ namespace DormCare.Business.Services
                 ? i.Payments.Where(p => p.Status == "Completed").Sum(p => p.Amount)
                 : 0;
 
+            string status = i.Status;
+            if (totalPaid >= i.TotalAmount)
+            {
+                status = "Paid";
+            }
+            else if (totalPaid > 0)
+            {
+                status = "PartiallyPaid";
+            }
+            else if (i.DueDate.Date < DateTime.Today.Date)
+            {
+                status = "Overdue";
+            }
+
             return new InvoiceDto
             {
                 Id = i.InvoiceId,
@@ -225,7 +239,7 @@ namespace DormCare.Business.Services
                 TotalPaid = totalPaid,
                 DueDate = i.DueDate,
                 PaidAt = i.PaidAt,
-                Status = i.Status,
+                Status = status,
                 Note = i.Note ?? string.Empty,
                 CreatedAt = i.CreatedAt
             };
