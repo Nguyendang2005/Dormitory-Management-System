@@ -121,7 +121,7 @@ namespace DormCare.WPF.ViewModels
             CreateInvoiceCommand = new RelayCommand(ExecuteCreateInvoice);
             ViewInvoiceDetailsCommand = new RelayCommand(ExecuteViewInvoiceDetails, () => SelectedInvoice != null);
             UpdatePaymentCommand = new RelayCommand(ExecuteUpdatePayment, () => SelectedInvoice != null && SelectedInvoice.Status != "Paid");
-            DeleteInvoiceCommand = new AsyncRelayCommand(ExecuteDeleteInvoiceAsync, () => SelectedInvoice != null);
+            DeleteInvoiceCommand = new AsyncRelayCommand(ExecuteDeleteInvoiceAsync, () => SelectedInvoice != null && SelectedInvoice.Status != "Paid" && SelectedInvoice.Status != "Overdue");
             FilterUnpaidCommand = new RelayCommand(() => SelectedStatusFilter = "Unpaid");
             FilterAllCommand = new RelayCommand(() => SelectedStatusFilter = "All");
 

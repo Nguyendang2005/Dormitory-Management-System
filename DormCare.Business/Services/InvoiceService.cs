@@ -167,9 +167,24 @@ namespace DormCare.Business.Services
 
         public async Task<ServiceResult<bool>> DeleteInvoiceAsync(int invoiceId)
         {
-            var invoice = await _invoiceRepository.GetByIdAsync(invoiceId);
+            var invoice = await _invoiceRepository.GetByIdWithDetailsAsync(invoiceId);
             if (invoice == null)
                 return ServiceResult<bool>.Failure("Không tìm thấy hóa đơn cần xóa.");
+
+            if (invoice.Status.Equals("Paid", StringComparison.OrdinalIgnoreCase))
+            {
+                return ServiceResult<bool>.Failure("Không thể xóa hóa đơn đã thanh toán.");
+            }
+
+            if (invoice.Status.Equals("Overdue", StringComparison.OrdinalIgnoreCase))
+            {
+                return ServiceResult<bool>.Failure("Không thể xóa hóa đơn đang trong trạng thái quá hạn.");
+            }
+
+            if (invoice.Payments != null && invoice.Payments.Any())
+            {
+                return ServiceResult<bool>.Failure("Không thể xóa hóa đơn này vì đã có giao dịch thanh toán.");
+            }
 
             try
             {
@@ -179,7 +194,7 @@ namespace DormCare.Business.Services
             }
             catch (Exception)
             {
-                return ServiceResult<bool>.Failure("Không thể xóa hóa đơn này vì đã có dữ liệu liên quan hoặc lịch sử giao dịch thanh toán.");
+                return ServiceResult<bool>.Failure("Không thể xóa hóa đơn này vì đã có dữ liệu liên quan.");
             }
         }
 
