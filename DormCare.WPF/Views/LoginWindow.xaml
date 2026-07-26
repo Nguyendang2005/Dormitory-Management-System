@@ -12,8 +12,8 @@
 
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="1fr"/>
-            <ColumnDefinition Width="1.2fr"/>
+            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="1.2*"/>
         </Grid.ColumnDefinitions>
 
         <!-- Left Branding Panel (Impeccable Light Slate / Indigo Gradient Accent) -->
@@ -60,20 +60,17 @@
             <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <StackPanel VerticalAlignment="Center">
 
-                    <!-- Tab Mode Header -->
-                    <DockPanel Margin="0,0,0,24">
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <TextBlock Text="{Binding IsRegisterMode, Converter={StaticResource BoolToVisConverter}, ConverterParameter=Inverse}" FontSize="24" FontWeight="Bold" Foreground="#0F172A"/>
-                            <TextBlock Text="ĐĂNG NHẬP" FontSize="24" FontWeight="Bold" Foreground="#0F172A"/>
-                        </StackPanel>
+                    <!-- Header -->
+                    <DockPanel Margin="0,0,0,20">
+                        <TextBlock Text="ĐĂNG NHẬP HỆ THỐNG" FontSize="24" FontWeight="Bold" Foreground="#0F172A"/>
                     </DockPanel>
 
                     <!-- Quick Preset Role Helper Buttons -->
                     <Border Background="#F1F5F9" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="8" Padding="6" Margin="0,0,0,24">
                         <Grid>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="1fr"/>
-                                <ColumnDefinition Width="1fr"/>
+                                <ColumnDefinition Width="1*"/>
+                                <ColumnDefinition Width="1*"/>
                             </Grid.ColumnDefinitions>
                             <Button Grid.Column="0" Content="👤 Tài khoản Quản lý" Command="{Binding SelectAdminCommand}" Style="{StaticResource SecondaryButton}" Height="36" Margin="0,0,4,0"/>
                             <Button Grid.Column="1" Content="🎓 Tài khoản Sinh viên" Command="{Binding SelectStudentCommand}" Style="{StaticResource SecondaryButton}" Height="36" Margin="4,0,0,0"/>
@@ -109,8 +106,8 @@
                     <StackPanel Visibility="{Binding IsRegisterMode, Converter={StaticResource BoolToVisConverter}}">
                         <Grid Margin="0,0,0,12">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="1fr"/>
-                                <ColumnDefinition Width="1fr"/>
+                                <ColumnDefinition Width="1*"/>
+                                <ColumnDefinition Width="1*"/>
                             </Grid.ColumnDefinitions>
                             
                             <StackPanel Grid.Column="0" Margin="0,0,6,0">
@@ -126,8 +123,8 @@
 
                         <Grid Margin="0,0,0,12">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="1fr"/>
-                                <ColumnDefinition Width="1fr"/>
+                                <ColumnDefinition Width="1*"/>
+                                <ColumnDefinition Width="1*"/>
                             </Grid.ColumnDefinitions>
 
                             <StackPanel Grid.Column="0" Margin="0,0,6,0">
@@ -143,8 +140,8 @@
 
                         <Grid Margin="0,0,0,12">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="1fr"/>
-                                <ColumnDefinition Width="1fr"/>
+                                <ColumnDefinition Width="1*"/>
+                                <ColumnDefinition Width="1*"/>
                             </Grid.ColumnDefinitions>
 
                             <StackPanel Grid.Column="0" Margin="0,0,6,0">
@@ -160,8 +157,8 @@
 
                         <Grid Margin="0,0,0,20">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="1fr"/>
-                                <ColumnDefinition Width="1fr"/>
+                                <ColumnDefinition Width="1*"/>
+                                <ColumnDefinition Width="1*"/>
                             </Grid.ColumnDefinitions>
 
                             <StackPanel Grid.Column="0" Margin="0,0,6,0">
