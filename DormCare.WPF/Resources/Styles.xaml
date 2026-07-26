@@ -67,6 +67,17 @@
         </Style.Triggers>
     </Style>
 
+    <Style x:Key="SmallSecondaryButton" TargetType="Button" BasedOn="{StaticResource SecondaryButton}">
+        <Setter Property="Padding" Value="10,4" />
+        <Setter Property="FontSize" Value="12" />
+    </Style>
+
+    <Style x:Key="SmallDangerButton" TargetType="Button" BasedOn="{StaticResource PrimaryButton}">
+        <Setter Property="Background" Value="#EF4444" />
+        <Setter Property="Padding" Value="10,4" />
+        <Setter Property="FontSize" Value="12" />
+    </Style>
+
     <!-- Active Navigation Sidebar Button Style -->
     <Style x:Key="NavButton" TargetType="Button" BasedOn="{StaticResource PrimaryButton}">
         <Setter Property="Background" Value="Transparent" />
@@ -80,11 +91,6 @@
                 <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
             </Trigger>
         </Style.Triggers>
-    </Style>
-
-    <!-- Danger Button Style -->
-    <Style x:Key="DangerButton" TargetType="Button" BasedOn="{StaticResource PrimaryButton}">
-        <Setter Property="Background" Value="{StaticResource DangerBrush}" />
     </Style>
 
     <!-- Modern TextBox Style -->
@@ -110,24 +116,70 @@
         </Setter>
     </Style>
 
-    <!-- Validation Error Banner Style -->
-    <Style x:Key="ValidationBanner" TargetType="Border">
-        <Setter Property="Background" Value="#3B0764" />
-        <Setter Property="BorderBrush" Value="#EF4444" />
-        <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="CornerRadius" Value="8" />
-        <Setter Property="Padding" Value="12,8" />
-        <Setter Property="Margin" Value="0,0,0,12" />
+    <!-- Form TextBox Style -->
+    <Style x:Key="FormTextBox" TargetType="TextBox" BasedOn="{StaticResource ModernTextBox}">
+        <Setter Property="Background" Value="#F8FAFC" />
+        <Setter Property="Foreground" Value="#0F172A" />
+        <Setter Property="BorderBrush" Value="#CBD5E1" />
+        <Setter Property="CaretBrush" Value="#0F172A" />
     </Style>
 
-    <!-- DataGrid Style -->
-    <Style TargetType="DataGrid">
-        <Setter Property="Background" Value="{StaticResource CardBgBrush}" />
-        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
-        <Setter Property="RowBackground" Value="#1E293B" />
-        <Setter Property="AlternatingRowBackground" Value="#172234" />
+    <!-- Search TextBox Style -->
+    <Style x:Key="SearchTextBox" TargetType="TextBox" BasedOn="{StaticResource FormTextBox}">
+        <Setter Property="Padding" Value="10,6" />
+        <Setter Property="FontSize" Value="13" />
+    </Style>
+
+    <!-- ComboBox Style -->
+    <Style x:Key="ModernComboBox" TargetType="ComboBox">
+        <Setter Property="Background" Value="#F8FAFC" />
+        <Setter Property="Foreground" Value="#0F172A" />
+        <Setter Property="BorderBrush" Value="#CBD5E1" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Padding" Value="10,6" />
+        <Setter Property="FontSize" Value="13" />
+    </Style>
+
+    <!-- Header Card Style -->
+    <Style x:Key="HeaderCard" TargetType="Border">
+        <Setter Property="Background" Value="#FFFFFF" />
+        <Setter Property="BorderBrush" Value="#E2E8F0" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="10" />
+        <Setter Property="Padding" Value="20,16" />
+    </Style>
+
+    <!-- Card Border Style -->
+    <Style x:Key="CardBorder" TargetType="Border">
+        <Setter Property="Background" Value="#FFFFFF" />
+        <Setter Property="BorderBrush" Value="#E2E8F0" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="10" />
+        <Setter Property="Padding" Value="16" />
+    </Style>
+
+    <!-- Modern DataGrid Style -->
+    <Style x:Key="ModernDataGrid" TargetType="DataGrid">
+        <Setter Property="Background" Value="#FFFFFF" />
+        <Setter Property="Foreground" Value="#0F172A" />
+        <Setter Property="RowBackground" Value="#FFFFFF" />
+        <Setter Property="AlternatingRowBackground" Value="#F8FAFC" />
         <Setter Property="GridLinesVisibility" Value="Horizontal" />
-        <Setter Property="HorizontalGridLinesBrush" Value="{StaticResource CardBorderBrush}" />
+        <Setter Property="HorizontalGridLinesBrush" Value="#E2E8F0" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="HeadersVisibility" Value="Column" />
+        <Setter Property="AutoGenerateColumns" Value="False" />
+        <Setter Property="CanUserAddRows" Value="False" />
+        <Setter Property="RowHeight" Value="42" />
+    </Style>
+
+    <Style TargetType="DataGrid">
+        <Setter Property="Background" Value="#FFFFFF" />
+        <Setter Property="Foreground" Value="#0F172A" />
+        <Setter Property="RowBackground" Value="#FFFFFF" />
+        <Setter Property="AlternatingRowBackground" Value="#F8FAFC" />
+        <Setter Property="GridLinesVisibility" Value="Horizontal" />
+        <Setter Property="HorizontalGridLinesBrush" Value="#E2E8F0" />
         <Setter Property="BorderThickness" Value="0" />
         <Setter Property="HeadersVisibility" Value="Column" />
         <Setter Property="AutoGenerateColumns" Value="False" />
@@ -136,12 +188,12 @@
     </Style>
 
     <Style TargetType="DataGridColumnHeader">
-        <Setter Property="Background" Value="#0F172A" />
-        <Setter Property="Foreground" Value="{StaticResource TextMutedBrush}" />
+        <Setter Property="Background" Value="#F1F5F9" />
+        <Setter Property="Foreground" Value="#475569" />
         <Setter Property="FontWeight" Value="Bold" />
         <Setter Property="Padding" Value="12,8" />
         <Setter Property="BorderThickness" Value="0,0,0,1" />
-        <Setter Property="BorderBrush" Value="{StaticResource CardBorderBrush}" />
+        <Setter Property="BorderBrush" Value="#E2E8F0" />
     </Style>
 
     <Style TargetType="DataGridCell">
