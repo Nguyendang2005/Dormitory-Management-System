@@ -20,6 +20,7 @@ namespace DormCare.WPF
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
+            ShutdownMode = ShutdownMode.OnExplicitShutdown;
 
             var services = new ServiceCollection();
             ConfigureServices(services);
@@ -33,9 +34,15 @@ namespace DormCare.WPF
 
         private void ConfigureServices(IServiceCollection services)
         {
+            // Primary SQL Server Connection String (matching DANG / localhost)
+            string connectionString = "Server=DANG;Database=DormCareDB;User Id=sa;Password=123456;TrustServerCertificate=True;Encrypt=False;";
+            
             services.AddDbContext<DormCareDbContext>(options =>
             {
-                options.UseSqlServer("Server=localhost;Database=DormCareDB;User Id=hau;Password=123456;TrustServerCertificate=True;Encrypt=False;");
+                options.UseSqlServer(connectionString, sqlOptions =>
+                {
+                    sqlOptions.EnableRetryOnFailure(maxRetryCount: 3, maxRetryDelay: TimeSpan.FromSeconds(5), errorNumbersToAdd: null);
+                });
             });
 
             services.AddScoped<UserRepository>();
@@ -95,8 +102,15 @@ namespace DormCare.WPF
 
             loginVm.LoginSuccess += (user) =>
             {
-                loginWindow.Hide();
-                OpenMainWindow(user, loginWindow);
+                try
+                {
+                    OpenMainWindow(user, loginWindow);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Lỗi khi mở giao diện chính: {ex.Message}\n{ex.InnerException?.Message}", "Lỗi Hệ Thống", MessageBoxButton.OK, MessageBoxImage.Error);
+                    loginWindow.Show();
+                }
             };
 
             loginWindow.Show();
@@ -118,7 +132,12 @@ namespace DormCare.WPF
                     Width = 1200,
                     Height = 750
                 };
-                studentWindow.Closed += (s, e) => loginWindow.Close();
+                studentWindow.Closed += (s, e) =>
+                {
+                    Shutdown();
+                };
+                
+                loginWindow.Hide();
                 studentWindow.Show();
             }
             else
@@ -144,7 +163,12 @@ namespace DormCare.WPF
                     mainWindow.Close();
                     ShowLoginWindow();
                 };
-                mainWindow.Closed += (s, e) => loginWindow.Close();
+                mainWindow.Closed += (s, e) =>
+                {
+                    Shutdown();
+                };
+
+                loginWindow.Hide();
                 mainWindow.Show();
             }
         }
