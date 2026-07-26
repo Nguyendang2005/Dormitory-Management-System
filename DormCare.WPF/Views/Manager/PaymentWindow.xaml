@@ -54,9 +54,10 @@
                         </Grid>
                         <Rectangle Height="1" Fill="{StaticResource CardBorderBrush}" Margin="0,4,0,8"/>
                         <Grid Margin="0,0,0,0">
-                            <TextBlock Text="DƯ NỢ CÒN LẠI:" FontWeight="Bold" Foreground="#F59E0B"/>
-                            <TextBlock Text="{Binding RemainingBalance, StringFormat='{}{0:N0} VNĐ'}" FontWeight="Bold" FontSize="15" Foreground="#F59E0B" HorizontalAlignment="Right"/>
+                            <TextBlock Text="TỔNG DƯ NỢ CỦA SINH VIÊN:" FontWeight="Bold" Foreground="#F59E0B"/>
+                            <TextBlock Text="{Binding TotalStudentDebt, StringFormat='{}{0:N0} VNĐ'}" FontWeight="Bold" FontSize="15" Foreground="#F59E0B" HorizontalAlignment="Right"/>
                         </Grid>
+                        <TextBlock Text="{Binding TotalStudentDebtText}" FontSize="11" Foreground="{StaticResource TextMutedBrush}" Margin="0,3,0,0" HorizontalAlignment="Right"/>
                     </StackPanel>
                 </Border>
 

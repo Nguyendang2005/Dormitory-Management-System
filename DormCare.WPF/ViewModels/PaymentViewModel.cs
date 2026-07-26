@@ -21,6 +21,23 @@ namespace DormCare.WPF.ViewModels
         public decimal TotalPaid => _invoice.TotalPaid;
         public decimal RemainingBalance => _invoice.RemainingBalance;
 
+        private decimal _totalStudentDebt;
+        public decimal TotalStudentDebt
+        {
+            get => _totalStudentDebt;
+            set
+            {
+                if (SetProperty(ref _totalStudentDebt, value))
+                {
+                    OnPropertyChanged(nameof(TotalStudentDebtText));
+                }
+            }
+        }
+
+        public string TotalStudentDebtText => TotalStudentDebt > RemainingBalance
+            ? $"Gồm hóa đơn này ({RemainingBalance:N0}đ) + nợ các kỳ trước ({(TotalStudentDebt - RemainingBalance):N0}đ)"
+            : $"Hóa đơn này ({RemainingBalance:N0}đ)";
+
         private decimal _amountToPay;
         public decimal AmountToPay
         {
@@ -86,12 +103,32 @@ namespace DormCare.WPF.ViewModels
             _invoice = invoice;
             _currentUserId = currentUserId;
 
+            _totalStudentDebt = _invoice.RemainingBalance;
             AmountToPay = _invoice.RemainingBalance;
             Note = $"Thanh toán hóa đơn {_invoice.InvoiceCode}";
 
-            PayFullCommand = new RelayCommand(() => AmountToPay = RemainingBalance);
+            PayFullCommand = new RelayCommand(() => AmountToPay = TotalStudentDebt);
             SubmitCommand = new AsyncRelayCommand(ExecuteSubmitAsync);
             CancelCommand = new RelayCommand(() => RequestClose?.Invoke(false));
+
+            _ = LoadTotalStudentDebtAsync();
+        }
+
+        private async Task LoadTotalStudentDebtAsync()
+        {
+            try
+            {
+                var totalDebt = await _paymentService.GetStudentTotalDebtAsync(_invoice.StudentId);
+                if (totalDebt > 0)
+                {
+                    TotalStudentDebt = totalDebt;
+                    AmountToPay = totalDebt;
+                }
+            }
+            catch
+            {
+                // Fallback to invoice remaining balance
+            }
         }
 
         private async Task ExecuteSubmitAsync()
@@ -102,9 +139,9 @@ namespace DormCare.WPF.ViewModels
                 return;
             }
 
-            if (AmountToPay > RemainingBalance)
+            if (AmountToPay > TotalStudentDebt)
             {
-                ErrorMessage = $"Số tiền vượt quá dư nợ còn lại ({RemainingBalance:N0} VNĐ).";
+                ErrorMessage = $"Số tiền vượt quá tổng dư nợ của sinh viên ({TotalStudentDebt:N0} VNĐ).";
                 return;
             }
 
