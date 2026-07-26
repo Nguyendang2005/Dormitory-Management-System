@@ -83,20 +83,53 @@ namespace DormCare.Business.Services
 
         public async Task<IEnumerable<InvoiceDto>> GetAllInvoicesAsync()
         {
-            var invoices = await _invoiceRepository.GetInvoicesWithStudentAsync();
+            var invoices = (await _invoiceRepository.GetInvoicesWithStudentAsync()).ToList();
+            await SyncInvoiceStatusesAsync(invoices);
             return invoices.Select(MapToDto);
         }
 
         public async Task<IEnumerable<InvoiceDto>> GetUnpaidInvoicesAsync()
         {
-            var invoices = await _invoiceRepository.GetUnpaidInvoicesAsync();
+            var invoices = (await _invoiceRepository.GetUnpaidInvoicesAsync()).ToList();
+            await SyncInvoiceStatusesAsync(invoices);
             return invoices.Select(MapToDto);
         }
 
         public async Task<IEnumerable<InvoiceDto>> GetInvoicesByStudentIdAsync(int studentId)
         {
-            var invoices = await _invoiceRepository.GetInvoicesByStudentIdAsync(studentId);
+            var invoices = (await _invoiceRepository.GetInvoicesByStudentIdAsync(studentId)).ToList();
+            await SyncInvoiceStatusesAsync(invoices);
             return invoices.Select(MapToDto);
+        }
+
+        private async Task SyncInvoiceStatusesAsync(IEnumerable<Invoice> invoices)
+        {
+            bool hasChanges = false;
+            foreach (var i in invoices)
+            {
+                decimal totalPaid = i.Payments != null
+                    ? i.Payments.Where(p => p.Status == "Completed").Sum(p => p.Amount)
+                    : 0;
+
+                if (totalPaid >= i.TotalAmount && i.Status != "Paid")
+                {
+                    i.Status = "Paid";
+                    if (!i.PaidAt.HasValue) i.PaidAt = DateTime.UtcNow;
+                    await _invoiceRepository.UpdateAsync(i);
+                    hasChanges = true;
+                }
+                else if (totalPaid < i.TotalAmount && i.DueDate.Date < DateTime.Today.Date && i.Status != "Overdue" && i.Status != "Paid")
+                {
+                    i.Status = "Overdue";
+                    await _invoiceRepository.UpdateAsync(i);
+                    hasChanges = true;
+                }
+            }
+
+            if (hasChanges)
+            {
+                await _invoiceRepository.SaveChangesAsync();
+            }
         }
 
         public async Task<InvoiceDetailDto?> GetInvoiceDetailsAsync(int invoiceId)
