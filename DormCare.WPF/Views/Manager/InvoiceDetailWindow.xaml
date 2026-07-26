@@ -75,7 +75,7 @@
                             </Grid>
                             <Grid Margin="0,0,0,0">
                                 <TextBlock Text="Tháng Thu Phí:" Foreground="{StaticResource TextMutedBrush}"/>
-                                <TextBlock Text="{Binding InvoiceDetail.Month, StringFormat='Tháng {0}/{1}', ConverterParameter={Binding InvoiceDetail.Year}}" FontWeight="Bold" Foreground="White" HorizontalAlignment="Right"/>
+                                <TextBlock Text="{Binding InvoiceDetail.BillingMonth, StringFormat='Tháng {0:MM/yyyy}'}" FontWeight="Bold" Foreground="White" HorizontalAlignment="Right"/>
                             </Grid>
                         </StackPanel>
                     </Border>
