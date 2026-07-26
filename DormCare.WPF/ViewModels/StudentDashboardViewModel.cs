@@ -109,10 +109,13 @@ namespace DormCare.WPF.ViewModels
             NavigateInvoiceCommand = new AsyncRelayCommand(async () =>
             {
                 ActiveTabName = "Invoice";
-                if (Student != null)
+                if (Student == null)
+                {
+                    await LoadStudentDataAsync();
+                }
+                if (Student != null && InvoiceViewModel == null)
                 {
                     InvoiceViewModel = new InvoiceViewModel(_invoiceService, _paymentService, _studentService, _roomService, _dialogService, Student.StudentId);
-                    await InvoiceViewModel.LoadInvoicesAsync();
                 }
                 IsProfileVisible = false;
                 IsRoomRegistrationVisible = false;
