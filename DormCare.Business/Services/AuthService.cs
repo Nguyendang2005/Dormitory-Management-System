@@ -27,7 +27,12 @@ namespace DormCare.Business.Services
             var user = await _userRepository.GetByUsernameAsync(username);
 
             // Accept plain match or hash match for development flexibility
-            if (user == null || (user.PasswordHash != password && !user.PasswordHash.Contains(password)))
+            if (user == null)
+            {
+                return ServiceResult<User>.Failure($"Tài khoản '{username}' không tồn tại trong Database.");
+            }
+            
+            if (user.PasswordHash != password && !user.PasswordHash.Contains(password))
             {
                 return ServiceResult<User>.Failure("Tài khoản hoặc mật khẩu không chính xác.");
             }

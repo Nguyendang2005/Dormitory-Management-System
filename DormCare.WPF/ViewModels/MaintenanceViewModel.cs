@@ -102,6 +102,9 @@ namespace DormCare.WPF.ViewModels
         public ICommand RefreshCommand { get; }
         public ICommand CreateRequestCommand { get; }
         public ICommand CompleteRequestCommand { get; }
+        public ICommand SetPriorityCommand { get; }
+        public ICommand CloseRequestCommand { get; }
+        public ICommand MarkInProgressCommand { get; }
 
         public MaintenanceViewModel(MaintenanceService maintenanceService, DialogService dialogService, User? currentUser = null)
         {
@@ -113,6 +116,9 @@ namespace DormCare.WPF.ViewModels
             RefreshCommand = new AsyncRelayCommand(LoadRequestsAsync);
             CreateRequestCommand = new AsyncRelayCommand(ExecuteCreateRequestAsync);
             CompleteRequestCommand = new AsyncRelayCommand(ExecuteCompleteRequestAsync, () => SelectedRequest != null);
+            SetPriorityCommand = new AsyncRelayCommand(ExecuteSetPriorityAsync, (_) => SelectedRequest != null);
+            CloseRequestCommand = new AsyncRelayCommand(ExecuteCloseRequestAsync, () => SelectedRequest != null);
+            MarkInProgressCommand = new AsyncRelayCommand(ExecuteMarkInProgressAsync, () => SelectedRequest != null);
 
             _ = LoadRequestsAsync();
         }
@@ -214,6 +220,63 @@ namespace DormCare.WPF.ViewModels
 
             IsBusy = true;
             var result = await _maintenanceService.UpdateStatusAsync(SelectedRequest.RequestId, "Resolved", "Đã xử lý sửa chữa hoàn tất.");
+            IsBusy = false;
+
+            if (result.IsSuccess)
+            {
+                _dialogService.ShowInformation(result.Message);
+                await LoadRequestsAsync();
+            }
+            else
+            {
+                _dialogService.ShowError(result.Message);
+            }
+        }
+
+        private async Task ExecuteSetPriorityAsync(object? param)
+        {
+            if (SelectedRequest == null || param is not string newPriority) return;
+
+            IsBusy = true;
+            var result = await _maintenanceService.UpdatePriorityAsync(SelectedRequest.RequestId, newPriority);
+            IsBusy = false;
+
+            if (result.IsSuccess)
+            {
+                _dialogService.ShowInformation(result.Message);
+                await LoadRequestsAsync();
+            }
+            else
+            {
+                _dialogService.ShowError(result.Message);
+            }
+        }
+
+        private async Task ExecuteCloseRequestAsync()
+        {
+            if (SelectedRequest == null) return;
+
+            IsBusy = true;
+            var result = await _maintenanceService.CloseRequestAsync(SelectedRequest.RequestId, "Quản lý đã đóng yêu cầu này.");
+            IsBusy = false;
+
+            if (result.IsSuccess)
+            {
+                _dialogService.ShowInformation(result.Message);
+                await LoadRequestsAsync();
+            }
+            else
+            {
+                _dialogService.ShowError(result.Message);
+            }
+        }
+
+        private async Task ExecuteMarkInProgressAsync()
+        {
+            if (SelectedRequest == null) return;
+
+            IsBusy = true;
+            var result = await _maintenanceService.UpdateStatusAsync(SelectedRequest.RequestId, "InProgress", "Sự cố đang được tiến hành xử lý.");
             IsBusy = false;
 
             if (result.IsSuccess)

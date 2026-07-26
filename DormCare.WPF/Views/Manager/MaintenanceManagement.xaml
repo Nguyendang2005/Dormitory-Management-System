@@ -57,6 +57,20 @@
         <!-- DataGrid -->
         <Border Grid.Row="2" Style="{StaticResource CardFrame}" Margin="0,0,0,16">
             <DataGrid ItemsSource="{Binding Requests}" SelectedItem="{Binding SelectedRequest}">
+                <DataGrid.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="Đang xử lý (In Progress)" Command="{Binding MarkInProgressCommand}"/>
+                        <MenuItem Header="Đánh dấu hoàn thành (Resolved)" Command="{Binding CompleteRequestCommand}"/>
+                        <MenuItem Header="Đóng yêu cầu (Closed)" Command="{Binding CloseRequestCommand}"/>
+                        <Separator/>
+                        <MenuItem Header="Đặt mức độ ưu tiên">
+                            <MenuItem Header="Thấp (Low)" Command="{Binding SetPriorityCommand}" CommandParameter="Low"/>
+                            <MenuItem Header="Trung bình (Medium)" Command="{Binding SetPriorityCommand}" CommandParameter="Medium"/>
+                            <MenuItem Header="Cao (High)" Command="{Binding SetPriorityCommand}" CommandParameter="High"/>
+                            <MenuItem Header="Khẩn cấp (Critical)" Command="{Binding SetPriorityCommand}" CommandParameter="Critical"/>
+                        </MenuItem>
+                    </ContextMenu>
+                </DataGrid.ContextMenu>
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Mã YC" Binding="{Binding RequestId}" Width="70"/>
                     <DataGridTextColumn Header="Mã Code" Binding="{Binding RequestCode}" Width="130" FontWeight="Bold"/>

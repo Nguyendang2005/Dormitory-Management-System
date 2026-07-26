@@ -27,7 +27,7 @@ namespace DormCare.DataAccess.Data
             if (!optionsBuilder.IsConfigured)
             {
                 // Real SQL Server Connection String specified by user
-                optionsBuilder.UseSqlServer("Server=DANG;Database=DormCareDB;User Id=sa;Password=123456;TrustServerCertificate=True;Encrypt=False;");
+                optionsBuilder.UseSqlServer("Server=LuccyKing;Database=DormCareDB;User Id=sa;Password=123456;TrustServerCertificate=True;Encrypt=False;");
             }
         }
 

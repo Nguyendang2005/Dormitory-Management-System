@@ -115,7 +115,7 @@ namespace DormCare.WPF
                 maintenanceService,
                 dialogService);
 
-            var mainWindow = new MainWindow
+            var mainWindow = new Views.MainWindow
             {
                 DataContext = mainViewModel
             };
