@@ -52,7 +52,7 @@ namespace DormCare.WPF.ViewModels
             {
                 if (SetProperty(ref _selectedRoom, value))
                 {
-                    if (_selectedRoom != null && RoomFee == 0)
+                    if (_selectedRoom != null)
                     {
                         RoomFee = _selectedRoom.MonthlyRent;
                     }

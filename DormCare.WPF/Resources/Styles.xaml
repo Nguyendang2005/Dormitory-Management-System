@@ -252,7 +252,11 @@
                             Padding="12,10" 
                             CornerRadius="6" 
                             Margin="2">
-                        <ContentPresenter TextElement.Foreground="White" 
+                        <ContentPresenter Content="{TemplateBinding Content}"
+                                          ContentTemplate="{TemplateBinding ContentTemplate}"
+                                          ContentTemplateSelector="{TemplateBinding ContentTemplateSelector}"
+                                          ContentStringFormat="{TemplateBinding ContentStringFormat}"
+                                          TextElement.Foreground="White" 
                                           TextElement.FontSize="13"/>
                     </Border>
                     <ControlTemplate.Triggers>
