@@ -97,6 +97,7 @@ namespace DormCare.WPF.ViewModels
         public ICommand CreateInvoiceCommand { get; }
         public ICommand ViewInvoiceDetailsCommand { get; }
         public ICommand UpdatePaymentCommand { get; }
+        public ICommand DeleteInvoiceCommand { get; }
         public ICommand FilterUnpaidCommand { get; }
         public ICommand FilterAllCommand { get; }
 
@@ -120,6 +121,7 @@ namespace DormCare.WPF.ViewModels
             CreateInvoiceCommand = new RelayCommand(ExecuteCreateInvoice);
             ViewInvoiceDetailsCommand = new RelayCommand(ExecuteViewInvoiceDetails, () => SelectedInvoice != null);
             UpdatePaymentCommand = new RelayCommand(ExecuteUpdatePayment, () => SelectedInvoice != null && SelectedInvoice.Status != "Paid");
+            DeleteInvoiceCommand = new AsyncRelayCommand(ExecuteDeleteInvoiceAsync, () => SelectedInvoice != null);
             FilterUnpaidCommand = new RelayCommand(() => SelectedStatusFilter = "Unpaid");
             FilterAllCommand = new RelayCommand(() => SelectedStatusFilter = "All");
 
@@ -237,6 +239,28 @@ namespace DormCare.WPF.ViewModels
             };
 
             dialog.ShowDialog();
+        }
+
+        private async Task ExecuteDeleteInvoiceAsync()
+        {
+            if (SelectedInvoice == null) return;
+
+            bool confirm = _dialogService.ShowConfirmation($"Bạn có chắc chắn muốn xóa hóa đơn '{SelectedInvoice.InvoiceCode}' của sinh viên {SelectedInvoice.StudentName}?");
+            if (!confirm) return;
+
+            IsBusy = true;
+            var result = await _invoiceService.DeleteInvoiceAsync(SelectedInvoice.Id);
+            IsBusy = false;
+
+            if (result.IsSuccess)
+            {
+                _dialogService.ShowInformation("Xóa hóa đơn thành công!");
+                await LoadInvoicesAsync();
+            }
+            else
+            {
+                _dialogService.ShowError(result.Message);
+            }
         }
     }
 }

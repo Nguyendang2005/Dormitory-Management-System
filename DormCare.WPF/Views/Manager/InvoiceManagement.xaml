@@ -25,6 +25,7 @@
                 <Button Content="➕ Tạo Hóa Đơn" Style="{StaticResource PrimaryButton}" Command="{Binding CreateInvoiceCommand}" Margin="0,0,10,0"/>
                 <Button Content="👁️ Xem Chi Tiết" Style="{StaticResource PrimaryButton}" Command="{Binding ViewInvoiceDetailsCommand}" Margin="0,0,10,0"/>
                 <Button Content="💳 Cập Nhật Thanh Toán" Style="{StaticResource PrimaryButton}" Command="{Binding UpdatePaymentCommand}" Margin="0,0,10,0"/>
+                <Button Content="🗑️ Xóa Hóa Đơn" Style="{StaticResource DangerButton}" Command="{Binding DeleteInvoiceCommand}" Margin="0,0,10,0"/>
                 <Button Content="🔄 Tải lại" Style="{StaticResource PrimaryButton}" Command="{Binding RefreshCommand}"/>
             </StackPanel>
         </DockPanel>
@@ -62,16 +63,15 @@
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="2*"/>
-                    <ColumnDefinition Width="1.2*"/>
-                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="1*"/>
                 </Grid.ColumnDefinitions>
 
-                <StackPanel Grid.Column="0" Margin="0,0,12,0">
+                <StackPanel Grid.Column="0" Margin="0,0,16,0">
                     <TextBlock Text="🔍 Tìm kiếm hóa đơn (Mã HĐ / Họ tên / Mã SV / Phòng)" FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,4"/>
                     <TextBox Style="{StaticResource ModernTextBox}" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"/>
                 </StackPanel>
 
-                <StackPanel Grid.Column="1" Margin="0,0,12,0">
+                <StackPanel Grid.Column="1">
                     <TextBlock Text="⚡ Trạng Thái Thanh Toán" FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,4"/>
                     <ComboBox SelectedValue="{Binding SelectedStatusFilter, Mode=TwoWay}" SelectedValuePath="Tag" Height="38" Background="#0F172A" Foreground="White" BorderBrush="{StaticResource CardBorderBrush}">
                         <ComboBoxItem Content="Tất cả trạng thái" Tag="All" IsSelected="True"/>
@@ -80,12 +80,6 @@
                         <ComboBoxItem Content="✅ Đã thanh toán (Paid)" Tag="Paid"/>
                         <ComboBoxItem Content="🛑 Quá hạn (Overdue)" Tag="Overdue"/>
                     </ComboBox>
-                </StackPanel>
-
-                <!-- Quick Filter Buttons -->
-                <StackPanel Grid.Column="2" VerticalAlignment="Bottom" Orientation="Horizontal">
-                    <Button Content="⚠️ Lọc Chưa Thanh Toán" Style="{StaticResource PrimaryButton}" Height="38" Command="{Binding FilterUnpaidCommand}" Margin="0,0,8,0" Background="#33EF4444" Foreground="#EF4444" BorderBrush="#EF4444"/>
-                    <Button Content="📋 tất Cả" Style="{StaticResource PrimaryButton}" Height="38" Command="{Binding FilterAllCommand}"/>
                 </StackPanel>
             </Grid>
         </Border>

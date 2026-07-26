@@ -165,6 +165,24 @@ namespace DormCare.Business.Services
             return ServiceResult<bool>.Success(true, "Xác nhận thanh toán hóa đơn thành công!");
         }
 
+        public async Task<ServiceResult<bool>> DeleteInvoiceAsync(int invoiceId)
+        {
+            var invoice = await _invoiceRepository.GetByIdAsync(invoiceId);
+            if (invoice == null)
+                return ServiceResult<bool>.Failure("Không tìm thấy hóa đơn cần xóa.");
+
+            try
+            {
+                await _invoiceRepository.DeleteAsync(invoice);
+                await _invoiceRepository.SaveChangesAsync();
+                return ServiceResult<bool>.Success(true, "Xóa hóa đơn thành công!");
+            }
+            catch (Exception)
+            {
+                return ServiceResult<bool>.Failure("Không thể xóa hóa đơn này vì đã có dữ liệu liên quan hoặc lịch sử giao dịch thanh toán.");
+            }
+        }
+
         private static InvoiceDto MapToDto(Invoice i)
         {
             decimal totalPaid = i.Payments != null
