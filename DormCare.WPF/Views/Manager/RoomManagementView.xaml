@@ -1,0 +1,62 @@
+<UserControl x:Class="DormCare.WPF.Views.Manager.RoomManagementView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header Filter Bar -->
+        <Border Grid.Row="0" Style="{StaticResource HeaderCard}" Margin="0,0,0,16">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBox Text="{Binding SearchKeyword, UpdateSourceTrigger=PropertyChanged}" Width="160" Margin="0,0,8,0" Style="{StaticResource SearchTextBox}"/>
+                    <ComboBox SelectedItem="{Binding SelectedBuildingFilter}" Style="{StaticResource ModernComboBox}" Width="130" Margin="0,0,8,0">
+                        <ComboBoxItem Content="Tất cả tòa"/>
+                        <ComboBoxItem Content="Tòa nhà A"/>
+                        <ComboBoxItem Content="Tòa nhà B"/>
+                        <ComboBoxItem Content="Tòa nhà C"/>
+                    </ComboBox>
+                    <ComboBox SelectedItem="{Binding SelectedTypeFilter}" Style="{StaticResource ModernComboBox}" Width="130" Margin="0,0,8,0">
+                        <ComboBoxItem Content="Tất cả loại"/>
+                        <ComboBoxItem Content="Standard"/>
+                        <ComboBoxItem Content="Premium"/>
+                    </ComboBox>
+                    <Button Content="➕ Thêm Phòng" Command="{Binding AddRoomCommand}" Style="{StaticResource PrimaryButton}"/>
+                </StackPanel>
+                <StackPanel VerticalAlignment="Center">
+                    <TextBlock Text="🚪 QUẢN LÝ PHÒNG Ở KÝ TÚC XÁ" FontSize="20" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}"/>
+                    <TextBlock Text="Hiển thị sức chứa, số giường đang sử dụng (4/6) và đơn giá phòng" FontSize="13" Foreground="{StaticResource TextMutedBrush}" Margin="0,4,0,0"/>
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <!-- DataGrid Rooms -->
+        <Border Grid.Row="1" Style="{StaticResource CardBorder}">
+            <DataGrid ItemsSource="{Binding Rooms}" SelectedItem="{Binding SelectedRoom}" AutoGenerateColumns="False" IsReadOnly="True" Style="{StaticResource ModernDataGrid}">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Số Phòng" Binding="{Binding RoomNumber}" Width="100"/>
+                    <DataGridTextColumn Header="Tòa Nhà" Binding="{Binding BuildingName}" Width="140"/>
+                    <DataGridTextColumn Header="Tầng" Binding="{Binding FloorNumber}" Width="70"/>
+                    <DataGridTextColumn Header="Loại Phòng" Binding="{Binding RoomType}" Width="110"/>
+                    <DataGridTextColumn Header="Sức Chứa" Binding="{Binding Capacity}" Width="90"/>
+                    <DataGridTextColumn Header="Tình Trạng Chỗ Ở" Binding="{Binding OccupancySummary}" Width="160"/>
+                    <DataGridTextColumn Header="Giá Thuê/Tháng" Binding="{Binding MonthlyRent, StringFormat={}{0:N0} VNĐ}" Width="140"/>
+                    <DataGridTextColumn Header="Đối Tượng" Binding="{Binding GenderType}" Width="100"/>
+                    <DataGridTextColumn Header="Trạng Thái" Binding="{Binding Status}" Width="120"/>
+                    <DataGridTemplateColumn Header="Thao Tác" Width="*">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <Button Content="✏️ Sửa" Command="{Binding DataContext.EditRoomCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" Style="{StaticResource SmallSecondaryButton}" Margin="0,0,6,0"/>
+                                    <Button Content="🗑️ Xóa" Command="{Binding DataContext.DeleteRoomCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" Style="{StaticResource SmallDangerButton}"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
+    </Grid>
+</UserControl>

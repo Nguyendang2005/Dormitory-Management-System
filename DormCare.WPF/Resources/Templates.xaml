@@ -6,15 +6,15 @@
 
     <!-- Manager View DataTemplates -->
     <DataTemplate DataType="{x:Type vm:BuildingViewModel}">
-        <views:BuildingManagement/>
+        <views:BuildingManagementView/>
     </DataTemplate>
 
     <DataTemplate DataType="{x:Type vm:RoomViewModel}">
-        <views:RoomManagement/>
+        <views:RoomManagementView/>
     </DataTemplate>
 
     <DataTemplate DataType="{x:Type vm:BedViewModel}">
-        <views:BedManagement/>
+        <views:BedManagementView/>
     </DataTemplate>
 
     <DataTemplate DataType="{x:Type vm:AvailableRoomViewModel}">
