@@ -1,13 +1,15 @@
 using System;
 using System.Windows;
-using Microsoft.Extensions.DependencyInjection;
+using DormCare.Business.Services;
 using DormCare.DataAccess.Data;
 using DormCare.DataAccess.Repositories;
-using DormCare.Business.Services;
 using DormCare.Domain.Entities;
 using DormCare.WPF.Services;
 using DormCare.WPF.ViewModels;
 using DormCare.WPF.Views;
+using DormCare.WPF.Views.Student;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DormCare.WPF
 {
@@ -24,36 +26,26 @@ namespace DormCare.WPF
 
             ServiceProvider = services.BuildServiceProvider();
 
-            // Connect to SQL Server Database (DormCareDB)
-            try
-            {
-                using (var scope = ServiceProvider.CreateScope())
-                {
-                    var dbContext = scope.ServiceProvider.GetRequiredService<DormCareDbContext>();
-                    DbInitializer.Initialize(dbContext);
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Cảnh báo kết nối SQL Server: {ex.Message}\nỨng dụng sẽ tiếp tục với cấu hình hiện tại.", "DormCare SQL Server", MessageBoxButton.OK, MessageBoxImage.Warning);
-            }
+            _ = TestDbConnectionAsync();
 
             ShowLoginWindow();
         }
 
         private void ConfigureServices(IServiceCollection services)
         {
-            // 1. DataAccess & DbContext (Scoped Lifetime)
-            services.AddDbContext<DormCareDbContext>(ServiceLifetime.Scoped);
+            services.AddDbContext<DormCareDbContext>(options =>
+            {
+                options.UseSqlServer("Server=DANG;Database=DormCareDB;User Id=sa;Password=123456;TrustServerCertificate=True;Encrypt=False;");
+            });
+
             services.AddScoped<UserRepository>();
+            services.AddScoped<StudentRepository>();
             services.AddScoped<BuildingRepository>();
             services.AddScoped<RoomRepository>();
             services.AddScoped<BedRepository>();
-            services.AddScoped<StudentRepository>();
             services.AddScoped<InvoiceRepository>();
             services.AddScoped<MaintenanceRepository>();
 
-            // 2. Business Services (Scoped Lifetimes)
             services.AddScoped<AuthService>();
             services.AddScoped<BuildingService>();
             services.AddScoped<RoomService>();
@@ -64,69 +56,96 @@ namespace DormCare.WPF
             services.AddScoped<PaymentService>();
             services.AddScoped<MaintenanceService>();
             services.AddScoped<NotificationService>();
+            services.AddScoped<OccupancyService>();
 
-            // 3. Presentation Infrastructure (Singleton Lifetime)
-            services.AddSingleton<NavigationService>();
             services.AddSingleton<DialogService>();
+            services.AddSingleton<NavigationService>();
 
-            // 4. ViewModels & Views (Transient Lifetime)
             services.AddTransient<LoginViewModel>();
-            services.AddTransient<LoginWindow>();
+            services.AddTransient<BuildingViewModel>();
+            services.AddTransient<RoomViewModel>();
+            services.AddTransient<BedViewModel>();
+            services.AddTransient<AvailableRoomViewModel>();
+            services.AddTransient<OccupancyStatisticsViewModel>();
+            services.AddTransient<StudentViewModel>();
+            services.AddTransient<ApplicationViewModel>();
+            services.AddTransient<InvoiceViewModel>();
+            services.AddTransient<MaintenanceViewModel>();
+            services.AddTransient<StudentDashboardViewModel>();
         }
 
-        public void ShowLoginWindow()
+        private async System.Threading.Tasks.Task TestDbConnectionAsync()
         {
-            var loginViewModel = ServiceProvider.GetRequiredService<LoginViewModel>();
-            var loginWindow = new LoginWindow
+            try
             {
-                DataContext = loginViewModel
-            };
+                using var scope = ServiceProvider.CreateScope();
+                var dbContext = scope.ServiceProvider.GetRequiredService<DormCareDbContext>();
+                await DbInitializer.InitializeAsync(dbContext);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"DB Init Warning: {ex.Message}");
+            }
+        }
 
-            loginViewModel.LoginSuccess += (user) =>
+        private void ShowLoginWindow()
+        {
+            var loginVm = ServiceProvider.GetRequiredService<LoginViewModel>();
+            var loginWindow = new LoginWindow { DataContext = loginVm };
+
+            loginVm.LoginSuccess += (user) =>
             {
-                ShowMainWindow(user);
-                loginWindow.Close();
+                loginWindow.Hide();
+                OpenMainWindow(user, loginWindow);
             };
 
             loginWindow.Show();
         }
 
-        public void ShowMainWindow(User currentUser)
+        private void OpenMainWindow(User user, Window loginWindow)
         {
-            var navService = ServiceProvider.GetRequiredService<NavigationService>();
-            var studentService = ServiceProvider.GetRequiredService<StudentService>();
-            var roomService = ServiceProvider.GetRequiredService<RoomService>();
-            var buildingService = ServiceProvider.GetRequiredService<BuildingService>();
-            var bedService = ServiceProvider.GetRequiredService<BedService>();
-            var appService = ServiceProvider.GetRequiredService<ApplicationService>();
-            var invoiceService = ServiceProvider.GetRequiredService<InvoiceService>();
-            var maintenanceService = ServiceProvider.GetRequiredService<MaintenanceService>();
-            var dialogService = ServiceProvider.GetRequiredService<DialogService>();
-
-            var mainViewModel = new MainViewModel(
-                currentUser,
-                navService,
-                studentService,
-                roomService,
-                buildingService,
-                bedService,
-                appService,
-                invoiceService,
-                maintenanceService,
-                dialogService);
-
-            var mainWindow = new MainWindow
+            if (user.Role == "Student")
             {
-                DataContext = mainViewModel
-            };
-
-            mainViewModel.RequestLogout += () =>
+                var studentVm = new StudentDashboardViewModel(
+                    ServiceProvider.GetRequiredService<StudentService>(),
+                    user
+                );
+                var studentWindow = new Window
+                {
+                    Title = "DormCare — Cổng Thông Tin Sinh Viên",
+                    Content = new StudentDashboard { DataContext = studentVm },
+                    WindowStartupLocation = WindowStartupLocation.CenterScreen,
+                    Width = 1200,
+                    Height = 750
+                };
+                studentWindow.Closed += (s, e) => loginWindow.Close();
+                studentWindow.Show();
+            }
+            else
             {
-                mainWindow.Close();
-                ShowLoginWindow();
-            };
+                var mainVm = new MainViewModel(
+                    user,
+                    ServiceProvider.GetRequiredService<AuthService>(),
+                    ServiceProvider.GetRequiredService<DialogService>(),
+                    ServiceProvider.GetRequiredService<BuildingService>(),
+                    ServiceProvider.GetRequiredService<RoomService>(),
+                    ServiceProvider.GetRequiredService<BedService>(),
+                    ServiceProvider.GetRequiredService<StudentService>(),
+                    ServiceProvider.GetRequiredService<ApplicationService>(),
+                    ServiceProvider.GetRequiredService<InvoiceService>(),
+                    ServiceProvider.GetRequiredService<MaintenanceService>(),
+                    ServiceProvider.GetRequiredService<OccupancyService>()
+                );
 
-            mainWindow.Show();
+                var mainWindow = new MainWindow { DataContext = mainVm };
+                mainVm.RequestLogout += () =>
+                {
+                    mainWindow.Close();
+                    ShowLoginWindow();
+                };
+                mainWindow.Closed += (s, e) => loginWindow.Close();
+                mainWindow.Show();
+            }
         }
     }
 }

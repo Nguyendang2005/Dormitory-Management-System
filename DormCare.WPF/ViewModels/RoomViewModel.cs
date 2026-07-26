@@ -1,3 +1,4 @@
+using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -12,7 +13,7 @@ namespace DormCare.WPF.ViewModels
     public class RoomViewModel : BaseViewModel
     {
         private readonly RoomService _roomService;
-        private readonly ApplicationService _applicationService;
+        private readonly ApplicationService? _applicationService;
         private readonly DialogService _dialogService;
         private readonly User? _currentUser;
 
@@ -80,57 +81,61 @@ namespace DormCare.WPF.ViewModels
         public ICommand SearchCommand { get; }
         public ICommand ApplyRoomCommand { get; }
 
-        public RoomViewModel(RoomService roomService, ApplicationService applicationService, DialogService dialogService, User? currentUser = null)
+        public RoomViewModel(RoomService roomService, DialogService dialogService, ApplicationService? applicationService = null, User? currentUser = null)
         {
-            Title = "🔵 Dạng — Quản Lý Phòng & Thống Kê Giường";
+            Title = "Quản Lý Phòng & Thống Kê Giường";
             _roomService = roomService;
-            _applicationService = applicationService;
             _dialogService = dialogService;
+            _applicationService = applicationService;
             _currentUser = currentUser;
 
-            RefreshCommand = new AsyncRelayCommand(LoadDataAsync);
+            RefreshCommand = new AsyncRelayCommand(LoadRoomsAsync);
             SearchCommand = new AsyncRelayCommand(FilterRoomsAsync);
             ApplyRoomCommand = new AsyncRelayCommand(ExecuteApplyRoomAsync, () => SelectedRoom != null);
 
-            _ = LoadDataAsync();
+            _ = LoadRoomsAsync();
         }
 
-        public async Task LoadDataAsync()
+        public async Task LoadRoomsAsync()
         {
             IsBusy = true;
+            var dtos = await _roomService.GetAllRoomsAsync();
+            Rooms = new ObservableCollection<RoomDto>(dtos);
+
             OccupancyStats = await _roomService.GetOccupancyStatsAsync();
-            await FilterRoomsAsync();
             IsBusy = false;
         }
 
         public async Task FilterRoomsAsync()
         {
-            var roomDtos = await _roomService.SearchAndFilterRoomsAsync(null, SelectedGenderFilter, SelectedRoomTypeFilter, SearchText);
-            Rooms = new ObservableCollection<RoomDto>(roomDtos);
+            IsBusy = true;
+            var filtered = await _roomService.SearchAndFilterRoomsAsync(null, SelectedGenderFilter, SelectedRoomTypeFilter, SearchText);
+            Rooms = new ObservableCollection<RoomDto>(filtered);
+            IsBusy = false;
         }
 
         private async Task ExecuteApplyRoomAsync()
         {
-            if (SelectedRoom == null || _currentUser == null || _currentUser.StudentProfile == null)
+            if (SelectedRoom == null) return;
+            if (_currentUser == null || _currentUser.Role != "Student" || _currentUser.StudentProfile == null)
             {
-                _dialogService.ShowError("Vui lòng chọn phòng trống muốn đăng ký.");
+                _dialogService.ShowInformation("Tính năng Đăng ký ở phòng này dành cho sinh viên.", "Thông báo");
                 return;
             }
 
-            if (!_dialogService.ShowConfirmation($"Bạn có chắc chắn muốn gửi đơn đăng ký phòng {SelectedRoom.RoomNumber} ({SelectedRoom.BuildingName})?"))
-                return;
+            if (_applicationService == null) return;
 
             IsBusy = true;
-            var result = await _applicationService.CreateApplicationAsync(_currentUser.StudentProfile.StudentId, SelectedRoom.RoomId, "Đăng ký từ ứng dụng DormCare");
+            var result = await _applicationService.SubmitApplicationAsync(_currentUser.StudentProfile.StudentId, SelectedRoom.RoomId, null, "Đăng ký ở từ giao diện danh sách phòng");
             IsBusy = false;
 
             if (result.IsSuccess)
             {
-                _dialogService.ShowInformation(result.Message);
+                _dialogService.ShowInformation(result.Message, "Thành công");
             }
             else
             {
-                _dialogService.ShowError(result.Message);
+                _dialogService.ShowError(result.Message, "Không thể đăng ký");
             }
         }
     }

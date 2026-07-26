@@ -8,37 +8,38 @@ namespace DormCare.WPF.ViewModels
 {
     public class MainViewModel : BaseViewModel
     {
-        private readonly NavigationService _navigationService;
-        private readonly StudentService _studentService;
-        private readonly RoomService _roomService;
+        private readonly AuthService _authService;
+        private readonly DialogService _dialogService;
         private readonly BuildingService _buildingService;
+        private readonly RoomService _roomService;
         private readonly BedService _bedService;
+        private readonly StudentService _studentService;
         private readonly ApplicationService _applicationService;
         private readonly InvoiceService _invoiceService;
         private readonly MaintenanceService _maintenanceService;
-        private readonly DialogService _dialogService;
+        private readonly OccupancyService _occupancyService;
 
-        private User _currentUser;
-        public User CurrentUser
+        public User CurrentUser { get; }
+
+        private BaseViewModel _currentView;
+        public BaseViewModel CurrentView
         {
-            get => _currentUser;
-            set => SetProperty(ref _currentUser, value);
+            get => _currentView;
+            set => SetProperty(ref _currentView, value);
         }
 
-        private BaseViewModel _currentChildViewModel = null!;
-        public BaseViewModel CurrentChildViewModel
+        private string _activeTabName = "Buildings";
+        public string ActiveTabName
         {
-            get => _currentChildViewModel;
-            set => SetProperty(ref _currentChildViewModel, value);
+            get => _activeTabName;
+            set => SetProperty(ref _activeTabName, value);
         }
 
-        public bool IsManager => CurrentUser.Role == "Manager";
-        public bool IsStudent => CurrentUser.Role == "Student";
-
-        public ICommand NavigateDashboardCommand { get; }
         public ICommand NavigateBuildingsCommand { get; }
         public ICommand NavigateRoomsCommand { get; }
         public ICommand NavigateBedsCommand { get; }
+        public ICommand NavigateAvailableRoomsCommand { get; }
+        public ICommand NavigateOccupancyCommand { get; }
         public ICommand NavigateStudentsCommand { get; }
         public ICommand NavigateApplicationsCommand { get; }
         public ICommand NavigateInvoicesCommand { get; }
@@ -48,61 +49,89 @@ namespace DormCare.WPF.ViewModels
         public event System.Action? RequestLogout;
 
         public MainViewModel(
-            User user,
-            NavigationService navigationService,
-            StudentService studentService,
-            RoomService roomService,
+            User currentUser,
+            AuthService authService,
+            DialogService dialogService,
             BuildingService buildingService,
+            RoomService roomService,
             BedService bedService,
+            StudentService studentService,
             ApplicationService applicationService,
             InvoiceService invoiceService,
             MaintenanceService maintenanceService,
-            DialogService dialogService)
+            OccupancyService occupancyService)
         {
-            _currentUser = user;
-            _navigationService = navigationService;
-            _studentService = studentService;
-            _roomService = roomService;
+            Title = "DormCare — Quản Lý Ký Túc Xá Sinh Viên";
+            CurrentUser = currentUser;
+            _authService = authService;
+            _dialogService = dialogService;
             _buildingService = buildingService;
+            _roomService = roomService;
             _bedService = bedService;
+            _studentService = studentService;
             _applicationService = applicationService;
             _invoiceService = invoiceService;
             _maintenanceService = maintenanceService;
-            _dialogService = dialogService;
+            _occupancyService = occupancyService;
 
-            Title = $"DormCare — Ký Túc Xá ({user.Username} - {user.Role})";
-
-            NavigateDashboardCommand = new RelayCommand(ExecuteNavigateDashboard);
-            NavigateBuildingsCommand = new RelayCommand(() => CurrentChildViewModel = new BuildingViewModel(_buildingService, _dialogService));
-            NavigateRoomsCommand = new RelayCommand(() => CurrentChildViewModel = new RoomViewModel(_roomService, _applicationService, _dialogService, CurrentUser));
-            NavigateBedsCommand = new RelayCommand(() => CurrentChildViewModel = new BedViewModel(_bedService, _dialogService));
-            NavigateStudentsCommand = new RelayCommand(() => CurrentChildViewModel = new StudentViewModel(_studentService));
-            NavigateApplicationsCommand = new RelayCommand(() => CurrentChildViewModel = new ApplicationViewModel(_applicationService, _dialogService, CurrentUser));
-            NavigateInvoicesCommand = new RelayCommand(() => CurrentChildViewModel = new InvoiceViewModel(_invoiceService, _dialogService, IsStudent ? CurrentUser.StudentProfile?.StudentId : null));
-            NavigateMaintenanceCommand = new RelayCommand(() => CurrentChildViewModel = new MaintenanceViewModel(_maintenanceService, _dialogService, CurrentUser));
-            LogoutCommand = new RelayCommand(ExecuteLogout);
-
-            ExecuteNavigateDashboard();
-        }
-
-        private void ExecuteNavigateDashboard()
-        {
-            if (IsStudent)
+            NavigateBuildingsCommand = new RelayCommand(() =>
             {
-                CurrentChildViewModel = new StudentDashboardViewModel(_studentService, CurrentUser);
-            }
-            else
-            {
-                CurrentChildViewModel = new RoomViewModel(_roomService, _applicationService, _dialogService, CurrentUser);
-            }
-        }
+                ActiveTabName = "Buildings";
+                CurrentView = new BuildingViewModel(_buildingService, _dialogService);
+            });
 
-        private void ExecuteLogout()
-        {
-            if (_dialogService.ShowConfirmation("Bạn có muốn đăng xuất khỏi hệ thống?"))
+            NavigateRoomsCommand = new RelayCommand(() =>
             {
-                RequestLogout?.Invoke();
-            }
+                ActiveTabName = "Rooms";
+                CurrentView = new RoomViewModel(_roomService, _dialogService);
+            });
+
+            NavigateBedsCommand = new RelayCommand(() =>
+            {
+                ActiveTabName = "Beds";
+                CurrentView = new BedViewModel(_bedService, _dialogService);
+            });
+
+            NavigateAvailableRoomsCommand = new RelayCommand(() =>
+            {
+                ActiveTabName = "AvailableRooms";
+                CurrentView = new AvailableRoomViewModel(_roomService);
+            });
+
+            NavigateOccupancyCommand = new RelayCommand(() =>
+            {
+                ActiveTabName = "Occupancy";
+                CurrentView = new OccupancyStatisticsViewModel(_occupancyService);
+            });
+
+            NavigateStudentsCommand = new RelayCommand(() =>
+            {
+                ActiveTabName = "Students";
+                CurrentView = new StudentViewModel(_studentService);
+            });
+
+            NavigateApplicationsCommand = new RelayCommand(() =>
+            {
+                ActiveTabName = "Applications";
+                CurrentView = new ApplicationViewModel(_applicationService, _dialogService, CurrentUser);
+            });
+
+            NavigateInvoicesCommand = new RelayCommand(() =>
+            {
+                ActiveTabName = "Invoices";
+                CurrentView = new InvoiceViewModel(_invoiceService, _dialogService);
+            });
+
+            NavigateMaintenanceCommand = new RelayCommand(() =>
+            {
+                ActiveTabName = "Maintenance";
+                CurrentView = new MaintenanceViewModel(_maintenanceService, _dialogService, CurrentUser);
+            });
+
+            LogoutCommand = new RelayCommand(() => RequestLogout?.Invoke());
+
+            // Default startup view: Buildings & Rooms (as specified)
+            _currentView = new BuildingViewModel(_buildingService, _dialogService);
         }
     }
 }

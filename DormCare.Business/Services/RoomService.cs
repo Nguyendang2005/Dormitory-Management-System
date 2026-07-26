@@ -41,6 +41,49 @@ namespace DormCare.Business.Services
             });
         }
 
+        public async Task<IEnumerable<RoomDto>> GetAvailableRoomsAsync()
+        {
+            var rooms = await _roomRepository.GetRoomsWithBuildingAndBedsAsync();
+            var availableRooms = rooms
+                .Where(r => r.Status == "Available" && (r.Capacity - r.Beds.Count(b => b.Status == "Occupied")) > 0)
+                .Select(r => new RoomDto
+                {
+                    RoomId = r.RoomId,
+                    BuildingId = r.BuildingId,
+                    BuildingName = r.Building != null ? r.Building.BuildingName : "N/A",
+                    RoomNumber = r.RoomNumber,
+                    FloorNumber = r.FloorNumber,
+                    RoomType = r.RoomType,
+                    Capacity = r.Capacity,
+                    MonthlyRent = r.MonthlyRent,
+                    GenderType = r.GenderType,
+                    Status = r.Status,
+                    Description = r.Description ?? string.Empty,
+                    OccupiedBeds = r.Beds.Count(b => b.Status == "Occupied")
+                });
+
+            return availableRooms;
+        }
+
+        public async Task<RoomOccupancyDto> GetOccupancyStatsAsync()
+        {
+            var rooms = await _roomRepository.GetRoomsWithBuildingAndBedsAsync();
+            var roomList = rooms.ToList();
+
+            var totalBeds = roomList.Sum(r => r.Beds.Count);
+            var occupiedBeds = roomList.Sum(r => r.Beds.Count(b => b.Status == "Occupied"));
+            var availableBeds = roomList.Sum(r => r.Beds.Count(b => b.Status == "Available"));
+
+            return new RoomOccupancyDto
+            {
+                TotalRooms = roomList.Count,
+                TotalBeds = totalBeds,
+                OccupiedBeds = occupiedBeds,
+                AvailableBeds = availableBeds,
+                OccupancyRate = totalBeds > 0 ? (double)occupiedBeds / totalBeds * 100 : 0
+            };
+        }
+
         public async Task<IEnumerable<RoomDto>> SearchAndFilterRoomsAsync(int? buildingId, string? genderType, string? roomType, string? searchText)
         {
             var rooms = await _roomRepository.GetRoomsWithBuildingAndBedsAsync();
@@ -86,44 +129,18 @@ namespace DormCare.Business.Services
             });
         }
 
-        public async Task<RoomOccupancyDto> GetOccupancyStatsAsync()
+        public async Task<ServiceResult<Room>> AddRoomAsync(Room room)
         {
-            var buildings = await _buildingRepository.GetBuildingsWithRoomsAsync();
-            var allRooms = buildings.SelectMany(b => b.Rooms).ToList();
-            var allBeds = allRooms.SelectMany(r => r.Beds).ToList();
-
-            return new RoomOccupancyDto
+            var building = await _buildingRepository.GetByIdAsync(room.BuildingId);
+            if (building != null && (building.Status == "Inactive" || building.Status == "Maintenance"))
             {
-                TotalBuildings = buildings.Count(),
-                TotalRooms = allRooms.Count,
-                TotalBeds = allBeds.Count,
-                OccupiedBeds = allBeds.Count(b => b.Status == "Occupied"),
-                AvailableBeds = allBeds.Count(b => b.Status == "Available"),
-                MaintenanceBeds = allBeds.Count(b => b.Status == "Maintenance")
-            };
-        }
-
-        public async Task<ServiceResult<bool>> AddRoomAsync(Room room)
-        {
-            if (string.IsNullOrWhiteSpace(room.RoomNumber))
-            {
-                return ServiceResult<bool>.Failure("Số phòng không được để trống.");
+                return ServiceResult<Room>.Failure($"Tòa nhà '{building.BuildingName}' đang ở trạng thái {building.Status}, không thể thêm phòng mới.");
             }
 
             await _roomRepository.AddAsync(room);
             await _roomRepository.SaveChangesAsync();
-
             RoomUpdated?.Invoke(this, EventArgs.Empty);
-            return ServiceResult<bool>.Success(true, "Thêm phòng mới thành công!");
-        }
-
-        public async Task<ServiceResult<bool>> UpdateRoomAsync(Room room)
-        {
-            await _roomRepository.UpdateAsync(room);
-            await _roomRepository.SaveChangesAsync();
-
-            RoomUpdated?.Invoke(this, EventArgs.Empty);
-            return ServiceResult<bool>.Success(true, "Cập nhật thông tin phòng thành công!");
+            return ServiceResult<Room>.Success(room, "Thêm phòng thành công!");
         }
     }
 }

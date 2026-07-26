@@ -1,16 +1,49 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:vm="clr-namespace:DormCare.WPF.ViewModels"
+                    xmlns:views="clr-namespace:DormCare.WPF.Views.Manager"
+                    xmlns:studentViews="clr-namespace:DormCare.WPF.Views.Student">
 
-    <ResourceDictionary.MergedDictionaries>
-        <ResourceDictionary Source="Colors.xaml" />
-    </ResourceDictionary.MergedDictionaries>
+    <!-- Manager View DataTemplates -->
+    <DataTemplate DataType="{x:Type vm:BuildingViewModel}">
+        <views:BuildingManagement/>
+    </DataTemplate>
 
-    <!-- Header Title Template -->
-    <DataTemplate x:Key="PageHeaderTemplate">
-        <StackPanel Margin="0,0,0,24">
-            <TextBlock Text="{Binding Title}" FontSize="24" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" />
-            <TextBlock Text="{Binding Subtitle}" FontSize="14" Foreground="{StaticResource TextMutedBrush}" Margin="0,4,0,0" />
-        </StackPanel>
+    <DataTemplate DataType="{x:Type vm:RoomViewModel}">
+        <views:RoomManagement/>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type vm:BedViewModel}">
+        <views:BedManagement/>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type vm:AvailableRoomViewModel}">
+        <views:AvailableRoomsView/>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type vm:OccupancyStatisticsViewModel}">
+        <views:OccupancyStatisticsView/>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type vm:StudentViewModel}">
+        <views:StudentManagement/>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type vm:ApplicationViewModel}">
+        <views:ApplicationManagement/>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type vm:InvoiceViewModel}">
+        <views:InvoiceManagement/>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type vm:MaintenanceViewModel}">
+        <views:MaintenanceManagement/>
+    </DataTemplate>
+
+    <!-- Student Dashboard DataTemplate -->
+    <DataTemplate DataType="{x:Type vm:StudentDashboardViewModel}">
+        <studentViews:StudentDashboard/>
     </DataTemplate>
 
 </ResourceDictionary>

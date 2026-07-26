@@ -58,55 +58,49 @@ namespace DormCare.Business.Services
             return ServiceResult<bool>.Success(true, "Gửi đơn đăng ký thuê phòng thành công!");
         }
 
-        public async Task<ServiceResult<bool>> ApproveApplicationAsync(int applicationId, int reviewerUserId, string reviewNote)
+        public async Task<ServiceResult<bool>> SubmitApplicationAsync(int studentId, int roomId, int? preferredBedId, string reason)
+        {
+            return await CreateApplicationAsync(studentId, roomId, reason);
+        }
+
+        public async Task<ServiceResult<bool>> ApproveApplicationAsync(int applicationId, int reviewerId, string reviewNote)
         {
             var app = await _context.RoomApplications
-                .Include(a => a.Student)
                 .Include(a => a.Room)
                     .ThenInclude(r => r.Beds)
                 .FirstOrDefaultAsync(a => a.ApplicationId == applicationId);
 
-            if (app == null) return ServiceResult<bool>.Failure("Không tìm thấy đơn đăng ký.");
-
-            var availableBed = app.Room.Beds.FirstOrDefault(b => b.Status == "Available");
-            if (availableBed == null)
+            if (app == null)
             {
-                return ServiceResult<bool>.Failure("Phòng này đã hết giường trống!");
+                return ServiceResult<bool>.Failure("Đơn đăng ký không tồn tại.");
+            }
+
+            if (app.Status != "Pending")
+            {
+                return ServiceResult<bool>.Failure("Đơn đăng ký đã xử lý trước đó.");
             }
 
             app.Status = "Approved";
-            app.ReviewedBy = reviewerUserId;
+            app.ReviewedBy = reviewerId;
             app.ReviewedAt = DateTime.UtcNow;
             app.ReviewNote = reviewNote;
 
-            availableBed.Status = "Occupied";
-
-            var assignment = new RoomAssignment
-            {
-                StudentId = app.StudentId,
-                RoomId = app.RoomId,
-                BedId = availableBed.BedId,
-                StartDate = DateTime.UtcNow.Date,
-                AssignmentType = "InitialAssignment",
-                Status = "Active",
-                AssignedBy = reviewerUserId,
-                Note = "Duyệt đơn đăng ký tự động"
-            };
-
-            _context.RoomAssignments.Add(assignment);
             await _context.SaveChangesAsync();
-
             ApplicationUpdated?.Invoke(this, EventArgs.Empty);
-            return ServiceResult<bool>.Success(true, "Duyệt đơn đăng ký thành công!");
+
+            return ServiceResult<bool>.Success(true, "Đã phê duyệt đơn đăng ký!");
         }
 
-        public async Task<ServiceResult<bool>> RejectApplicationAsync(int applicationId, int reviewerUserId, string reviewNote)
+        public async Task<ServiceResult<bool>> RejectApplicationAsync(int applicationId, int reviewerId, string reviewNote)
         {
             var app = await _context.RoomApplications.FindAsync(applicationId);
-            if (app == null) return ServiceResult<bool>.Failure("Không tìm thấy đơn đăng ký.");
+            if (app == null)
+            {
+                return ServiceResult<bool>.Failure("Đơn đăng ký không tồn tại.");
+            }
 
             app.Status = "Rejected";
-            app.ReviewedBy = reviewerUserId;
+            app.ReviewedBy = reviewerId;
             app.ReviewedAt = DateTime.UtcNow;
             app.ReviewNote = reviewNote;
 

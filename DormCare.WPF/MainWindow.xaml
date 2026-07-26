@@ -1,12 +1,67 @@
-﻿<Window x:Class="DormCare.WPF.MainWindow"
+<Window x:Class="DormCare.WPF.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:DormCare.WPF"
-        mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
+        Title="{Binding Title}" Height="800" Width="1360"
+        WindowStartupLocation="CenterScreen"
+        Style="{StaticResource ModernWindow}">
 
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="260"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Sidebar Navigation -->
+        <Border Grid.Column="0" Background="#0F172A" BorderBrush="{StaticResource CardBorderBrush}" BorderThickness="0,0,1,0">
+            <DockPanel Margin="16">
+
+                <!-- Logo & Brand Header -->
+                <StackPanel DockPanel.Dock="Top" Margin="0,10,0,24">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Border Background="{StaticResource KinpakuGoldBrush}" CornerRadius="8" Width="36" Height="36" Margin="0,0,10,0">
+                            <TextBlock Text="DC" Foreground="#0F172A" FontWeight="Bold" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <StackPanel>
+                            <TextBlock Text="DormCare" FontSize="20" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}"/>
+                            <TextBlock Text="Hệ Thống Quản Lý Ký Túc Xá" FontSize="11" Foreground="{StaticResource TextMutedBrush}"/>
+                        </StackPanel>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Current User Profile Footer -->
+                <Border DockPanel.Dock="Bottom" Background="#1E293B" CornerRadius="10" Padding="12" Margin="0,16,0,0">
+                    <DockPanel>
+                        <Button DockPanel.Dock="Right" Content="🚪" Command="{Binding LogoutCommand}" ToolTip="Đăng xuất" Style="{StaticResource NavButton}" Width="36" Height="36" Padding="0"/>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="{Binding CurrentUser.Username}" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" FontSize="13"/>
+                            <TextBlock Text="{Binding CurrentUser.Role}" Foreground="{StaticResource KinpakuGoldBrush}" FontSize="11"/>
+                        </StackPanel>
+                    </DockPanel>
+                </Border>
+
+                <!-- Navigation Menu Buttons -->
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <TextBlock Text="QUẢN LÝ CƠ SỞ VẬT CHẤT" FontSize="11" FontWeight="Bold" Foreground="{StaticResource TextMutedBrush}" Margin="8,0,0,8"/>
+
+                        <Button Content="🏢 Quản Lý Tòa Nhà" Style="{StaticResource NavButton}" Command="{Binding NavigateBuildingsCommand}" Margin="0,0,0,4"/>
+                        <Button Content="🚪 Quản Lý Phòng" Style="{StaticResource NavButton}" Command="{Binding NavigateRoomsCommand}" Margin="0,0,0,4"/>
+                        <Button Content="🛏️ Quản Lý Giường" Style="{StaticResource NavButton}" Command="{Binding NavigateBedsCommand}" Margin="0,0,0,4"/>
+                        <Button Content="🔍 Tìm Phòng Còn Chỗ" Style="{StaticResource NavButton}" Command="{Binding NavigateAvailableRoomsCommand}" Margin="0,0,0,4"/>
+                        <Button Content="📊 Thống Kê Sử Dụng" Style="{StaticResource NavButton}" Command="{Binding NavigateOccupancyCommand}" Margin="0,0,0,16"/>
+
+                        <TextBlock Text="QUẢN LÝ SINH VIÊN &amp; DỊCH VỤ" FontSize="11" FontWeight="Bold" Foreground="{StaticResource TextMutedBrush}" Margin="8,8,0,8"/>
+
+                        <Button Content="👥 Danh Sách Sinh Viên" Style="{StaticResource NavButton}" Command="{Binding NavigateStudentsCommand}" Margin="0,0,0,4"/>
+                        <Button Content="📝 Đơn Đăng Ký Phòng" Style="{StaticResource NavButton}" Command="{Binding NavigateApplicationsCommand}" Margin="0,0,0,4"/>
+                        <Button Content="💳 Hóa Đơn Điện Nước" Style="{StaticResource NavButton}" Command="{Binding NavigateInvoicesCommand}" Margin="0,0,0,4"/>
+                        <Button Content="🛠️ Báo Cáo Sửa Chữa" Style="{StaticResource NavButton}" Command="{Binding NavigateMaintenanceCommand}" Margin="0,0,0,4"/>
+                    </StackPanel>
+                </ScrollViewer>
+            </DockPanel>
+        </Border>
+
+        <!-- Main Dynamic Content Area -->
+        <ContentControl Grid.Column="1" Content="{Binding CurrentView}" Margin="16"/>
     </Grid>
 </Window>
