@@ -20,10 +20,13 @@ namespace DormCare.WPF.ViewModels
             set
             {
                 SetProperty(ref _isRegisterMode, value);
+                OnPropertyChanged(nameof(IsLoginMode));
                 ErrorMessage = string.Empty;
                 SuccessMessage = string.Empty;
             }
         }
+
+        public bool IsLoginMode => !IsRegisterMode;
 
         // --- LOGIN FIELDS ---
         private string _username = "manager01";
@@ -180,6 +183,12 @@ namespace DormCare.WPF.ViewModels
         {
             ErrorMessage = string.Empty;
             SuccessMessage = string.Empty;
+
+            if (string.IsNullOrWhiteSpace(RegUsername) || string.IsNullOrWhiteSpace(RegPassword))
+            {
+                ErrorMessage = "Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu.";
+                return;
+            }
 
             if (RegPassword != RegConfirmPassword)
             {

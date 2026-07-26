@@ -62,7 +62,8 @@
 
                     <!-- Header -->
                     <DockPanel Margin="0,0,0,20">
-                        <TextBlock Text="ĐĂNG NHẬP HỆ THỐNG" FontSize="24" FontWeight="Bold" Foreground="#0F172A"/>
+                        <TextBlock Visibility="{Binding IsLoginMode, Converter={StaticResource BoolToVisConverter}}" Text="ĐĂNG NHẬP HỆ THỐNG" FontSize="24" FontWeight="Bold" Foreground="#0F172A"/>
+                        <TextBlock Visibility="{Binding IsRegisterMode, Converter={StaticResource BoolToVisConverter}}" Text="ĐĂNG KÝ TÀI KHOẢN MỚI" FontSize="24" FontWeight="Bold" Foreground="#0F172A"/>
                     </DockPanel>
 
                     <!-- Quick Preset Role Helper Buttons -->
@@ -87,7 +88,7 @@
                     </Border>
 
                     <!-- LOGIN FORM VIEW -->
-                    <StackPanel Visibility="{Binding IsRegisterMode, Converter={StaticResource BoolToVisConverter}, ConverterParameter=Inverse}">
+                    <StackPanel Visibility="{Binding IsLoginMode, Converter={StaticResource BoolToVisConverter}}">
                         <TextBlock Text="Tên đăng nhập" FontSize="13" FontWeight="SemiBold" Foreground="#475569" Margin="0,0,0,6"/>
                         <TextBox Text="{Binding Username, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormTextBox}" Margin="0,0,0,16"/>
 
