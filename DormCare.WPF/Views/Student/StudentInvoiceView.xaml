@@ -149,7 +149,7 @@
             <DataGrid ItemsSource="{Binding Invoices}" SelectedItem="{Binding SelectedInvoice}" AutoGenerateColumns="False" IsReadOnly="True" Style="{StaticResource ModernDataGrid}">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Mã HĐ" Binding="{Binding InvoiceCode}" Width="120" FontWeight="Bold"/>
-                    <DataGridTextColumn Header="Kỳ Thu" Binding="{Binding BillingMonth, StringFormat='Tháng {0:MM/yyyy}'}" Width="110" FontWeight="SemiBold"/>
+                    <DataGridTextColumn Header="Kỳ Thu" Binding="{Binding BillingMonth, StringFormat='Tháng {0}'}" Width="110" FontWeight="SemiBold"/>
                     <DataGridTextColumn Header="Tiền Phòng" Binding="{Binding RoomFee, StringFormat='{}{0:N0}'}" Width="110"/>
                     <DataGridTextColumn Header="Tiền Điện" Binding="{Binding ElectricityFee, StringFormat='{}{0:N0}'}" Width="95"/>
                     <DataGridTextColumn Header="Nước &amp; Khác" Binding="{Binding WaterFee, StringFormat='{}{0:N0}'}" Width="105"/>

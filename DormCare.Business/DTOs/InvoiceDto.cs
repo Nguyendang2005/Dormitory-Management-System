@@ -14,6 +14,7 @@ namespace DormCare.Business.DTOs
         public string BuildingName { get; set; } = string.Empty;
         public int Month { get; set; }
         public int Year { get; set; }
+        public string BillingMonth => $"{Month:D2}/{Year}";
         public decimal RoomFee { get; set; }
         public decimal ElectricityFee { get; set; }
         public decimal WaterFee { get; set; }
