@@ -41,7 +41,7 @@
         <views:MaintenanceManagement/>
     </DataTemplate>
 
-    <!-- Student Dashboard DataTemplate -->
+    <!-- Student View DataTemplates -->
     <DataTemplate DataType="{x:Type vm:StudentDashboardViewModel}">
         <studentViews:StudentDashboard/>
     </DataTemplate>
