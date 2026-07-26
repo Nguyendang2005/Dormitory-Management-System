@@ -126,14 +126,53 @@
         <Setter Property="FontSize" Value="13" />
     </Style>
 
-    <!-- ComboBox Style -->
-    <Style x:Key="ModernComboBox" TargetType="ComboBox">
-        <Setter Property="Background" Value="#F8FAFC" />
-        <Setter Property="Foreground" Value="#0F172A" />
-        <Setter Property="BorderBrush" Value="#CBD5E1" />
+    <!-- Global ComboBox & ComboBoxItem Styles -->
+    <Style TargetType="ComboBox">
+        <Setter Property="Background" Value="#1E293B" />
+        <Setter Property="Foreground" Value="White" />
+        <Setter Property="BorderBrush" Value="{StaticResource CardBorderBrush}" />
         <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="Padding" Value="10,6" />
+        <Setter Property="Padding" Value="10,8" />
         <Setter Property="FontSize" Value="13" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+    </Style>
+
+    <Style x:Key="ModernComboBox" TargetType="ComboBox" BasedOn="{StaticResource {x:Type ComboBox}}"/>
+
+    <Style TargetType="ComboBoxItem">
+        <Setter Property="Background" Value="#1E293B" />
+        <Setter Property="Foreground" Value="White" />
+        <Setter Property="Padding" Value="12,10" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="#334155" />
+                <Setter Property="Foreground" Value="White" />
+            </Trigger>
+            <Trigger Property="IsSelected" Value="True">
+                <Setter Property="Background" Value="{StaticResource PrimaryBrush}" />
+                <Setter Property="Foreground" Value="White" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- Global DatePicker Styles -->
+    <Style TargetType="DatePicker">
+        <Setter Property="Background" Value="#1E293B" />
+        <Setter Property="Foreground" Value="White" />
+        <Setter Property="BorderBrush" Value="{StaticResource CardBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Padding" Value="4" />
+    </Style>
+
+    <Style TargetType="DatePickerTextBox">
+        <Setter Property="Background" Value="#1E293B" />
+        <Setter Property="Foreground" Value="White" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Padding" Value="6,0" />
     </Style>
 
     <!-- Header Card Style -->

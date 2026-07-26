@@ -77,7 +77,7 @@
 
                     <StackPanel Grid.Column="0">
                         <TextBlock Text="🏦 Hình Thức Thanh Toán" FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,6"/>
-                        <ComboBox SelectedValue="{Binding PaymentMethod, Mode=TwoWay}" SelectedValuePath="Tag" Height="38" Background="#1E293B" Foreground="White" BorderBrush="{StaticResource CardBorderBrush}">
+                        <ComboBox SelectedValue="{Binding PaymentMethod, Mode=TwoWay}" SelectedValuePath="Tag" Height="38" Style="{StaticResource ModernComboBox}">
                             <ComboBoxItem Content="Chuyển Khoản Ngân Hàng" Tag="BankTransfer" IsSelected="True"/>
                             <ComboBoxItem Content="Tiền Mặt (Cash)" Tag="Cash"/>
                             <ComboBoxItem Content="Ví Điện Tử / Online" Tag="MockPayment"/>
