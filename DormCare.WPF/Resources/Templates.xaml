@@ -1,0 +1,16 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="Colors.xaml" />
+    </ResourceDictionary.MergedDictionaries>
+
+    <!-- Header Title Template -->
+    <DataTemplate x:Key="PageHeaderTemplate">
+        <StackPanel Margin="0,0,0,24">
+            <TextBlock Text="{Binding Title}" FontSize="24" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" />
+            <TextBlock Text="{Binding Subtitle}" FontSize="14" Foreground="{StaticResource TextMutedBrush}" Margin="0,4,0,0" />
+        </StackPanel>
+    </DataTemplate>
+
+</ResourceDictionary>

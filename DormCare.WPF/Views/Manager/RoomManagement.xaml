@@ -1,0 +1,121 @@
+<UserControl x:Class="DormCare.WPF.Views.Manager.RoomManagement"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:conv="clr-namespace:DormCare.WPF.Converters">
+
+    <UserControl.Resources>
+        <conv:StatusToColorConverter x:Key="StatusColorConverter"/>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <DockPanel Grid.Row="0" Margin="0,0,0,16">
+            <StackPanel DockPanel.Dock="Left">
+                <TextBlock Text="🔵 Dạng — Quản Lý Phòng &amp; Thống Kê Giường Trống" FontSize="26" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}"/>
+                <TextBlock Text="Tìm kiếm, lọc phòng còn chỗ, sức chứa và quản lý tình trạng chỗ ở ký túc xá" FontSize="14" Foreground="{StaticResource TextMutedBrush}" Margin="0,4,0,0"/>
+            </StackPanel>
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                <Button Content="📝 Đăng Ký Phòng Này" Style="{StaticResource PrimaryButton}" Command="{Binding ApplyRoomCommand}" Margin="0,0,10,0"/>
+                <Button Content="🔄 Tải lại" Style="{StaticResource PrimaryButton}" Command="{Binding RefreshCommand}"/>
+            </StackPanel>
+        </DockPanel>
+
+        <!-- Stats Cards Grid -->
+        <UniformGrid Grid.Row="1" Columns="4" Margin="0,0,0,16">
+            <Border Style="{StaticResource CardFrame}" Margin="0,0,8,0" Padding="16,12">
+                <StackPanel>
+                    <TextBlock Text="TỔNG SỐ PHÒNG" FontSize="11" FontWeight="Bold" Foreground="{StaticResource TextMutedBrush}"/>
+                    <TextBlock Text="{Binding OccupancyStats.TotalRooms}" FontSize="24" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,4,0,0"/>
+                </StackPanel>
+            </Border>
+            <Border Style="{StaticResource CardFrame}" Margin="4,0,4,0" Padding="16,12">
+                <StackPanel>
+                    <TextBlock Text="TỔNG SỐ GIƯỜNG" FontSize="11" FontWeight="Bold" Foreground="{StaticResource TextMutedBrush}"/>
+                    <TextBlock Text="{Binding OccupancyStats.TotalBeds}" FontSize="24" FontWeight="Bold" Foreground="{StaticResource PrimaryHoverBrush}" Margin="0,4,0,0"/>
+                </StackPanel>
+            </Border>
+            <Border Style="{StaticResource CardFrame}" Margin="4,0,4,0" Padding="16,12">
+                <StackPanel>
+                    <TextBlock Text="GIƯỜNG CÒN TRỐNG" FontSize="11" FontWeight="Bold" Foreground="{StaticResource TextMutedBrush}"/>
+                    <TextBlock Text="{Binding OccupancyStats.AvailableBeds}" FontSize="24" FontWeight="Bold" Foreground="{StaticResource SuccessBrush}" Margin="0,4,0,0"/>
+                </StackPanel>
+            </Border>
+            <Border Style="{StaticResource CardFrame}" Margin="8,0,0,0" Padding="16,12">
+                <StackPanel>
+                    <TextBlock Text="TỶ LỆ LẤP ĐẦY (%)" FontSize="11" FontWeight="Bold" Foreground="{StaticResource TextMutedBrush}"/>
+                    <TextBlock Text="{Binding OccupancyStats.OverallOccupancyRate, StringFormat='{}{0:F1}%'}" FontSize="24" FontWeight="Bold" Foreground="{StaticResource WarningBrush}" Margin="0,4,0,0"/>
+                </StackPanel>
+            </Border>
+        </UniformGrid>
+
+        <!-- Filter & Search Bar -->
+        <Border Grid.Row="2" Style="{StaticResource CardFrame}" Margin="0,0,0,16" Padding="16,12">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="2*"/>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Margin="0,0,12,0">
+                    <TextBlock Text="🔍 Tìm kiếm phòng (Số phòng / Tòa)" FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,4"/>
+                    <TextBox Style="{StaticResource ModernTextBox}" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Margin="0,0,12,0">
+                    <TextBlock Text="👤 Lọc Giới Tính" FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,4"/>
+                    <ComboBox SelectedValue="{Binding SelectedGenderFilter, Mode=TwoWay}" SelectedValuePath="Tag" Height="38" Background="#0F172A" Foreground="White" BorderBrush="{StaticResource CardBorderBrush}">
+                        <ComboBoxItem Content="Tất cả giới tính" Tag="All" IsSelected="True"/>
+                        <ComboBoxItem Content="Nam (Male)" Tag="Male"/>
+                        <ComboBoxItem Content="Nữ (Female)" Tag="Female"/>
+                        <ComboBoxItem Content="Hỗn hợp (Mixed)" Tag="Mixed"/>
+                    </ComboBox>
+                </StackPanel>
+
+                <StackPanel Grid.Column="2">
+                    <TextBlock Text="🏠 Lọc Loại Phòng" FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,4"/>
+                    <ComboBox SelectedValue="{Binding SelectedRoomTypeFilter, Mode=TwoWay}" SelectedValuePath="Tag" Height="38" Background="#0F172A" Foreground="White" BorderBrush="{StaticResource CardBorderBrush}">
+                        <ComboBoxItem Content="Tất cả loại phòng" Tag="All" IsSelected="True"/>
+                        <ComboBoxItem Content="Tiêu chuẩn (Standard)" Tag="Standard"/>
+                        <ComboBoxItem Content="Cao cấp (Premium)" Tag="Premium"/>
+                        <ComboBoxItem Content="Hỗ trợ (Accessible)" Tag="Accessible"/>
+                    </ComboBox>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Rooms DataGrid -->
+        <Border Grid.Row="3" Style="{StaticResource CardFrame}">
+            <DataGrid ItemsSource="{Binding Rooms}" SelectedItem="{Binding SelectedRoom}">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Số Phòng" Binding="{Binding RoomNumber}" Width="110" FontWeight="Bold"/>
+                    <DataGridTextColumn Header="Tòa Nhà" Binding="{Binding BuildingName}" Width="150"/>
+                    <DataGridTextColumn Header="Tầng" Binding="{Binding FloorNumber}" Width="80"/>
+                    <DataGridTextColumn Header="Loại Phòng" Binding="{Binding RoomType}" Width="120"/>
+                    <DataGridTextColumn Header="Dành Cho" Binding="{Binding GenderType}" Width="100"/>
+                    <DataGridTextColumn Header="Sức Chứa" Binding="{Binding Capacity}" Width="90"/>
+                    <DataGridTextColumn Header="Đã Ở" Binding="{Binding OccupiedBeds}" Width="80"/>
+                    <DataGridTextColumn Header="Giường Trống" Binding="{Binding AvailableBeds}" Width="110" FontWeight="Bold"/>
+                    <DataGridTextColumn Header="Giá / Tháng" Binding="{Binding MonthlyRent, StringFormat='{}{0:N0} VNĐ'}" Width="140" Foreground="{StaticResource SuccessBrush}"/>
+                    <DataGridTemplateColumn Header="Trạng Thái" Width="130">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Border Background="{Binding Status, Converter={StaticResource StatusColorConverter}}"
+                                        CornerRadius="12" Padding="10,4" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding Status}" Foreground="White" FontWeight="Bold" FontSize="12"/>
+                                </Border>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
+    </Grid>
+</UserControl>
