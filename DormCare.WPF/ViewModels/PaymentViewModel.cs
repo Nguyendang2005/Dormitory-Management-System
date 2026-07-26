@@ -92,11 +92,15 @@ namespace DormCare.WPF.ViewModels
             ErrorMessage = string.Empty;
             IsBusy = true;
 
+            string refCode = string.IsNullOrWhiteSpace(TransactionReference)
+                ? $"TXN-{DateTime.Now:yyyyMMddHHmmss}"
+                : TransactionReference;
+
             var result = await _paymentService.ProcessPaymentAsync(
                 _invoice.Id,
                 AmountToPay,
                 PaymentMethod,
-                TransactionReference,
+                refCode,
                 _currentUserId,
                 Note
             );

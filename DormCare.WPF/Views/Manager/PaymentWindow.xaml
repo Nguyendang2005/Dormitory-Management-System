@@ -68,27 +68,14 @@
                     <TextBox Style="{StaticResource ModernTextBox}" Text="{Binding AmountToPay, StringFormat='{}{0:0.#}', UpdateSourceTrigger=PropertyChanged}" FontSize="15" FontWeight="Bold" Foreground="{StaticResource SuccessBrush}"/>
                 </StackPanel>
 
-                <Grid Margin="0,0,0,12">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="1*"/>
-                        <ColumnDefinition Width="16"/>
-                        <ColumnDefinition Width="1*"/>
-                    </Grid.ColumnDefinitions>
-
-                    <StackPanel Grid.Column="0">
-                        <TextBlock Text="🏦 Hình Thức Thanh Toán" FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,6"/>
-                        <ComboBox SelectedValue="{Binding PaymentMethod, Mode=TwoWay}" SelectedValuePath="Tag" Height="38" Style="{StaticResource ModernComboBox}">
-                            <ComboBoxItem Content="Chuyển Khoản Ngân Hàng" Tag="BankTransfer" IsSelected="True"/>
-                            <ComboBoxItem Content="Tiền Mặt (Cash)" Tag="Cash"/>
-                            <ComboBoxItem Content="Ví Điện Tử / Online" Tag="MockPayment"/>
-                        </ComboBox>
-                    </StackPanel>
-
-                    <StackPanel Grid.Column="2">
-                        <TextBlock Text="🔢 Mã Giao Dịch / Ref Code" FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,6"/>
-                        <TextBox Style="{StaticResource ModernTextBox}" Text="{Binding TransactionReference, UpdateSourceTrigger=PropertyChanged}"/>
-                    </StackPanel>
-                </Grid>
+                <StackPanel Margin="0,0,0,12">
+                    <TextBlock Text="🏦 Hình Thức Thanh Toán" FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,6"/>
+                    <ComboBox SelectedValue="{Binding PaymentMethod, Mode=TwoWay}" SelectedValuePath="Tag" Height="38" Style="{StaticResource ModernComboBox}">
+                        <ComboBoxItem Content="Chuyển Khoản Ngân Hàng" Tag="BankTransfer" IsSelected="True"/>
+                        <ComboBoxItem Content="Tiền Mặt (Cash)" Tag="Cash"/>
+                        <ComboBoxItem Content="Ví Điện Tử / Online" Tag="MockPayment"/>
+                    </ComboBox>
+                </StackPanel>
 
                 <StackPanel Margin="0,0,0,12">
                     <TextBlock Text="📝 Ghi Chú Giao Dịch" FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,6"/>
