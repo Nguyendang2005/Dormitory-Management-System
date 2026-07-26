@@ -18,7 +18,7 @@
         <!-- Header -->
         <DockPanel Grid.Row="0" Margin="0,0,0,16">
             <StackPanel DockPanel.Dock="Left">
-                <TextBlock Text="💳 Hậu — Quản Lý Hóa Đơn &amp; Thanh Toán" FontSize="26" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}"/>
+                <TextBlock Text="💳 Quản Lý Hóa Đơn &amp; Thanh Toán" FontSize="26" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}"/>
                 <TextBlock Text="Tạo hóa đơn, tính tổng phí, xem chi tiết, cập nhật thanh toán và lọc hóa đơn chưa thanh toán" FontSize="14" Foreground="{StaticResource TextMutedBrush}" Margin="0,4,0,0"/>
             </StackPanel>
             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">

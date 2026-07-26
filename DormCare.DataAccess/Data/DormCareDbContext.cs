@@ -89,6 +89,10 @@ namespace DormCare.DataAccess.Data
                       .WithMany(r => r.RoomApplications)
                       .HasForeignKey(a => a.RoomId)
                       .OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(a => a.Reviewer)
+                      .WithMany()
+                      .HasForeignKey(a => a.ReviewedBy)
+                      .OnDelete(DeleteBehavior.Restrict);
             });
 
             modelBuilder.Entity<RoomAssignment>(entity =>
@@ -103,6 +107,10 @@ namespace DormCare.DataAccess.Data
                 entity.HasOne(a => a.Bed)
                       .WithMany(b => b.RoomAssignments)
                       .HasForeignKey(a => a.BedId);
+                entity.HasOne(a => a.Manager)
+                      .WithMany()
+                      .HasForeignKey(a => a.AssignedBy)
+                      .OnDelete(DeleteBehavior.Restrict);
             });
 
             modelBuilder.Entity<Invoice>(entity =>
@@ -115,11 +123,19 @@ namespace DormCare.DataAccess.Data
             modelBuilder.Entity<Payment>(entity =>
             {
                 entity.HasKey(e => e.PaymentId);
+                entity.HasOne(p => p.Receiver)
+                      .WithMany()
+                      .HasForeignKey(p => p.ReceivedBy)
+                      .OnDelete(DeleteBehavior.Restrict);
             });
 
             modelBuilder.Entity<MaintenanceRequest>(entity =>
             {
                 entity.HasKey(e => e.RequestId);
+                entity.HasOne(m => m.Assignee)
+                      .WithMany()
+                      .HasForeignKey(m => m.AssignedTo)
+                      .OnDelete(DeleteBehavior.Restrict);
             });
 
             modelBuilder.Entity<Notification>(entity =>
