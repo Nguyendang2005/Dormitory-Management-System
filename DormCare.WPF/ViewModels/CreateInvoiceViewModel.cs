@@ -220,7 +220,7 @@ namespace DormCare.WPF.ViewModels
 
             if (SelectedRoom == null)
             {
-                ErrorMessage = "Vui lòng chọn phòng.";
+                ErrorMessage = "Sinh viên được chọn chưa được phân phòng ký túc xá.";
                 return;
             }
 
