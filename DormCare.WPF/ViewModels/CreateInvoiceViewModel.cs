@@ -210,7 +210,12 @@ namespace DormCare.WPF.ViewModels
             }
         }
 
-        public DateTime MinDueDate => DateTime.Today;
+        private DateTime _minDueDate = DateTime.Today;
+        public DateTime MinDueDate
+        {
+            get => _minDueDate;
+            set => SetProperty(ref _minDueDate, value);
+        }
 
         private async Task ExecuteSaveAsync()
         {
