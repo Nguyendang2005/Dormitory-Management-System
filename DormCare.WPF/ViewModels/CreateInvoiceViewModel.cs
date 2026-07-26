@@ -210,6 +210,8 @@ namespace DormCare.WPF.ViewModels
             }
         }
 
+        public DateTime MinDueDate => DateTime.Today;
+
         private async Task ExecuteSaveAsync()
         {
             if (SelectedStudent == null)
@@ -227,6 +229,12 @@ namespace DormCare.WPF.ViewModels
             if (Month < 1 || Month > 12)
             {
                 ErrorMessage = "Tháng không hợp lệ (1 - 12).";
+                return;
+            }
+
+            if (DueDate.Date < DateTime.Today)
+            {
+                ErrorMessage = "Hạn thanh toán không được nằm trong quá khứ (phải từ ngày hôm nay trở đi).";
                 return;
             }
 
