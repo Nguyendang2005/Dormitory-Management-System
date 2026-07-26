@@ -35,7 +35,7 @@ namespace DormCare.WPF
         {
             services.AddDbContext<DormCareDbContext>(options =>
             {
-                options.UseSqlServer("Server=DANG;Database=DormCareDB;User Id=sa;Password=123456;TrustServerCertificate=True;Encrypt=False;");
+                options.UseSqlServer("Server=.\\MSSQLSERVER01;Database=DormCareDB;User Id=sa;Password=123456;TrustServerCertificate=True;Encrypt=False;");
             });
 
             services.AddScoped<UserRepository>();

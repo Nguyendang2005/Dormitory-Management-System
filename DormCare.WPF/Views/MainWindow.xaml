@@ -37,6 +37,12 @@
         <DataTemplate DataType="{x:Type vm:MaintenanceViewModel}">
             <managerViews:MaintenanceManagement/>
         </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:AvailableRoomViewModel}">
+            <managerViews:AvailableRoomsView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:OccupancyStatisticsViewModel}">
+            <managerViews:OccupancyStatisticsView/>
+        </DataTemplate>
     </Window.Resources>
 
     <Grid>
@@ -94,7 +100,7 @@
 
         <!-- Right Content Main Frame -->
         <Grid Grid.Column="1" Margin="24">
-            <ContentControl Content="{Binding CurrentChildViewModel}"/>
+            <ContentControl Content="{Binding CurrentView}"/>
         </Grid>
     </Grid>
 </Window>

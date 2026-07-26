@@ -21,6 +21,8 @@ namespace DormCare.WPF.ViewModels
 
         public User CurrentUser { get; }
 
+        public bool IsManager => CurrentUser.Role == "Manager";
+
         private BaseViewModel _currentView;
         public BaseViewModel CurrentView
         {
@@ -35,6 +37,7 @@ namespace DormCare.WPF.ViewModels
             set => SetProperty(ref _activeTabName, value);
         }
 
+        public ICommand NavigateDashboardCommand { get; }
         public ICommand NavigateBuildingsCommand { get; }
         public ICommand NavigateRoomsCommand { get; }
         public ICommand NavigateBedsCommand { get; }
@@ -74,6 +77,12 @@ namespace DormCare.WPF.ViewModels
             _maintenanceService = maintenanceService;
             _occupancyService = occupancyService;
 
+            NavigateDashboardCommand = new RelayCommand(() =>
+            {
+                ActiveTabName = "Dashboard";
+                CurrentView = new OccupancyStatisticsViewModel(_occupancyService);
+            });
+
             NavigateBuildingsCommand = new RelayCommand(() =>
             {
                 ActiveTabName = "Buildings";
@@ -107,7 +116,7 @@ namespace DormCare.WPF.ViewModels
             NavigateStudentsCommand = new RelayCommand(() =>
             {
                 ActiveTabName = "Students";
-                CurrentView = new StudentViewModel(_studentService);
+                CurrentView = new StudentViewModel(_studentService, _dialogService, CurrentUser);
             });
 
             NavigateApplicationsCommand = new RelayCommand(() =>
