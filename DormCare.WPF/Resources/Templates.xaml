@@ -46,4 +46,8 @@
         <studentViews:StudentDashboard/>
     </DataTemplate>
 
+    <DataTemplate DataType="{x:Type vm:StudentRoomRegistrationViewModel}">
+        <studentViews:RoomApplicationView/>
+    </DataTemplate>
+
 </ResourceDictionary>

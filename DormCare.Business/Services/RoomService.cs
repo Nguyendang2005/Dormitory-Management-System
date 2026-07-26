@@ -37,7 +37,11 @@ namespace DormCare.Business.Services
                 GenderType = r.GenderType,
                 Status = r.Status,
                 Description = r.Description ?? string.Empty,
-                OccupiedBeds = r.Beds.Count(b => b.Status == "Occupied")
+                OccupiedBeds = r.Beds.Count(b => b.Status == "Occupied"),
+                AvailableBeds = r.Beds.Count(b => b.Status == "Available"),
+                ReservedBeds = r.Beds.Count(b => b.Status == "Reserved"),
+                MaintenanceBeds = r.Beds.Count(b => b.Status == "Maintenance"),
+                TotalBedsCreated = r.Beds.Count
             });
         }
 
@@ -45,7 +49,7 @@ namespace DormCare.Business.Services
         {
             var rooms = await _roomRepository.GetRoomsWithBuildingAndBedsAsync();
             var availableRooms = rooms
-                .Where(r => r.Status == "Available" && (r.Capacity - r.Beds.Count(b => b.Status == "Occupied")) > 0)
+                .Where(r => r.Status == "Available" && r.Beds.Any(b => b.Status == "Available"))
                 .Select(r => new RoomDto
                 {
                     RoomId = r.RoomId,
@@ -59,7 +63,11 @@ namespace DormCare.Business.Services
                     GenderType = r.GenderType,
                     Status = r.Status,
                     Description = r.Description ?? string.Empty,
-                    OccupiedBeds = r.Beds.Count(b => b.Status == "Occupied")
+                    OccupiedBeds = r.Beds.Count(b => b.Status == "Occupied"),
+                    AvailableBeds = r.Beds.Count(b => b.Status == "Available"),
+                    ReservedBeds = r.Beds.Count(b => b.Status == "Reserved"),
+                    MaintenanceBeds = r.Beds.Count(b => b.Status == "Maintenance"),
+                    TotalBedsCreated = r.Beds.Count
                 });
 
             return availableRooms;
@@ -125,7 +133,11 @@ namespace DormCare.Business.Services
                 GenderType = r.GenderType,
                 Status = r.Status,
                 Description = r.Description ?? string.Empty,
-                OccupiedBeds = r.Beds.Count(b => b.Status == "Occupied")
+                OccupiedBeds = r.Beds.Count(b => b.Status == "Occupied"),
+                AvailableBeds = r.Beds.Count(b => b.Status == "Available"),
+                ReservedBeds = r.Beds.Count(b => b.Status == "Reserved"),
+                MaintenanceBeds = r.Beds.Count(b => b.Status == "Maintenance"),
+                TotalBedsCreated = r.Beds.Count
             });
         }
 

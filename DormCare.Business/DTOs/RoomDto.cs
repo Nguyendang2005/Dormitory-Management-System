@@ -15,6 +15,9 @@ namespace DormCare.Business.DTOs
         public string Description { get; set; } = string.Empty;
 
         public int OccupiedBeds { get; set; }
-        public int AvailableBeds => Capacity - OccupiedBeds;
+        public int AvailableBeds { get; set; }
+        public int ReservedBeds { get; set; }
+        public int MaintenanceBeds { get; set; }
+        public int TotalBedsCreated { get; set; }
     }
 }

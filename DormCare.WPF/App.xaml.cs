@@ -108,6 +108,9 @@ namespace DormCare.WPF
             {
                 var studentVm = new StudentDashboardViewModel(
                     ServiceProvider.GetRequiredService<StudentService>(),
+                    ServiceProvider.GetRequiredService<RoomService>(),
+                    ServiceProvider.GetRequiredService<ApplicationService>(),
+                    ServiceProvider.GetRequiredService<DialogService>(),
                     user
                 );
                 var studentWindow = new Window

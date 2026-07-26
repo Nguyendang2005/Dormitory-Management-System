@@ -89,6 +89,10 @@ namespace DormCare.DataAccess.Data
                       .WithMany(r => r.RoomApplications)
                       .HasForeignKey(a => a.RoomId)
                       .OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(a => a.PreferredBed)
+                      .WithMany(b => b.RoomApplications)
+                      .HasForeignKey(a => a.PreferredBedId)
+                      .OnDelete(DeleteBehavior.Restrict);
                 entity.HasOne(a => a.Reviewer)
                       .WithMany()
                       .HasForeignKey(a => a.ReviewedBy)

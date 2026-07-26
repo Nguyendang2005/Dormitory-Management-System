@@ -2,20 +2,12 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="clr-namespace:DormCare.WPF.ViewModels"
-        xmlns:views="clr-namespace:DormCare.WPF.Views"
-        xmlns:studentViews="clr-namespace:DormCare.WPF.Views.Student"
         xmlns:managerViews="clr-namespace:DormCare.WPF.Views.Manager"
-        xmlns:conv="clr-namespace:DormCare.WPF.Converters"
         Title="{Binding Title}" Height="800" Width="1280"
         WindowStartupLocation="CenterScreen"
         Style="{StaticResource ModernWindow}">
 
     <Window.Resources>
-        <conv:BoolToVisibilityConverter x:Key="BoolToVisConverter"/>
-
-        <DataTemplate DataType="{x:Type vm:StudentDashboardViewModel}">
-            <studentViews:StudentDashboard/>
-        </DataTemplate>
         <DataTemplate DataType="{x:Type vm:BuildingViewModel}">
             <managerViews:BuildingManagement/>
         </DataTemplate>
@@ -24,6 +16,12 @@
         </DataTemplate>
         <DataTemplate DataType="{x:Type vm:BedViewModel}">
             <managerViews:BedManagement/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:AvailableRoomViewModel}">
+            <managerViews:AvailableRoomsView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:OccupancyStatisticsViewModel}">
+            <managerViews:OccupancyStatisticsView/>
         </DataTemplate>
         <DataTemplate DataType="{x:Type vm:StudentViewModel}">
             <managerViews:StudentManagement/>
@@ -45,56 +43,37 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <!-- Left Sidebar Navigation -->
         <Border Grid.Column="0" Background="{StaticResource CardBgBrush}" BorderBrush="{StaticResource CardBorderBrush}" BorderThickness="0,0,1,0">
             <DockPanel Margin="16">
-                <!-- App Header -->
                 <StackPanel DockPanel.Dock="Top" Margin="8,12,8,24">
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <Border Width="36" Height="36" CornerRadius="8" Background="{StaticResource PrimaryBrush}" Margin="0,0,12,0">
-                            <TextBlock Text="🏠" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <StackPanel>
-                            <TextBlock Text="DormCare" FontSize="20" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}"/>
-                            <TextBlock Text="Management System" FontSize="11" Foreground="{StaticResource TextMutedBrush}"/>
-                        </StackPanel>
-                    </StackPanel>
+                    <TextBlock Text="DormCare" FontSize="22" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}"/>
+                    <TextBlock Text="Dormitory Management" FontSize="11" Foreground="{StaticResource TextMutedBrush}"/>
                     <Border Height="1" Background="{StaticResource CardBorderBrush}" Margin="0,16,0,0"/>
                 </StackPanel>
 
-                <!-- Logout Button Docked Bottom -->
-                <Button DockPanel.Dock="Bottom" Content="🚪 Đăng Xuất" Style="{StaticResource DangerButton}" Command="{Binding LogoutCommand}" Margin="0,16,0,0"/>
+                <Button DockPanel.Dock="Bottom" Content="Dang xuat" Style="{StaticResource DangerButton}" Command="{Binding LogoutCommand}" Margin="0,16,0,0"/>
 
-                <!-- Navigation Menu -->
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel>
-                        <!-- Common / Student Dashboard -->
-                        <Button Content="📊 Trang Chủ" Style="{StaticResource PrimaryButton}" Command="{Binding NavigateDashboardCommand}" Margin="0,0,0,8" HorizontalContentAlignment="Left" Padding="14,10"/>
+                        <TextBlock Text="Phong va toa nha" FontSize="11" FontWeight="Bold" Foreground="{StaticResource TextMutedBrush}" Margin="8,12,8,6"/>
+                        <Button Content="Quan ly toa nha" Style="{StaticResource PrimaryButton}" Command="{Binding NavigateBuildingsCommand}" Margin="0,0,0,8" HorizontalContentAlignment="Left" Padding="14,10"/>
+                        <Button Content="Quan ly phong" Style="{StaticResource PrimaryButton}" Command="{Binding NavigateRoomsCommand}" Margin="0,0,0,8" HorizontalContentAlignment="Left" Padding="14,10"/>
+                        <Button Content="Quan ly giuong" Style="{StaticResource PrimaryButton}" Command="{Binding NavigateBedsCommand}" Margin="0,0,0,8" HorizontalContentAlignment="Left" Padding="14,10"/>
+                        <Button Content="Phong con cho" Style="{StaticResource PrimaryButton}" Command="{Binding NavigateAvailableRoomsCommand}" Margin="0,0,0,8" HorizontalContentAlignment="Left" Padding="14,10"/>
+                        <Button Content="Thong ke su dung" Style="{StaticResource PrimaryButton}" Command="{Binding NavigateOccupancyCommand}" Margin="0,0,0,8" HorizontalContentAlignment="Left" Padding="14,10"/>
 
-                        <!-- Dạng's Core Modules (Building, Room, Bed) -->
-                        <StackPanel Visibility="{Binding IsManager, Converter={StaticResource BoolToVisConverter}}">
-                            <TextBlock Text="🔵 DẠNG — PHÒNG &amp; TÒA NHÀ" FontSize="11" FontWeight="Bold" Foreground="{StaticResource PrimaryHoverBrush}" Margin="8,12,8,6"/>
-                            <Button Content="🏢 Quản Lý Tòa Nhà" Style="{StaticResource PrimaryButton}" Command="{Binding NavigateBuildingsCommand}" Margin="0,0,0,8" HorizontalContentAlignment="Left" Padding="14,10"/>
-                            <Button Content="🚪 Quản Lý &amp; Lọc Phòng" Style="{StaticResource PrimaryButton}" Command="{Binding NavigateRoomsCommand}" Margin="0,0,0,8" HorizontalContentAlignment="Left" Padding="14,10"/>
-                            <Button Content="🛏️ Quản Lý Giường" Style="{StaticResource PrimaryButton}" Command="{Binding NavigateBedsCommand}" Margin="0,0,0,8" HorizontalContentAlignment="Left" Padding="14,10"/>
-
-                            <TextBlock Text="QUẢN LÝ SINH VIÊN" FontSize="11" FontWeight="Bold" Foreground="{StaticResource TextMutedBrush}" Margin="8,16,8,6"/>
-                            <Button Content="👥 Quản lý Sinh viên" Style="{StaticResource PrimaryButton}" Command="{Binding NavigateStudentsCommand}" Margin="0,0,0,8" HorizontalContentAlignment="Left" Padding="14,10"/>
-                            <Button Content="📝 Đơn Đăng Ký Phòng" Style="{StaticResource PrimaryButton}" Command="{Binding NavigateApplicationsCommand}" Margin="0,0,0,8" HorizontalContentAlignment="Left" Padding="14,10"/>
-                        </StackPanel>
-
-                        <!-- Financial & Maintenance Links -->
-                        <TextBlock Text="TÀI CHÍNH &amp; VẬN HÀNH" FontSize="11" FontWeight="Bold" Foreground="{StaticResource TextMutedBrush}" Margin="8,16,8,6"/>
-                        <Button Content="💳 Hóa đơn &amp; Điện nước" Style="{StaticResource PrimaryButton}" Command="{Binding NavigateInvoicesCommand}" Margin="0,0,0,8" HorizontalContentAlignment="Left" Padding="14,10"/>
-                        <Button Content="🛠️ Báo cáo &amp; Sửa chữa" Style="{StaticResource PrimaryButton}" Command="{Binding NavigateMaintenanceCommand}" Margin="0,0,0,8" HorizontalContentAlignment="Left" Padding="14,10"/>
+                        <TextBlock Text="Sinh vien va dich vu" FontSize="11" FontWeight="Bold" Foreground="{StaticResource TextMutedBrush}" Margin="8,16,8,6"/>
+                        <Button Content="Quan ly sinh vien" Style="{StaticResource PrimaryButton}" Command="{Binding NavigateStudentsCommand}" Margin="0,0,0,8" HorizontalContentAlignment="Left" Padding="14,10"/>
+                        <Button Content="Don dang ky phong" Style="{StaticResource PrimaryButton}" Command="{Binding NavigateApplicationsCommand}" Margin="0,0,0,8" HorizontalContentAlignment="Left" Padding="14,10"/>
+                        <Button Content="Hoa don va thanh toan" Style="{StaticResource PrimaryButton}" Command="{Binding NavigateInvoicesCommand}" Margin="0,0,0,8" HorizontalContentAlignment="Left" Padding="14,10"/>
+                        <Button Content="Bao cao sua chua" Style="{StaticResource PrimaryButton}" Command="{Binding NavigateMaintenanceCommand}" Margin="0,0,0,8" HorizontalContentAlignment="Left" Padding="14,10"/>
                     </StackPanel>
                 </ScrollViewer>
             </DockPanel>
         </Border>
 
-        <!-- Right Content Main Frame -->
         <Grid Grid.Column="1" Margin="24">
-            <ContentControl Content="{Binding CurrentChildViewModel}"/>
+            <ContentControl Content="{Binding CurrentView}"/>
         </Grid>
     </Grid>
 </Window>
