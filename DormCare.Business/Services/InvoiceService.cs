@@ -39,6 +39,14 @@ namespace DormCare.Business.Services
             if (room == null)
                 return ServiceResult<InvoiceDto>.Failure("Không tìm thấy phòng đã chọn.");
 
+            DateTime billingMonth = new DateTime(dto.BillingMonth.Year, dto.BillingMonth.Month, 1);
+
+            var existingInvoices = await _invoiceRepository.FindAsync(i => i.StudentId == dto.StudentId && i.BillingMonth == billingMonth);
+            if (existingInvoices.Any())
+            {
+                return ServiceResult<InvoiceDto>.Failure($"Sinh viên {student.FullName} đã có hóa đơn cho tháng {billingMonth:MM/yyyy} rồi!");
+            }
+
             string invoiceCode = await _invoiceRepository.GenerateNextInvoiceCodeAsync();
             decimal totalCalculated = CalculateTotalFee(dto.RoomFee, dto.ElectricityFee, dto.WaterFee + dto.OtherFee, dto.DiscountAmount);
 
@@ -47,7 +55,7 @@ namespace DormCare.Business.Services
                 InvoiceCode = invoiceCode,
                 StudentId = dto.StudentId,
                 RoomId = dto.RoomId,
-                BillingMonth = new DateTime(dto.BillingMonth.Year, dto.BillingMonth.Month, 1),
+                BillingMonth = billingMonth,
                 RoomFee = dto.RoomFee,
                 ServiceFee = dto.ElectricityFee,
                 OtherFee = dto.WaterFee + dto.OtherFee,
@@ -59,8 +67,15 @@ namespace DormCare.Business.Services
                 CreatedAt = DateTime.UtcNow
             };
 
-            await _invoiceRepository.AddAsync(invoice);
-            await _invoiceRepository.SaveChangesAsync();
+            try
+            {
+                await _invoiceRepository.AddAsync(invoice);
+                await _invoiceRepository.SaveChangesAsync();
+            }
+            catch (Exception)
+            {
+                return ServiceResult<InvoiceDto>.Failure($"Lỗi lưu hóa đơn: Hóa đơn tháng {billingMonth:MM/yyyy} của sinh viên này đã tồn tại.");
+            }
 
             var createdInvoice = await _invoiceRepository.GetByIdWithDetailsAsync(invoice.InvoiceId);
             return ServiceResult<InvoiceDto>.Success(MapToDto(createdInvoice!), "Tạo hóa đơn thành công!");
