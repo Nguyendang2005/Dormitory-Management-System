@@ -22,6 +22,9 @@ namespace DormCare.WPF.ViewModels
         private readonly DialogService _dialogService;
         private readonly int? _studentId;
 
+        public bool IsManagerMode => !_studentId.HasValue;
+        public bool IsStudentMode => _studentId.HasValue;
+
         private ObservableCollection<InvoiceDto> _allInvoices = new();
 
         private ObservableCollection<InvoiceDto> _invoices = new();

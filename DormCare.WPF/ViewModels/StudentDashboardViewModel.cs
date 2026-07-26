@@ -12,6 +12,8 @@ namespace DormCare.WPF.ViewModels
         private readonly StudentService _studentService;
         private readonly RoomService _roomService;
         private readonly ApplicationService _applicationService;
+        private readonly InvoiceService _invoiceService;
+        private readonly PaymentService _paymentService;
         private readonly DialogService _dialogService;
         private readonly User _currentUser;
 
@@ -29,6 +31,13 @@ namespace DormCare.WPF.ViewModels
             set => SetProperty(ref _roomRegistrationViewModel, value);
         }
 
+        private InvoiceViewModel? _invoiceViewModel;
+        public InvoiceViewModel? InvoiceViewModel
+        {
+            get => _invoiceViewModel;
+            set => SetProperty(ref _invoiceViewModel, value);
+        }
+
         private bool _isProfileVisible = true;
         public bool IsProfileVisible
         {
@@ -43,6 +52,13 @@ namespace DormCare.WPF.ViewModels
             set => SetProperty(ref _isRoomRegistrationVisible, value);
         }
 
+        private bool _isInvoiceVisible;
+        public bool IsInvoiceVisible
+        {
+            get => _isInvoiceVisible;
+            set => SetProperty(ref _isInvoiceVisible, value);
+        }
+
         private string _activeTabName = "Profile";
         public string ActiveTabName
         {
@@ -52,19 +68,24 @@ namespace DormCare.WPF.ViewModels
 
         public ICommand NavigateProfileCommand { get; }
         public ICommand NavigateRoomRegistrationCommand { get; }
+        public ICommand NavigateInvoiceCommand { get; }
         public ICommand RefreshCommand { get; }
 
         public StudentDashboardViewModel(
             StudentService studentService,
             RoomService roomService,
             ApplicationService applicationService,
+            InvoiceService invoiceService,
+            PaymentService paymentService,
             DialogService dialogService,
             User currentUser)
         {
-            Title = "Trang chu Sinh vien";
+            Title = "Trang chủ Sinh viên";
             _studentService = studentService;
             _roomService = roomService;
             _applicationService = applicationService;
+            _invoiceService = invoiceService;
+            _paymentService = paymentService;
             _dialogService = dialogService;
             _currentUser = currentUser;
 
@@ -73,6 +94,7 @@ namespace DormCare.WPF.ViewModels
                 ActiveTabName = "Profile";
                 IsProfileVisible = true;
                 IsRoomRegistrationVisible = false;
+                IsInvoiceVisible = false;
             });
 
             NavigateRoomRegistrationCommand = new RelayCommand(() =>
@@ -81,6 +103,20 @@ namespace DormCare.WPF.ViewModels
                 RoomRegistrationViewModel = new StudentRoomRegistrationViewModel(_roomService, _applicationService, _dialogService, Student);
                 IsProfileVisible = false;
                 IsRoomRegistrationVisible = true;
+                IsInvoiceVisible = false;
+            });
+
+            NavigateInvoiceCommand = new AsyncRelayCommand(async () =>
+            {
+                ActiveTabName = "Invoice";
+                if (Student != null)
+                {
+                    InvoiceViewModel = new InvoiceViewModel(_invoiceService, _paymentService, _studentService, _roomService, _dialogService, Student.StudentId);
+                    await InvoiceViewModel.LoadInvoicesAsync();
+                }
+                IsProfileVisible = false;
+                IsRoomRegistrationVisible = false;
+                IsInvoiceVisible = true;
             });
 
             RefreshCommand = new AsyncRelayCommand(LoadStudentDataAsync);

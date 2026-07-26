@@ -14,12 +14,13 @@
 
         <DockPanel Grid.Row="0" Margin="0,0,0,16">
             <StackPanel DockPanel.Dock="Left">
-                <TextBlock Text="Trang chu sinh vien" FontSize="26" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}"/>
-                <TextBlock Text="Thong tin ca nhan va dang ky phong ky tuc xa" FontSize="14" Foreground="{StaticResource TextMutedBrush}" Margin="0,4,0,0"/>
+                <TextBlock Text="🏫 Trang Chủ Sinh Viên" FontSize="26" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}"/>
+                <TextBlock Text="Thông tin cá nhân, đăng ký phòng và theo dõi hóa đơn KTX" FontSize="14" Foreground="{StaticResource TextMutedBrush}" Margin="0,4,0,0"/>
             </StackPanel>
             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
-                <Button Content="Thong tin ca nhan" Style="{StaticResource SecondaryButton}" Command="{Binding NavigateProfileCommand}" Margin="0,0,8,0"/>
-                <Button Content="Dang ky phong" Style="{StaticResource PrimaryButton}" Command="{Binding NavigateRoomRegistrationCommand}"/>
+                <Button Content="👤 Thông tin cá nhân" Style="{StaticResource SecondaryButton}" Command="{Binding NavigateProfileCommand}" Margin="0,0,8,0"/>
+                <Button Content="📝 Đăng ký phòng" Style="{StaticResource SecondaryButton}" Command="{Binding NavigateRoomRegistrationCommand}" Margin="0,0,8,0"/>
+                <Button Content="💳 Hóa Đơn &amp; Thanh Toán" Style="{StaticResource PrimaryButton}" Command="{Binding NavigateInvoiceCommand}"/>
             </StackPanel>
         </DockPanel>
 
@@ -86,6 +87,9 @@
 
             <ContentControl Content="{Binding RoomRegistrationViewModel}"
                             Visibility="{Binding IsRoomRegistrationVisible, Converter={StaticResource BoolToVisConverter}}"/>
+
+            <ContentControl Content="{Binding InvoiceViewModel}"
+                            Visibility="{Binding IsInvoiceVisible, Converter={StaticResource BoolToVisConverter}}"/>
         </Grid>
     </Grid>
 </UserControl>

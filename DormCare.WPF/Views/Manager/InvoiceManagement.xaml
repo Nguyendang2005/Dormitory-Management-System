@@ -5,6 +5,7 @@
 
     <UserControl.Resources>
         <conv:StatusToColorConverter x:Key="StatusColorConverter"/>
+        <conv:BoolToVisibilityConverter x:Key="BoolToVisConverter"/>
     </UserControl.Resources>
 
     <Grid>
@@ -18,14 +19,14 @@
         <!-- Header -->
         <DockPanel Grid.Row="0" Margin="0,0,0,16">
             <StackPanel DockPanel.Dock="Left">
-                <TextBlock Text="💳 Quản Lý Hóa Đơn &amp; Thanh Toán" FontSize="26" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}"/>
-                <TextBlock Text="Tạo hóa đơn, tính tổng phí, xem chi tiết, cập nhật thanh toán và lọc hóa đơn chưa thanh toán" FontSize="14" Foreground="{StaticResource TextMutedBrush}" Margin="0,4,0,0"/>
+                <TextBlock Text="💳 Hóa Đơn &amp; Thanh Toán" FontSize="26" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}"/>
+                <TextBlock Text="Xem chi tiết hóa đơn, thực hiện thanh toán và theo dõi dư nợ ký túc xá" FontSize="14" Foreground="{StaticResource TextMutedBrush}" Margin="0,4,0,0"/>
             </StackPanel>
             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
-                <Button Content="➕ Tạo Hóa Đơn" Style="{StaticResource PrimaryButton}" Command="{Binding CreateInvoiceCommand}" Margin="0,0,10,0"/>
+                <Button Content="➕ Tạo Hóa Đơn" Style="{StaticResource PrimaryButton}" Command="{Binding CreateInvoiceCommand}" Visibility="{Binding IsManagerMode, Converter={StaticResource BoolToVisConverter}}" Margin="0,0,10,0"/>
                 <Button Content="👁️ Xem Chi Tiết" Style="{StaticResource PrimaryButton}" Command="{Binding ViewInvoiceDetailsCommand}" Margin="0,0,10,0"/>
-                <Button Content="💳 Cập Nhật Thanh Toán" Style="{StaticResource PrimaryButton}" Command="{Binding UpdatePaymentCommand}" Margin="0,0,10,0"/>
-                <Button Content="🗑️ Xóa Hóa Đơn" Style="{StaticResource DangerButton}" Command="{Binding DeleteInvoiceCommand}" Margin="0,0,10,0"/>
+                <Button Content="💳 Thanh Toán" Style="{StaticResource PrimaryButton}" Command="{Binding UpdatePaymentCommand}" Margin="0,0,10,0"/>
+                <Button Content="🗑️ Xóa Hóa Đơn" Style="{StaticResource DangerButton}" Command="{Binding DeleteInvoiceCommand}" Visibility="{Binding IsManagerMode, Converter={StaticResource BoolToVisConverter}}" Margin="0,0,10,0"/>
                 <Button Content="🔄 Tải lại" Style="{StaticResource PrimaryButton}" Command="{Binding RefreshCommand}"/>
             </StackPanel>
         </DockPanel>

@@ -110,6 +110,8 @@ namespace DormCare.WPF
                     ServiceProvider.GetRequiredService<StudentService>(),
                     ServiceProvider.GetRequiredService<RoomService>(),
                     ServiceProvider.GetRequiredService<ApplicationService>(),
+                    ServiceProvider.GetRequiredService<InvoiceService>(),
+                    ServiceProvider.GetRequiredService<PaymentService>(),
                     ServiceProvider.GetRequiredService<DialogService>(),
                     user
                 );
