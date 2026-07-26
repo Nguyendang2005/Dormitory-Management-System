@@ -25,15 +25,34 @@ namespace DormCare.WPF.ViewModels
         public decimal AmountToPay
         {
             get => _amountToPay;
-            set => SetProperty(ref _amountToPay, value);
+            set
+            {
+                if (SetProperty(ref _amountToPay, value))
+                {
+                    OnPropertyChanged(nameof(VietQrImageUrl));
+                }
+            }
         }
 
         private string _paymentMethod = "BankTransfer";
         public string PaymentMethod
         {
             get => _paymentMethod;
-            set => SetProperty(ref _paymentMethod, value);
+            set
+            {
+                if (SetProperty(ref _paymentMethod, value))
+                {
+                    OnPropertyChanged(nameof(IsBankTransfer));
+                    OnPropertyChanged(nameof(VietQrImageUrl));
+                }
+            }
         }
+
+        public bool IsBankTransfer => PaymentMethod == "BankTransfer";
+
+        public string TransferContent => $"PT07_{InvoiceCode}";
+
+        public string VietQrImageUrl => $"https://img.vietqr.io/image/BIDV-123456789-compact2.png?amount={(long)Math.Max(0, AmountToPay)}&addInfo={Uri.EscapeDataString(TransferContent)}&accountName=BQL%20KY%20TUC%20XA%20DORMCARE";
 
         private string _transactionReference = string.Empty;
         public string TransactionReference
