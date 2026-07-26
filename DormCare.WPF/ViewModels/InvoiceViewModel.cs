@@ -67,6 +67,34 @@ namespace DormCare.WPF.ViewModels
             }
         }
 
+        private DateTime? _fromDate;
+        public DateTime? FromDate
+        {
+            get => _fromDate;
+            set
+            {
+                if (SetProperty(ref _fromDate, value))
+                {
+                    ApplyFilters();
+                }
+            }
+        }
+
+        private DateTime? _toDate;
+        public DateTime? ToDate
+        {
+            get => _toDate;
+            set
+            {
+                if (SetProperty(ref _toDate, value))
+                {
+                    ApplyFilters();
+                }
+            }
+        }
+
+        public ICommand ClearDateFilterCommand { get; }
+
         // Summary Statistics Properties
         private int _totalInvoiceCount;
         public int TotalInvoiceCount
@@ -127,6 +155,18 @@ namespace DormCare.WPF.ViewModels
             DeleteInvoiceCommand = new AsyncRelayCommand(ExecuteDeleteInvoiceAsync, () => SelectedInvoice != null && SelectedInvoice.Status != "Paid" && SelectedInvoice.Status != "Overdue");
             FilterUnpaidCommand = new RelayCommand(() => SelectedStatusFilter = "Unpaid");
             FilterAllCommand = new RelayCommand(() => SelectedStatusFilter = "All");
+            ClearDateFilterCommand = new RelayCommand(() =>
+            {
+                _fromDate = null;
+                OnPropertyChanged(nameof(FromDate));
+                _toDate = null;
+                OnPropertyChanged(nameof(ToDate));
+                _searchText = string.Empty;
+                OnPropertyChanged(nameof(SearchText));
+                _selectedStatusFilter = "All";
+                OnPropertyChanged(nameof(SelectedStatusFilter));
+                ApplyFilters();
+            });
 
             _ = LoadInvoicesAsync();
         }
@@ -157,6 +197,18 @@ namespace DormCare.WPF.ViewModels
         private void ApplyFilters()
         {
             var query = _allInvoices.AsEnumerable();
+
+            if (FromDate.HasValue)
+            {
+                var fromMonthStart = new DateTime(FromDate.Value.Year, FromDate.Value.Month, 1);
+                query = query.Where(i => new DateTime(i.Year, i.Month, 1) >= fromMonthStart);
+            }
+
+            if (ToDate.HasValue)
+            {
+                var toMonthEnd = new DateTime(ToDate.Value.Year, ToDate.Value.Month, 1);
+                query = query.Where(i => new DateTime(i.Year, i.Month, 1) <= toMonthEnd);
+            }
 
             if (!string.IsNullOrWhiteSpace(SearchText))
             {
