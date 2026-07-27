@@ -19,6 +19,21 @@ namespace DormCare.WPF
     {
         public static IServiceProvider ServiceProvider { get; private set; } = null!;
 
+        public App()
+        {
+            try
+            {
+                InitializeComponent();
+            }
+            catch (Exception ex)
+            {
+                var msg = $"[XAML PARSE ERROR TRACE]\nException: {ex.Message}\n\nInnerException 1: {ex.InnerException?.Message}\nType: {ex.InnerException?.GetType().FullName}\n\nInnerException 2: {ex.InnerException?.InnerException?.Message}\n\nFull Stack:\n{ex}";
+                System.IO.File.WriteAllText(@"d:\DormCare\xaml_error.txt", msg);
+                System.Diagnostics.Debug.WriteLine(msg);
+                MessageBox.Show(msg, "DormCare XAML Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);

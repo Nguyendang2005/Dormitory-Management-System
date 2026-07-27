@@ -117,11 +117,6 @@
         <Setter Property="Padding" Value="10,4" />
         <Setter Property="FontSize" Value="12" />
     </Style>
-
-    <Style x:Key="DangerButton" TargetType="Button" BasedOn="{StaticResource PrimaryButton}">
-        <Setter Property="Background" Value="#B91C1C" />
-    </Style>
-
     <!-- Circle Icon Action Button Style -->
     <Style x:Key="IconButton" TargetType="Button">
         <Setter Property="Background" Value="#E2E8F0" />
@@ -290,13 +285,8 @@
                                           ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}" 
                                           Margin="12,0,30,0" 
                                           VerticalAlignment="Center" 
-                                          HorizontalAlignment="Left">
-                            <ContentPresenter.Resources>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="Foreground" Value="White"/>
-                                </Style>
-                            </ContentPresenter.Resources>
-                        </ContentPresenter>
+                                          HorizontalAlignment="Left"
+                                          TextElement.Foreground="White"/>
                         <Popup x:Name="Popup" 
                                Placement="Bottom" 
                                IsOpen="{TemplateBinding IsDropDownOpen}" 
