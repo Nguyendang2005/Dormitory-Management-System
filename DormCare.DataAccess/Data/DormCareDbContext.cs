@@ -89,6 +89,11 @@ namespace DormCare.DataAccess.Data
                       .WithMany(r => r.RoomApplications)
                       .HasForeignKey(a => a.RoomId)
                       .OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(a => a.Reviewer)
+                      .WithMany()
+                      .HasForeignKey(a => a.ReviewedBy)
+                      .IsRequired(false)
+                      .OnDelete(DeleteBehavior.Restrict);
             });
 
             modelBuilder.Entity<RoomAssignment>(entity =>
@@ -96,13 +101,21 @@ namespace DormCare.DataAccess.Data
                 entity.HasKey(e => e.AssignmentId);
                 entity.HasOne(a => a.Student)
                       .WithMany(s => s.RoomAssignments)
-                      .HasForeignKey(a => a.StudentId);
+                      .HasForeignKey(a => a.StudentId)
+                      .OnDelete(DeleteBehavior.Restrict);
                 entity.HasOne(a => a.Room)
                       .WithMany(r => r.RoomAssignments)
-                      .HasForeignKey(a => a.RoomId);
+                      .HasForeignKey(a => a.RoomId)
+                      .OnDelete(DeleteBehavior.Restrict);
                 entity.HasOne(a => a.Bed)
                       .WithMany(b => b.RoomAssignments)
-                      .HasForeignKey(a => a.BedId);
+                      .HasForeignKey(a => a.BedId)
+                      .OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(a => a.Manager)
+                      .WithMany()
+                      .HasForeignKey(a => a.AssignedBy)
+                      .IsRequired(false)
+                      .OnDelete(DeleteBehavior.Restrict);
             });
 
             modelBuilder.Entity<Invoice>(entity =>
@@ -120,6 +133,11 @@ namespace DormCare.DataAccess.Data
             modelBuilder.Entity<MaintenanceRequest>(entity =>
             {
                 entity.HasKey(e => e.RequestId);
+                entity.HasOne(m => m.Assignee)
+                      .WithMany()
+                      .HasForeignKey(m => m.AssignedTo)
+                      .IsRequired(false)
+                      .OnDelete(DeleteBehavior.Restrict);
             });
 
             modelBuilder.Entity<Notification>(entity =>

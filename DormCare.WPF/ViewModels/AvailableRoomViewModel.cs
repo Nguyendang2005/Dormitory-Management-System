@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -12,6 +13,24 @@ namespace DormCare.WPF.ViewModels
     public class AvailableRoomViewModel : BaseViewModel
     {
         private readonly RoomService _roomService;
+        private readonly BuildingService _buildingService;
+
+        private bool _isInitializing = false;
+
+        // View Mode Toggle (Card View vs DataGrid Table View)
+        private bool _isCardView = true;
+        public bool IsCardView
+        {
+            get => _isCardView;
+            set
+            {
+                if (SetProperty(ref _isCardView, value))
+                {
+                    OnPropertyChanged(nameof(IsTableView));
+                }
+            }
+        }
+        public bool IsTableView => !IsCardView;
 
         private ObservableCollection<RoomAvailabilityDto> _availableRooms = new();
         public ObservableCollection<RoomAvailabilityDto> AvailableRooms
@@ -20,53 +39,108 @@ namespace DormCare.WPF.ViewModels
             set => SetProperty(ref _availableRooms, value);
         }
 
-        private string _selectedBuilding = "All";
-        public string SelectedBuilding
+        // Real Calculated Filter Summary Stats
+        private int _matchedRoomsCount;
+        public int MatchedRoomsCount
         {
-            get => _selectedBuilding;
+            get => _matchedRoomsCount;
+            set => SetProperty(ref _matchedRoomsCount, value);
+        }
+
+        private int _totalAvailableBedsCount;
+        public int TotalAvailableBedsCount
+        {
+            get => _totalAvailableBedsCount;
+            set => SetProperty(ref _totalAvailableBedsCount, value);
+        }
+
+        private decimal _averageRent;
+        public decimal AverageRent
+        {
+            get => _averageRent;
+            set => SetProperty(ref _averageRent, value);
+        }
+
+        // Dynamic Filter Dropdowns
+        public ObservableCollection<string> BuildingFilterOptions { get; } = new() { "Tất cả tòa" };
+        public List<string> RoomTypeOptions { get; } = new() { "Tất cả loại", "Standard", "Premium", "VIP" };
+        public List<string> GenderTypeOptions { get; } = new() { "Tất cả giới tính", "Male", "Female", "Mixed" };
+
+        private string _searchKeyword = string.Empty;
+        public string SearchKeyword
+        {
+            get => _searchKeyword;
             set
             {
-                if (SetProperty(ref _selectedBuilding, value)) ApplyFilters();
+                if (SetProperty(ref _searchKeyword, value))
+                {
+                    if (!_isInitializing) ApplyFilters();
+                }
             }
         }
 
-        private string _selectedRoomType = "All";
+        private string _selectedBuildingFilter = "Tất cả tòa";
+        public string SelectedBuildingFilter
+        {
+            get => _selectedBuildingFilter;
+            set
+            {
+                if (SetProperty(ref _selectedBuildingFilter, value))
+                {
+                    if (!_isInitializing) ApplyFilters();
+                }
+            }
+        }
+
+        private string _selectedRoomType = "Tất cả loại";
         public string SelectedRoomType
         {
             get => _selectedRoomType;
             set
             {
-                if (SetProperty(ref _selectedRoomType, value)) ApplyFilters();
+                if (SetProperty(ref _selectedRoomType, value))
+                {
+                    if (!_isInitializing) ApplyFilters();
+                }
             }
         }
 
-        private string _selectedGenderType = "All";
+        private string _selectedGenderType = "Tất cả giới tính";
         public string SelectedGenderType
         {
             get => _selectedGenderType;
             set
             {
-                if (SetProperty(ref _selectedGenderType, value)) ApplyFilters();
+                if (SetProperty(ref _selectedGenderType, value))
+                {
+                    if (!_isInitializing) ApplyFilters();
+                }
             }
         }
 
-        private int _minAvailableBeds = 1;
-        public int MinAvailableBeds
+        private string _minAvailableBedsText = "1";
+        public string MinAvailableBedsText
         {
-            get => _minAvailableBeds;
+            get => _minAvailableBedsText;
             set
             {
-                if (SetProperty(ref _minAvailableBeds, value)) ApplyFilters();
+                if (SetProperty(ref _minAvailableBedsText, value))
+                {
+                    if (!_isInitializing) ApplyFilters();
+                }
             }
         }
 
-        private decimal _maxMonthlyRent = 5000000;
-        public decimal MaxMonthlyRent
+        private string _maxMonthlyRentText = "5000000";
+        public string MaxMonthlyRentText
         {
-            get => _maxMonthlyRent;
+            get => _maxMonthlyRentText;
             set
             {
-                if (SetProperty(ref _maxMonthlyRent, value)) ApplyFilters();
+                if (SetProperty(ref _maxMonthlyRentText, value))
+                {
+                    if (!_isInitializing) ApplyFilters();
+                }
             }
         }
 
@@ -86,93 +160,167 @@ namespace DormCare.WPF.ViewModels
 
         public ICommand ResetFiltersCommand { get; }
         public ICommand RefreshCommand { get; }
+        public ICommand ToggleViewModeCommand { get; }
 
-        private ObservableCollection<RoomAvailabilityDto> _allRoomsCache = new();
+        private List<RoomAvailabilityDto> _allRoomsCache = new();
 
-        public AvailableRoomViewModel(RoomService roomService)
+        public AvailableRoomViewModel(RoomService roomService, BuildingService buildingService)
         {
-            Title = "Tìm phòng còn chỗ";
+            Title = "Tìm Phòng Còn Giường Trống";
             _roomService = roomService;
+            _buildingService = buildingService;
 
-            ResetFiltersCommand = new RelayCommand(ResetFilters);
+            ResetFiltersCommand = new RelayCommand(_ => ResetFilters());
             RefreshCommand = new AsyncRelayCommand(LoadAvailableRoomsAsync);
+            ToggleViewModeCommand = new RelayCommand(_ => IsCardView = !IsCardView);
 
-            _ = LoadAvailableRoomsAsync();
+            _ = InitializeAsync();
+        }
+
+        private async Task InitializeAsync()
+        {
+            try
+            {
+                _isInitializing = true;
+                await LoadBuildingFilterOptionsAsync();
+                await LoadAvailableRoomsAsync();
+            }
+            finally
+            {
+                _isInitializing = false;
+            }
+        }
+
+        private async Task LoadBuildingFilterOptionsAsync()
+        {
+            try
+            {
+                var buildings = await _buildingService.GetAllBuildingsAsync();
+                BuildingFilterOptions.Clear();
+                BuildingFilterOptions.Add("Tất cả tòa");
+
+                foreach (var b in buildings)
+                {
+                    if (!string.IsNullOrWhiteSpace(b.BuildingName))
+                    {
+                        BuildingFilterOptions.Add(b.BuildingName);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error loading building filters: {ex.Message}");
+            }
         }
 
         public async Task LoadAvailableRoomsAsync()
         {
-            IsBusy = true;
-            LoadingStateMessage = "Đang tìm kiếm phòng còn chỗ...";
-            IsEmptyState = false;
-
-            var dtos = await _roomService.GetAvailableRoomsAsync();
-            var roomAvailabilities = dtos.Select(r => new RoomAvailabilityDto
+            try
             {
-                RoomId = r.RoomId,
-                BuildingId = r.BuildingId,
-                BuildingName = r.BuildingName,
-                RoomNumber = r.RoomNumber,
-                FloorNumber = r.FloorNumber,
-                RoomType = r.RoomType,
-                Capacity = r.Capacity,
-                MonthlyRent = r.MonthlyRent,
-                GenderType = r.GenderType,
-                Status = r.Status,
-                OccupiedBeds = r.OccupiedBeds,
-                AvailableBeds = r.AvailableBeds
-            }).ToList();
+                IsBusy = true;
+                LoadingStateMessage = "Đang tìm kiếm phòng còn chỗ từ Database...";
+                IsEmptyState = false;
 
-            _allRoomsCache = new ObservableCollection<RoomAvailabilityDto>(roomAvailabilities);
-            ApplyFilters();
-            IsBusy = false;
+                var dtos = await _roomService.GetAvailableRoomsAsync();
+                _allRoomsCache = dtos.Select(r => new RoomAvailabilityDto
+                {
+                    RoomId = r.RoomId,
+                    BuildingId = r.BuildingId,
+                    BuildingName = r.BuildingName,
+                    RoomNumber = r.RoomNumber,
+                    FloorNumber = r.FloorNumber,
+                    RoomType = r.RoomType,
+                    Capacity = r.Capacity,
+                    MonthlyRent = r.MonthlyRent,
+                    GenderType = r.GenderType,
+                    Status = r.Status,
+                    OccupiedBeds = r.OccupiedBeds,
+                    AvailableBeds = r.AvailableBeds
+                }).ToList();
+
+                ApplyFilters();
+            }
+            catch (Exception ex)
+            {
+                LoadingStateMessage = $"Lỗi kết nối cơ sở dữ liệu: {ex.Message}";
+                IsEmptyState = true;
+            }
+            finally
+            {
+                IsBusy = false;
+            }
         }
 
         private void ApplyFilters()
         {
-            // Only rooms where Available Beds > 0 and Status is NOT Full/Inactive/Maintenance
-            var query = _allRoomsCache.Where(r => r.AvailableBeds >= MinAvailableBeds && r.Status == "Available");
+            var query = _allRoomsCache.AsEnumerable();
 
-            if (SelectedBuilding != "All" && !string.IsNullOrWhiteSpace(SelectedBuilding))
+            // Search Keyword Filter
+            if (!string.IsNullOrWhiteSpace(SearchKeyword))
             {
-                query = query.Where(r => r.BuildingName.Equals(SelectedBuilding, StringComparison.OrdinalIgnoreCase) ||
-                                         r.BuildingId.ToString() == SelectedBuilding);
+                string kw = SearchKeyword.Trim();
+                query = query.Where(r =>
+                    r.RoomNumber.Contains(kw, StringComparison.OrdinalIgnoreCase) ||
+                    r.BuildingName.Contains(kw, StringComparison.OrdinalIgnoreCase));
             }
 
-            if (SelectedRoomType != "All" && !string.IsNullOrWhiteSpace(SelectedRoomType))
+            // Min Available Beds Validation & Filter
+            if (int.TryParse(MinAvailableBedsText?.Trim(), out int minBeds) && minBeds > 0)
+            {
+                query = query.Where(r => r.AvailableBeds >= minBeds);
+            }
+
+            // Building Filter
+            if (!string.IsNullOrWhiteSpace(SelectedBuildingFilter) && SelectedBuildingFilter != "Tất cả tòa" && SelectedBuildingFilter != "All")
+            {
+                query = query.Where(r => r.BuildingName.Equals(SelectedBuildingFilter, StringComparison.OrdinalIgnoreCase));
+            }
+
+            // Room Type Filter
+            if (!string.IsNullOrWhiteSpace(SelectedRoomType) && SelectedRoomType != "Tất cả loại" && SelectedRoomType != "All")
             {
                 query = query.Where(r => r.RoomType.Equals(SelectedRoomType, StringComparison.OrdinalIgnoreCase));
             }
 
-            if (SelectedGenderType != "All" && !string.IsNullOrWhiteSpace(SelectedGenderType))
+            // Gender Filter
+            if (!string.IsNullOrWhiteSpace(SelectedGenderType) && SelectedGenderType != "Tất cả giới tính" && SelectedGenderType != "All")
             {
                 query = query.Where(r => r.GenderType.Equals(SelectedGenderType, StringComparison.OrdinalIgnoreCase));
             }
 
-            if (MaxMonthlyRent > 0)
+            // Max Monthly Rent Validation & Filter
+            if (decimal.TryParse(MaxMonthlyRentText?.Trim(), out decimal maxRent) && maxRent > 0)
             {
-                query = query.Where(r => r.MonthlyRent <= MaxMonthlyRent);
+                query = query.Where(r => r.MonthlyRent <= maxRent);
             }
 
             var result = query.ToList();
             AvailableRooms = new ObservableCollection<RoomAvailabilityDto>(result);
+
+            // Compute Summary Stats
+            MatchedRoomsCount = result.Count;
+            TotalAvailableBedsCount = result.Sum(r => r.AvailableBeds);
+            AverageRent = result.Count > 0 ? result.Average(r => r.MonthlyRent) : 0;
+
             IsEmptyState = AvailableRooms.Count == 0;
-            LoadingStateMessage = IsEmptyState ? "Không tìm thấy phòng nào phù hợp với bộ lọc." : string.Empty;
+            LoadingStateMessage = IsEmptyState ? "🔍 Không tìm thấy phòng nào phù hợp với bộ lọc tìm kiếm." : string.Empty;
         }
 
         private void ResetFilters()
         {
-            _selectedBuilding = "All";
-            _selectedRoomType = "All";
-            _selectedGenderType = "All";
-            _minAvailableBeds = 1;
-            _maxMonthlyRent = 5000000;
+            _searchKeyword = string.Empty;
+            _selectedBuildingFilter = "Tất cả tòa";
+            _selectedRoomType = "Tất cả loại";
+            _selectedGenderType = "Tất cả giới tính";
+            _minAvailableBedsText = "1";
+            _maxMonthlyRentText = "5000000";
 
-            OnPropertyChanged(nameof(SelectedBuilding));
+            OnPropertyChanged(nameof(SearchKeyword));
+            OnPropertyChanged(nameof(SelectedBuildingFilter));
             OnPropertyChanged(nameof(SelectedRoomType));
             OnPropertyChanged(nameof(SelectedGenderType));
-            OnPropertyChanged(nameof(MinAvailableBeds));
-            OnPropertyChanged(nameof(MaxMonthlyRent));
+            OnPropertyChanged(nameof(MinAvailableBedsText));
+            OnPropertyChanged(nameof(MaxMonthlyRentText));
 
             ApplyFilters();
         }

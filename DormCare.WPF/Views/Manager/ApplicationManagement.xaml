@@ -15,20 +15,22 @@
         </Grid.RowDefinitions>
 
         <!-- Header -->
-        <DockPanel Grid.Row="0" Margin="0,0,0,16">
-            <StackPanel DockPanel.Dock="Left">
-                <TextBlock Text="Đơn Đăng Ký Phòng" FontSize="26" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}"/>
-                <TextBlock Text="Xét duyệt đơn xin ở ký túc xá của sinh viên" FontSize="14" Foreground="{StaticResource TextMutedBrush}" Margin="0,4,0,0"/>
-            </StackPanel>
-            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
-                <Button Content="✅ Duyệt Đơn" Style="{StaticResource PrimaryButton}" Command="{Binding ApproveCommand}" Margin="0,0,10,0"/>
-                <Button Content="❌ Từ Chối" Style="{StaticResource DangerButton}" Command="{Binding RejectCommand}" Margin="0,0,10,0"/>
-                <Button Content="🔄 Tải lại" Style="{StaticResource PrimaryButton}" Command="{Binding RefreshCommand}"/>
-            </StackPanel>
-        </DockPanel>
+        <Border Grid.Row="0" Style="{StaticResource HeaderCard}" Margin="0,0,0,16">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button Content="✅ Duyệt Đơn" Style="{StaticResource PrimaryButton}" Command="{Binding ApproveCommand}" Margin="0,0,8,0"/>
+                    <Button Content="❌ Từ Chối" Style="{StaticResource SmallDangerButton}" Command="{Binding RejectCommand}" Height="36" Padding="12,0" Margin="0,0,8,0"/>
+                    <Button Content="🔄 Tải Lại Dữ Liệu" Style="{StaticResource SecondaryButton}" Command="{Binding RefreshCommand}"/>
+                </StackPanel>
+                <StackPanel VerticalAlignment="Center">
+                    <TextBlock Text="📝 QUẢN LÝ ĐƠN ĐĂNG KÝ PHÒNG" FontSize="20" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}"/>
+                    <TextBlock Text="Xét duyệt hồ sơ xin lưu trú ký túc xá của sinh viên theo thời gian thực" FontSize="13" Foreground="{StaticResource TextMutedBrush}" Margin="0,4,0,0"/>
+                </StackPanel>
+            </DockPanel>
+        </Border>
 
         <!-- Search & Filter Bar -->
-        <Border Grid.Row="1" Style="{StaticResource CardFrame}" Margin="0,0,0,16" Padding="16,12">
+        <Border Grid.Row="1" Style="{StaticResource CardBorder}" Margin="0,0,0,16" Padding="16,12">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="2*"/>
@@ -36,13 +38,13 @@
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Grid.Column="0" Margin="0,0,12,0">
-                    <TextBlock Text="🔍 Tìm kiếm đơn (Mã Đơn / Mã SV / Họ tên / Số phòng)" FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,4"/>
-                    <TextBox Style="{StaticResource ModernTextBox}" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"/>
+                    <TextBlock Text="Tìm kiếm đơn (Mã Đơn / Mã SV / Họ tên / Số phòng)" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,4"/>
+                    <TextBox Style="{StaticResource SearchTextBox}" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"/>
                 </StackPanel>
 
                 <StackPanel Grid.Column="1">
-                    <TextBlock Text="⚡ Lọc Trạng Thái Đơn" FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,4"/>
-                    <ComboBox SelectedValue="{Binding SelectedStatusFilter, Mode=TwoWay}" SelectedValuePath="Tag" Height="38" Background="#0F172A" Foreground="White" BorderBrush="{StaticResource CardBorderBrush}">
+                    <TextBlock Text="Lọc Trạng Thái Đơn" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,4"/>
+                    <ComboBox SelectedValue="{Binding SelectedStatusFilter, Mode=TwoWay}" SelectedValuePath="Tag" Style="{StaticResource ModernComboBox}" Height="36">
                         <ComboBoxItem Content="Tất cả trạng thái" Tag="All" IsSelected="True"/>
                         <ComboBoxItem Content="Chờ duyệt (Pending)" Tag="Pending"/>
                         <ComboBoxItem Content="Đã duyệt (Approved)" Tag="Approved"/>
@@ -53,8 +55,8 @@
         </Border>
 
         <!-- DataGrid -->
-        <Border Grid.Row="2" Style="{StaticResource CardFrame}">
-            <DataGrid ItemsSource="{Binding Applications}" SelectedItem="{Binding SelectedApplication}">
+        <Border Grid.Row="2" Style="{StaticResource CardBorder}">
+            <DataGrid ItemsSource="{Binding Applications}" SelectedItem="{Binding SelectedApplication}" Style="{StaticResource ModernDataGrid}">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Mã Đơn" Binding="{Binding ApplicationId}" Width="70"/>
                     <DataGridTextColumn Header="Mã Code" Binding="{Binding ApplicationCode}" Width="130" FontWeight="Bold"/>
@@ -67,13 +69,13 @@
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <Border Background="{Binding Status, Converter={StaticResource StatusColorConverter}}"
-                                        CornerRadius="12" Padding="10,4" HorizontalAlignment="Left" VerticalAlignment="Center">
-                                    <TextBlock Text="{Binding Status}" Foreground="White" FontWeight="Bold" FontSize="12"/>
+                                        CornerRadius="6" Padding="8,4" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding Status}" Foreground="White" FontWeight="Bold" FontSize="11"/>
                                 </Border>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
-                    <DataGridTextColumn Header="Ghi Chú Admin" Binding="{Binding ReviewNote}" Width="180"/>
+                    <DataGridTextColumn Header="Ghi Chú Admin" Binding="{Binding ReviewNote}" Width="*"/>
                 </DataGrid.Columns>
             </DataGrid>
         </Border>

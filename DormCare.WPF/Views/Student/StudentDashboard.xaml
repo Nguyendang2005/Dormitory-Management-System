@@ -13,10 +13,12 @@
         </Grid.RowDefinitions>
 
         <!-- Header -->
-        <StackPanel Grid.Row="0" Margin="0,0,0,24">
-            <TextBlock Text="Trang Chủ Sinh Viên" FontSize="26" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}"/>
-            <TextBlock Text="Thông tin cá nhân &amp; tình trạng chỗ ở ký túc xá" FontSize="14" Foreground="{StaticResource TextMutedBrush}" Margin="0,4,0,0"/>
-        </StackPanel>
+        <Border Grid.Row="0" Style="{StaticResource HeaderCard}" Margin="0,0,0,16">
+            <StackPanel VerticalAlignment="Center">
+                <TextBlock Text="🎓 CỔNG THÔNG TIN SINH VIÊN KÝ TÚC XÁ" FontSize="20" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}"/>
+                <TextBlock Text="Thông tin cá nhân, hồ sơ lưu trú và chi tiết chỗ ở hiện tại" FontSize="13" Foreground="{StaticResource TextMutedBrush}" Margin="0,4,0,0"/>
+            </StackPanel>
+        </Border>
 
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
@@ -25,9 +27,9 @@
             </Grid.ColumnDefinitions>
 
             <!-- Personal Info Card -->
-            <Border Grid.Column="0" Style="{StaticResource CardFrame}" Margin="0,0,12,0">
+            <Border Grid.Column="0" Style="{StaticResource CardBorder}" Margin="0,0,8,0">
                 <StackPanel>
-                    <TextBlock Text="👤 THÔNG TIN SINH VIÊN" FontSize="16" FontWeight="Bold" Foreground="{StaticResource PrimaryHoverBrush}" Margin="0,0,0,16"/>
+                    <TextBlock Text="👤 THÔNG TIN SINH VIÊN" FontSize="15" FontWeight="Bold" Foreground="{StaticResource PrimaryBrush}" Margin="0,0,0,16"/>
 
                     <Grid Margin="0,0,0,12">
                         <TextBlock Text="Mã Sinh Viên:" Foreground="{StaticResource TextMutedBrush}"/>
@@ -42,7 +44,7 @@
                         <TextBlock Text="{Binding Student.Major}" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Right"/>
                     </Grid>
                     <Grid Margin="0,0,0,12">
-                        <TextBlock Text="Lớp Biến Chế:" Foreground="{StaticResource TextMutedBrush}"/>
+                        <TextBlock Text="Lớp Sinh Hoạt:" Foreground="{StaticResource TextMutedBrush}"/>
                         <TextBlock Text="{Binding Student.ClassName}" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Right"/>
                     </Grid>
                     <Grid Margin="0,0,0,12">
@@ -57,9 +59,9 @@
             </Border>
 
             <!-- Current Bed / Room Card -->
-            <Border Grid.Column="1" Style="{StaticResource CardFrame}" Margin="12,0,0,0">
+            <Border Grid.Column="1" Style="{StaticResource CardBorder}" Margin="8,0,0,0">
                 <StackPanel>
-                    <TextBlock Text="🛏️ THÔNG TIN CHỖ Ở HIỆN TẠI" FontSize="16" FontWeight="Bold" Foreground="{StaticResource PrimaryHoverBrush}" Margin="0,0,0,16"/>
+                    <TextBlock Text="🛏️ THÔNG TIN CHỖ Ở HIỆN TẠI" FontSize="15" FontWeight="Bold" Foreground="{StaticResource PrimaryBrush}" Margin="0,0,0,16"/>
 
                     <Grid Margin="0,0,0,12">
                         <TextBlock Text="Khu / Tòa Nhà:" Foreground="{StaticResource TextMutedBrush}"/>

@@ -13,11 +13,12 @@ namespace DormCare.WPF.Converters
 
             return status switch
             {
-                "Available" or "Paid" or "Approved" or "Completed" or "Empty" => new SolidColorBrush(Color.FromRgb(46, 204, 113)), // Emerald Green
-                "Pending" or "InProgress" => new SolidColorBrush(Color.FromRgb(241, 196, 15)), // Sunflower Yellow
-                "Full" or "Unpaid" or "Rejected" or "Occupied" => new SolidColorBrush(Color.FromRgb(231, 76, 60)), // Alizarin Red
-                "Overdue" or "Maintenance" or "Disabled" => new SolidColorBrush(Color.FromRgb(230, 126, 34)), // Orange
-                _ => new SolidColorBrush(Color.FromRgb(149, 165, 166)) // Gray
+                "Active" or "Available" or "Paid" or "Approved" or "Completed" or "Empty" => new SolidColorBrush((Color)ColorConverter.ConvertFromString("#22C55E")), // Vibrant Emerald Green
+                "Pending" or "InProgress" => new SolidColorBrush((Color)ColorConverter.ConvertFromString("#EAB308")), // Gold Yellow
+                "Full" or "Unpaid" or "Rejected" or "Occupied" => new SolidColorBrush((Color)ColorConverter.ConvertFromString("#EF4444")), // Crimson Red
+                "Overdue" or "Maintenance" => new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F59E0B")), // Amber Orange
+                "Inactive" or "Disabled" => new SolidColorBrush((Color)ColorConverter.ConvertFromString("#94A3B8")), // Muted Slate Gray
+                _ => new SolidColorBrush((Color)ColorConverter.ConvertFromString("#64748B"))
             };
         }
 

@@ -11,11 +11,23 @@ namespace DormCare.DataAccess.Repositories
     {
         public BedRepository(DormCareDbContext context) : base(context) { }
 
+        public async Task<IEnumerable<Bed>> GetAllBedsWithDetailsAsync()
+        {
+            return await _dbSet
+                .Include(b => b.Room)
+                    .ThenInclude(r => r.Building)
+                .Include(b => b.RoomAssignments)
+                    .ThenInclude(ra => ra.Student)
+                .ToListAsync();
+        }
+
         public async Task<IEnumerable<Bed>> GetBedsByRoomIdAsync(int roomId)
         {
             return await _dbSet
                 .Include(b => b.Room)
                     .ThenInclude(r => r.Building)
+                .Include(b => b.RoomAssignments)
+                    .ThenInclude(ra => ra.Student)
                 .Where(b => b.RoomId == roomId)
                 .ToListAsync();
         }
@@ -25,6 +37,8 @@ namespace DormCare.DataAccess.Repositories
             return await _dbSet
                 .Include(b => b.Room)
                     .ThenInclude(r => r.Building)
+                .Include(b => b.RoomAssignments)
+                    .ThenInclude(ra => ra.Student)
                 .Where(b => b.Status == "Available")
                 .ToListAsync();
         }

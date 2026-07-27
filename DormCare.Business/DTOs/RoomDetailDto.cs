@@ -1,6 +1,18 @@
+using System.Collections.Generic;
+
 namespace DormCare.Business.DTOs
 {
-    public class RoomDto
+    public class BedDetailDto
+    {
+        public int BedId { get; set; }
+        public string BedNumber { get; set; } = string.Empty;
+        public string BedCode { get; set; } = string.Empty;
+        public string Status { get; set; } = "Available"; // Available, Occupied, Maintenance
+        public string StudentName { get; set; } = "-";
+        public string StudentCode { get; set; } = "-";
+    }
+
+    public class RoomDetailDto
     {
         public int RoomId { get; set; }
         public int BuildingId { get; set; }
@@ -18,20 +30,10 @@ namespace DormCare.Business.DTOs
         public int OccupiedBeds { get; set; }
         public int AvailableBeds { get; set; }
         public int MaintenanceBeds { get; set; }
-        public int TotalBeds => Capacity;
 
-        public string OccupancySummary => $"{OccupiedBeds}/{Capacity} đang ở";
         public double OccupancyRate => Capacity > 0 ? (double)OccupiedBeds / Capacity * 100 : 0;
+        public string OccupancyText => $"{OccupiedBeds}/{Capacity}";
 
-        public string StatusDisplay
-        {
-            get
-            {
-                if (Status == "Inactive") return "Vô hiệu";
-                if (Status == "Maintenance") return "Bảo trì";
-                if (AvailableBeds <= 0) return "Đã đầy";
-                return "Còn chỗ";
-            }
-        }
+        public List<BedDetailDto> Beds { get; set; } = new();
     }
 }

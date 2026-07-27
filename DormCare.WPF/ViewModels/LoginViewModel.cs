@@ -12,6 +12,22 @@ namespace DormCare.WPF.ViewModels
         private readonly AuthService _authService;
         private readonly DialogService _dialogService;
 
+        // Active Selected Role Toggle: true = Admin/Manager, false = Student
+        private bool _isAdminSelected = true;
+        public bool IsAdminSelected
+        {
+            get => _isAdminSelected;
+            set
+            {
+                if (SetProperty(ref _isAdminSelected, value))
+                {
+                    OnPropertyChanged(nameof(IsStudentSelected));
+                }
+            }
+        }
+
+        public bool IsStudentSelected => !IsAdminSelected;
+
         // View Mode: Login vs Register
         private bool _isRegisterMode;
         public bool IsRegisterMode
@@ -147,6 +163,7 @@ namespace DormCare.WPF.ViewModels
 
             SelectAdminCommand = new RelayCommand(() =>
             {
+                IsAdminSelected = true;
                 IsRegisterMode = false;
                 Username = "manager01";
                 Password = "HASH_MANAGER_01";
@@ -154,6 +171,7 @@ namespace DormCare.WPF.ViewModels
 
             SelectStudentCommand = new RelayCommand(() =>
             {
+                IsAdminSelected = false;
                 IsRegisterMode = false;
                 Username = "student1";
                 Password = "HASH_STUDENT_1";
@@ -210,6 +228,7 @@ namespace DormCare.WPF.ViewModels
                 // Pre-fill login with new account and switch to Login tab
                 Username = RegUsername;
                 Password = RegPassword;
+                IsAdminSelected = false;
                 IsRegisterMode = false;
             }
             else

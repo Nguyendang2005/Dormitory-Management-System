@@ -17,22 +17,46 @@ namespace DormCare.WPF.ViewModels
             set => SetProperty(ref _statistics, value);
         }
 
+        // View Mode Toggle (Card View vs DataGrid Table View)
+        private bool _isCardView = true;
+        public bool IsCardView
+        {
+            get => _isCardView;
+            set
+            {
+                if (SetProperty(ref _isCardView, value))
+                {
+                    OnPropertyChanged(nameof(IsTableView));
+                }
+            }
+        }
+        public bool IsTableView => !IsCardView;
+
         public ICommand RefreshCommand { get; }
+        public ICommand ToggleViewModeCommand { get; }
 
         public OccupancyStatisticsViewModel(OccupancyService occupancyService)
         {
-            Title = "Tổng quan tình trạng sử dụng";
+            Title = "Báo cáo & Thống kê lấp đầy KTX";
             _occupancyService = occupancyService;
 
             RefreshCommand = new AsyncRelayCommand(LoadStatisticsAsync);
+            ToggleViewModeCommand = new RelayCommand(_ => IsCardView = !IsCardView);
+
             _ = LoadStatisticsAsync();
         }
 
         public async Task LoadStatisticsAsync()
         {
-            IsBusy = true;
-            Statistics = await _occupancyService.GetOccupancyStatisticsAsync();
-            IsBusy = false;
+            try
+            {
+                IsBusy = true;
+                Statistics = await _occupancyService.GetOccupancyStatisticsAsync();
+            }
+            finally
+            {
+                IsBusy = false;
+            }
         }
     }
 }

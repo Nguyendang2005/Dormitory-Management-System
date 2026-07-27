@@ -5,40 +5,36 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Header -->
-        <DockPanel Grid.Row="0" Margin="0,0,0,16">
-            <StackPanel DockPanel.Dock="Left">
-                <TextBlock Text="Quản Lý Sinh Viên" FontSize="26" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}"/>
-                <TextBlock Text="Danh sách sinh viên ký túc xá và thông tin phòng ở" FontSize="14" Foreground="{StaticResource TextMutedBrush}" Margin="0,4,0,0"/>
-            </StackPanel>
-            <Button DockPanel.Dock="Right" Content="🔄 Tải lại" Style="{StaticResource PrimaryButton}" Command="{Binding RefreshCommand}" VerticalAlignment="Center"/>
-        </DockPanel>
-
-        <!-- Search Bar -->
-        <Border Grid.Row="1" Style="{StaticResource CardFrame}" Margin="0,0,0,16" Padding="16,12">
-            <StackPanel>
-                <TextBlock Text="🔍 Tìm kiếm sinh viên (Họ tên / Mã SV / Ngành học / Lớp)" FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,4"/>
-                <TextBox Style="{StaticResource ModernTextBox}" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"/>
-            </StackPanel>
+        <!-- Header Panel -->
+        <Border Grid.Row="0" Style="{StaticResource HeaderCard}" Margin="0,0,0,16">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" Width="240" Margin="0,0,10,0" Style="{StaticResource SearchTextBox}"/>
+                    <Button Content="🔄 Tải lại dữ liệu" Command="{Binding RefreshCommand}" Style="{StaticResource PrimaryButton}"/>
+                </StackPanel>
+                <StackPanel VerticalAlignment="Center">
+                    <TextBlock Text="👥 QUẢN LÝ SINH VIÊN KÝ TÚC XÁ" FontSize="20" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}"/>
+                    <TextBlock Text="Danh sách 30 sinh viên nội trú, ngành học, lớp và phân phòng ở thực tế" FontSize="13" Foreground="{StaticResource TextMutedBrush}" Margin="0,4,0,0"/>
+                </StackPanel>
+            </DockPanel>
         </Border>
 
         <!-- Student DataGrid -->
-        <Border Grid.Row="2" Style="{StaticResource CardFrame}">
-            <DataGrid ItemsSource="{Binding Students}" SelectedItem="{Binding SelectedStudent}">
+        <Border Grid.Row="1" Style="{StaticResource CardBorder}">
+            <DataGrid ItemsSource="{Binding Students}" SelectedItem="{Binding SelectedStudent}" Style="{StaticResource ModernDataGrid}">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Mã SV" Binding="{Binding StudentCode}" Width="100"/>
-                    <DataGridTextColumn Header="Họ và Tên" Binding="{Binding FullName}" Width="180" FontWeight="Bold"/>
-                    <DataGridTextColumn Header="Ngành Học" Binding="{Binding Major}" Width="160"/>
+                    <DataGridTextColumn Header="Mã SV" Binding="{Binding StudentCode}" Width="110"/>
+                    <DataGridTextColumn Header="Họ và Tên" Binding="{Binding FullName}" Width="180"/>
+                    <DataGridTextColumn Header="Ngành Học" Binding="{Binding Major}" Width="170"/>
                     <DataGridTextColumn Header="Lớp" Binding="{Binding ClassName}" Width="100"/>
                     <DataGridTextColumn Header="Giới Tính" Binding="{Binding Gender}" Width="90"/>
                     <DataGridTextColumn Header="Số Điện Thoại" Binding="{Binding PhoneNumber}" Width="130"/>
-                    <DataGridTextColumn Header="Tòa Nhà" Binding="{Binding BuildingName}" Width="120"/>
+                    <DataGridTextColumn Header="Tòa Nhà" Binding="{Binding BuildingName}" Width="130"/>
                     <DataGridTextColumn Header="Phòng" Binding="{Binding RoomNumber}" Width="100"/>
-                    <DataGridTextColumn Header="Giường" Binding="{Binding BedNumber}" Width="100"/>
+                    <DataGridTextColumn Header="Giường" Binding="{Binding BedNumber}" Width="*"/>
                 </DataGrid.Columns>
             </DataGrid>
         </Border>

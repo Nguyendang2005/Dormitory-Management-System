@@ -16,49 +16,50 @@
         </Grid.RowDefinitions>
 
         <!-- Header -->
-        <DockPanel Grid.Row="0" Margin="0,0,0,16">
-            <StackPanel DockPanel.Dock="Left">
-                <TextBlock Text="💳 Hậu — Quản Lý Hóa Đơn &amp; Thanh Toán" FontSize="26" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}"/>
-                <TextBlock Text="Tạo hóa đơn, tính tổng phí, xem chi tiết, cập nhật thanh toán và lọc hóa đơn chưa thanh toán" FontSize="14" Foreground="{StaticResource TextMutedBrush}" Margin="0,4,0,0"/>
-            </StackPanel>
-            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
-                <Button Content="➕ Tạo Hóa Đơn" Style="{StaticResource PrimaryButton}" Command="{Binding CreateInvoiceCommand}" Margin="0,0,10,0"/>
-                <Button Content="👁️ Xem Chi Tiết" Style="{StaticResource PrimaryButton}" Command="{Binding ViewInvoiceDetailsCommand}" Margin="0,0,10,0"/>
-                <Button Content="💳 Cập Nhật Thanh Toán" Style="{StaticResource PrimaryButton}" Command="{Binding UpdatePaymentCommand}" Margin="0,0,10,0"/>
-                <Button Content="🔄 Tải lại" Style="{StaticResource PrimaryButton}" Command="{Binding RefreshCommand}"/>
-            </StackPanel>
-        </DockPanel>
+        <Border Grid.Row="0" Style="{StaticResource HeaderCard}" Margin="0,0,0,16">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button Content="➕ Tạo Hóa Đơn" Style="{StaticResource PrimaryButton}" Command="{Binding CreateInvoiceCommand}" Margin="0,0,8,0"/>
+                    <Button Content="💳 Cập Nhật Thanh Toán" Style="{StaticResource SecondaryButton}" Command="{Binding UpdatePaymentCommand}" Margin="0,0,8,0"/>
+                    <Button Content="🔄 Tải Lại Dữ Liệu" Style="{StaticResource SecondaryButton}" Command="{Binding RefreshCommand}"/>
+                </StackPanel>
+                <StackPanel VerticalAlignment="Center">
+                    <TextBlock Text="💳 QUẢN LÝ HÓA ĐƠN &amp; LỆ PHÍ KTX" FontSize="20" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}"/>
+                    <TextBlock Text="Tạo hóa đơn điện nước, tiền phòng, cập nhật thanh toán và lọc nợ đọng" FontSize="13" Foreground="{StaticResource TextMutedBrush}" Margin="0,4,0,0"/>
+                </StackPanel>
+            </DockPanel>
+        </Border>
 
         <!-- Stats Summary Grid -->
         <UniformGrid Grid.Row="1" Columns="4" Margin="0,0,0,16">
-            <Border Style="{StaticResource CardFrame}" Margin="0,0,8,0" Padding="16,12">
+            <Border Style="{StaticResource CardBorder}" Margin="0,0,8,0" Padding="14,10">
                 <StackPanel>
                     <TextBlock Text="TỔNG SỐ HÓA ĐƠN" FontSize="11" FontWeight="Bold" Foreground="{StaticResource TextMutedBrush}"/>
                     <TextBlock Text="{Binding TotalInvoiceCount}" FontSize="24" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,4,0,0"/>
                 </StackPanel>
             </Border>
-            <Border Style="{StaticResource CardFrame}" Margin="4,0,4,0" Padding="16,12">
+            <Border Style="{StaticResource CardBorder}" Margin="0,0,8,0" Padding="14,10">
                 <StackPanel>
                     <TextBlock Text="TỔNG DOANH THU (VNĐ)" FontSize="11" FontWeight="Bold" Foreground="{StaticResource TextMutedBrush}"/>
-                    <TextBlock Text="{Binding TotalAmountSum, StringFormat='{}{0:N0}'}" FontSize="22" FontWeight="Bold" Foreground="{StaticResource PrimaryHoverBrush}" Margin="0,4,0,0"/>
+                    <TextBlock Text="{Binding TotalAmountSum, StringFormat='{}{0:N0}'}" FontSize="22" FontWeight="Bold" Foreground="{StaticResource PrimaryBrush}" Margin="0,4,0,0"/>
                 </StackPanel>
             </Border>
-            <Border Style="{StaticResource CardFrame}" Margin="4,0,4,0" Padding="16,12">
+            <Border Style="{StaticResource CardBorder}" Margin="0,0,8,0" Padding="14,10">
                 <StackPanel>
                     <TextBlock Text="ĐÃ THU THANH TOÁN (VNĐ)" FontSize="11" FontWeight="Bold" Foreground="{StaticResource TextMutedBrush}"/>
                     <TextBlock Text="{Binding PaidAmountSum, StringFormat='{}{0:N0}'}" FontSize="22" FontWeight="Bold" Foreground="{StaticResource SuccessBrush}" Margin="0,4,0,0"/>
                 </StackPanel>
             </Border>
-            <Border Style="{StaticResource CardFrame}" Margin="8,0,0,0" Padding="16,12">
+            <Border Style="{StaticResource CardBorder}" Padding="14,10">
                 <StackPanel>
                     <TextBlock Text="CÒN NỢ CHƯA THU (VNĐ)" FontSize="11" FontWeight="Bold" Foreground="{StaticResource TextMutedBrush}"/>
-                    <TextBlock Text="{Binding UnpaidAmountSum, StringFormat='{}{0:N0}'}" FontSize="22" FontWeight="Bold" Foreground="#EF4444" Margin="0,4,0,0"/>
+                    <TextBlock Text="{Binding UnpaidAmountSum, StringFormat='{}{0:N0}'}" FontSize="22" FontWeight="Bold" Foreground="#DC2626" Margin="0,4,0,0"/>
                 </StackPanel>
             </Border>
         </UniformGrid>
 
         <!-- Search & Filter Bar -->
-        <Border Grid.Row="2" Style="{StaticResource CardFrame}" Margin="0,0,0,16" Padding="16,12">
+        <Border Grid.Row="2" Style="{StaticResource CardBorder}" Margin="0,0,0,16" Padding="16,12">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="2*"/>
@@ -67,13 +68,13 @@
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Grid.Column="0" Margin="0,0,12,0">
-                    <TextBlock Text="🔍 Tìm kiếm hóa đơn (Mã HĐ / Họ tên / Mã SV / Phòng)" FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,4"/>
-                    <TextBox Style="{StaticResource ModernTextBox}" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"/>
+                    <TextBlock Text="Tìm kiếm hóa đơn (Mã HĐ / Họ tên / Mã SV / Phòng)" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,4"/>
+                    <TextBox Style="{StaticResource SearchTextBox}" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"/>
                 </StackPanel>
 
                 <StackPanel Grid.Column="1" Margin="0,0,12,0">
-                    <TextBlock Text="⚡ Trạng Thái Thanh Toán" FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,4"/>
-                    <ComboBox SelectedValue="{Binding SelectedStatusFilter, Mode=TwoWay}" SelectedValuePath="Tag" Height="38" Background="#0F172A" Foreground="White" BorderBrush="{StaticResource CardBorderBrush}">
+                    <TextBlock Text="Trạng Thái Thanh Toán" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,4"/>
+                    <ComboBox SelectedValue="{Binding SelectedStatusFilter, Mode=TwoWay}" SelectedValuePath="Tag" Style="{StaticResource ModernComboBox}" Height="36">
                         <ComboBoxItem Content="Tất cả trạng thái" Tag="All" IsSelected="True"/>
                         <ComboBoxItem Content="⚠️ Chưa thanh toán (Unpaid)" Tag="Unpaid"/>
                         <ComboBoxItem Content="⏳ Thanh toán một phần (PartiallyPaid)" Tag="PartiallyPaid"/>
@@ -84,34 +85,34 @@
 
                 <!-- Quick Filter Buttons -->
                 <StackPanel Grid.Column="2" VerticalAlignment="Bottom" Orientation="Horizontal">
-                    <Button Content="⚠️ Lọc Chưa Thanh Toán" Style="{StaticResource PrimaryButton}" Height="38" Command="{Binding FilterUnpaidCommand}" Margin="0,0,8,0" Background="#33EF4444" Foreground="#EF4444" BorderBrush="#EF4444"/>
-                    <Button Content="📋 tất Cả" Style="{StaticResource PrimaryButton}" Height="38" Command="{Binding FilterAllCommand}"/>
+                    <Button Content="⚠️ Lọc Chưa Thanh Toán" Style="{StaticResource SmallDangerButton}" Height="36" Padding="12,0" Command="{Binding FilterUnpaidCommand}" Margin="0,0,8,0"/>
+                    <Button Content="📋 Tất Cả" Style="{StaticResource SmallSecondaryButton}" Height="36" Padding="12,0" Command="{Binding FilterAllCommand}"/>
                 </StackPanel>
             </Grid>
         </Border>
 
         <!-- DataGrid -->
-        <Border Grid.Row="3" Style="{StaticResource CardFrame}">
-            <DataGrid ItemsSource="{Binding Invoices}" SelectedItem="{Binding SelectedInvoice}">
+        <Border Grid.Row="3" Style="{StaticResource CardBorder}">
+            <DataGrid ItemsSource="{Binding Invoices}" SelectedItem="{Binding SelectedInvoice}" Style="{StaticResource ModernDataGrid}">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Mã HĐ" Binding="{Binding InvoiceCode}" Width="130" FontWeight="Bold"/>
                     <DataGridTextColumn Header="Sinh Viên" Binding="{Binding StudentName}" Width="150"/>
                     <DataGridTextColumn Header="Mã SV" Binding="{Binding StudentCode}" Width="95"/>
-                    <DataGridTextColumn Header="Phòng / Tòa" Binding="{Binding RoomNumber, StringFormat='{}P.{0}'}" Width="110"/>
+                    <DataGridTextColumn Header="Phòng" Binding="{Binding RoomNumber, StringFormat='{}P.{0}'}" Width="100"/>
                     <DataGridTextColumn Header="Kỳ Thu" Binding="{Binding Month, StringFormat='{}Tháng {0}'}" Width="90"/>
                     <DataGridTextColumn Header="Tiền Phòng" Binding="{Binding RoomFee, StringFormat='{}{0:N0}'}" Width="105"/>
                     <DataGridTextColumn Header="Tiền Điện" Binding="{Binding ElectricityFee, StringFormat='{}{0:N0}'}" Width="95"/>
                     <DataGridTextColumn Header="Tiền Nước" Binding="{Binding WaterFee, StringFormat='{}{0:N0}'}" Width="95"/>
                     <DataGridTextColumn Header="Tổng Tiền (VNĐ)" Binding="{Binding TotalAmount, StringFormat='{}{0:N0}'}" Width="130" FontWeight="Bold" Foreground="{StaticResource KinpakuGoldBrush}"/>
                     <DataGridTextColumn Header="Đã Nộp" Binding="{Binding TotalPaid, StringFormat='{}{0:N0}'}" Width="105" Foreground="{StaticResource SuccessBrush}"/>
-                    <DataGridTextColumn Header="Dư Nợ" Binding="{Binding RemainingBalance, StringFormat='{}{0:N0}'}" Width="105" Foreground="#F59E0B" FontWeight="Bold"/>
+                    <DataGridTextColumn Header="Dư Nợ" Binding="{Binding RemainingBalance, StringFormat='{}{0:N0}'}" Width="105" Foreground="#D97706" FontWeight="Bold"/>
                     <DataGridTextColumn Header="Hạn Thu" Binding="{Binding DueDate, StringFormat='{}{0:dd/MM/yyyy}'}" Width="105"/>
-                    <DataGridTemplateColumn Header="Trạng Thái" Width="130">
+                    <DataGridTemplateColumn Header="Trạng Thái" Width="*">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <Border Background="{Binding Status, Converter={StaticResource StatusColorConverter}}"
-                                        CornerRadius="12" Padding="10,4" HorizontalAlignment="Left" VerticalAlignment="Center">
-                                    <TextBlock Text="{Binding Status}" Foreground="White" FontWeight="Bold" FontSize="12"/>
+                                        CornerRadius="6" Padding="8,4" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding Status}" Foreground="White" FontWeight="Bold" FontSize="11"/>
                                 </Border>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
@@ -121,4 +122,3 @@
         </Border>
     </Grid>
 </UserControl>
-

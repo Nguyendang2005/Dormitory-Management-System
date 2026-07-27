@@ -86,7 +86,7 @@ namespace DormCare.WPF.ViewModels
             NavigateRoomsCommand = new RelayCommand(() =>
             {
                 ActiveTabName = "Rooms";
-                CurrentView = new RoomViewModel(_roomService, _dialogService);
+                CurrentView = new RoomViewModel(_roomService, _buildingService, _dialogService, _applicationService, CurrentUser);
             });
 
             NavigateBedsCommand = new RelayCommand(() =>
@@ -98,7 +98,7 @@ namespace DormCare.WPF.ViewModels
             NavigateAvailableRoomsCommand = new RelayCommand(() =>
             {
                 ActiveTabName = "AvailableRooms";
-                CurrentView = new AvailableRoomViewModel(_roomService);
+                CurrentView = new AvailableRoomViewModel(_roomService, _buildingService);
             });
 
             NavigateOccupancyCommand = new RelayCommand(() =>

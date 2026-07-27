@@ -6,92 +6,227 @@
     <UserControl.Resources>
         <conv:StatusToColorConverter x:Key="StatusColorConverter"/>
         <conv:StatusToVietnameseConverter x:Key="StatusVietnameseConverter"/>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
     </UserControl.Resources>
 
-    <Grid Margin="20">
+    <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Header -->
-        <DockPanel Grid.Row="0" Margin="0,0,0,20">
-            <StackPanel DockPanel.Dock="Left">
-                <TextBlock Text="📊 Tổng Quan Tình Trạng Sử Dụng" FontSize="26" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}"/>
-                <TextBlock Text="Báo cáo thống kê tình trạng lấp đầy phòng ở và giường ký túc xá theo thời gian thực" FontSize="14" Foreground="{StaticResource TextMutedBrush}" Margin="0,4,0,0"/>
-            </StackPanel>
-            <Button DockPanel.Dock="Right" Content="🔄 Tải Lại Dữ Liệu" Style="{StaticResource PrimaryButton}" Command="{Binding RefreshCommand}" VerticalAlignment="Center"/>
-        </DockPanel>
-
-        <!-- Stats Metric Grid -->
-        <UniformGrid Grid.Row="1" Columns="4" Margin="0,0,0,20">
-            <Border Style="{StaticResource CardFrame}" Margin="0,0,10,0" Padding="16">
-                <StackPanel>
-                    <TextBlock Text="Tổng Số Tòa Nhà" FontSize="12" Foreground="{StaticResource TextMutedBrush}"/>
-                    <TextBlock Text="{Binding Statistics.TotalBuildings}" FontSize="28" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,4,0,0"/>
+        <!-- Header Panel (Soft Sky / Clean Cream Style) -->
+        <Border Grid.Row="0" Background="#FFFFFF" BorderBrush="#CBD5E1" BorderThickness="1" CornerRadius="12" Padding="20,16" Margin="0,0,0,16">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button Command="{Binding ToggleViewModeCommand}" Style="{StaticResource SecondaryButton}" Height="38" Margin="0,0,10,0" Padding="12,0">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="🔄 " FontSize="13"/>
+                            <TextBlock Text="Đổi Chế Độ Xem" FontWeight="SemiBold"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Content="⟳ Tải Lại Dữ Liệu" Command="{Binding RefreshCommand}" Style="{StaticResource PrimaryButton}" Height="38"/>
                 </StackPanel>
-            </Border>
 
-            <Border Style="{StaticResource CardFrame}" Margin="0,0,10,0" Padding="16">
-                <StackPanel>
-                    <TextBlock Text="Tổng Số Phòng / Giường" FontSize="12" Foreground="{StaticResource TextMutedBrush}"/>
-                    <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
-                        <TextBlock Text="{Binding Statistics.TotalRooms}" FontSize="28" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}"/>
-                        <TextBlock Text=" phòng / " FontSize="18" Foreground="{StaticResource TextMutedBrush}" VerticalAlignment="Bottom" Margin="4,0,4,4"/>
-                        <TextBlock Text="{Binding Statistics.TotalBeds}" FontSize="28" FontWeight="Bold" Foreground="{StaticResource PrimaryHoverBrush}"/>
-                        <TextBlock Text=" giường" FontSize="18" Foreground="{StaticResource TextMutedBrush}" VerticalAlignment="Bottom" Margin="4,0,0,4"/>
+                <StackPanel VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="📊 " FontSize="22"/>
+                        <TextBlock Text="BÁO CÁO &amp; THỐNG KÊ KÝ TÚC XÁ" FontSize="20" FontWeight="Bold" Foreground="#0F172A"/>
+                    </StackPanel>
+                    <TextBlock Text="Theo dõi tỷ lệ lấp đầy phòng ở, số lượng giường đang sử dụng và giường khả dụng theo thời gian thực" FontSize="13" Foreground="#475569" Margin="0,4,0,0"/>
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <!-- 4 Dynamic Metric Cards Row (Real Database Calculations) -->
+        <UniformGrid Grid.Row="1" Columns="4" Margin="0,0,0,16">
+            <Border Background="#FFFFFF" BorderBrush="#CBD5E1" BorderThickness="1" CornerRadius="12" Padding="16" Margin="0,0,8,0">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <Border Width="46" Height="46" CornerRadius="10" Background="#F0F9FF" BorderBrush="#BAE6FD" BorderThickness="1" Margin="0,0,14,0">
+                        <TextBlock Text="🏢" FontSize="22" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="TỔNG SỐ TÒA NHÀ" FontSize="11" FontWeight="Bold" Foreground="#475569"/>
+                        <TextBlock Text="{Binding Statistics.TotalBuildings}" FontSize="24" FontWeight="Bold" Foreground="#0F172A" Margin="0,2,0,0"/>
                     </StackPanel>
                 </StackPanel>
             </Border>
 
-            <Border Style="{StaticResource CardFrame}" Margin="0,0,10,0" Padding="16">
-                <StackPanel>
-                    <TextBlock Text="Giường Đang Sử Dụng / Còn Trống" FontSize="12" Foreground="{StaticResource TextMutedBrush}"/>
-                    <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
-                        <TextBlock Text="{Binding Statistics.OccupiedBeds}" FontSize="28" FontWeight="Bold" Foreground="#3B82F6"/>
-                        <TextBlock Text=" / " FontSize="22" Foreground="{StaticResource TextMutedBrush}" VerticalAlignment="Bottom" Margin="4,0,4,2"/>
-                        <TextBlock Text="{Binding Statistics.AvailableBeds}" FontSize="28" FontWeight="Bold" Foreground="{StaticResource KinpakuGoldBrush}"/>
+            <Border Background="#FFFFFF" BorderBrush="#CBD5E1" BorderThickness="1" CornerRadius="12" Padding="16" Margin="4,0,6,0">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <Border Width="46" Height="46" CornerRadius="10" Background="#F0F9FF" BorderBrush="#BAE6FD" BorderThickness="1" Margin="0,0,14,0">
+                        <TextBlock Text="🚪" FontSize="22" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="TỔNG PHÒNG / GIƯỜNG" FontSize="11" FontWeight="Bold" Foreground="#475569"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                            <TextBlock Text="{Binding Statistics.TotalRooms}" FontSize="22" FontWeight="Bold" Foreground="#0F172A"/>
+                            <TextBlock Text=" phòng / " FontSize="12" Foreground="#64748B" VerticalAlignment="Bottom" Margin="2,0,2,2"/>
+                            <TextBlock Text="{Binding Statistics.TotalBeds}" FontSize="22" FontWeight="Bold" Foreground="#0284C7"/>
+                            <TextBlock Text=" giường" FontSize="12" Foreground="#64748B" VerticalAlignment="Bottom" Margin="2,0,0,2"/>
+                        </StackPanel>
                     </StackPanel>
                 </StackPanel>
             </Border>
 
-            <Border Style="{StaticResource CardFrame}" Padding="16">
-                <StackPanel>
-                    <TextBlock Text="Tỷ Lệ Lấp Đầy Toàn Ký Túc Xá" FontSize="12" Foreground="{StaticResource TextMutedBrush}"/>
-                    <TextBlock Text="{Binding Statistics.OverallOccupancyRate, StringFormat='{}{0:F1}%'}" FontSize="28" FontWeight="Bold" Foreground="{StaticResource KinpakuGoldBrush}" Margin="0,4,0,0"/>
+            <Border Background="#FFFFFF" BorderBrush="#CBD5E1" BorderThickness="1" CornerRadius="12" Padding="16" Margin="4,0,6,0">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <Border Width="46" Height="46" CornerRadius="10" Background="#ECFDF5" BorderBrush="#A7F3D0" BorderThickness="1" Margin="0,0,14,0">
+                        <TextBlock Text="🛏️" FontSize="22" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="GIƯỜNG ĐANG Ở / TRỐNG" FontSize="11" FontWeight="Bold" Foreground="#475569"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                            <TextBlock Text="{Binding Statistics.OccupiedBeds}" FontSize="22" FontWeight="Bold" Foreground="#0284C7"/>
+                            <TextBlock Text=" / " FontSize="16" Foreground="#94A3B8" VerticalAlignment="Bottom" Margin="4,0,4,2"/>
+                            <TextBlock Text="{Binding Statistics.AvailableBeds}" FontSize="22" FontWeight="Bold" Foreground="#059669"/>
+                        </StackPanel>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <Border Background="#FFFFFF" BorderBrush="#CBD5E1" BorderThickness="1" CornerRadius="12" Padding="16" Margin="6,0,0,0">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <Border Width="46" Height="46" CornerRadius="10" Background="#FFFBEB" BorderBrush="#FDE68A" BorderThickness="1" Margin="0,0,14,0">
+                        <TextBlock Text="📈" FontSize="22" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="TỶ LỆ LẤP ĐẦY KTX" FontSize="11" FontWeight="Bold" Foreground="#475569"/>
+                        <TextBlock Text="{Binding Statistics.OverallOccupancyRate, StringFormat='{}{0:F1}%'}" FontSize="24" FontWeight="Bold" Foreground="#D97706" Margin="0,2,0,0"/>
+                    </StackPanel>
                 </StackPanel>
             </Border>
         </UniformGrid>
 
-        <!-- Building Breakdown Table -->
-        <Border Grid.Row="2" Style="{StaticResource CardFrame}">
-            <StackPanel>
-                <TextBlock Text="🏢 Thống Kê Theo Tòa Nhà" FontSize="16" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,12"/>
-                <DataGrid ItemsSource="{Binding Statistics.BuildingBreakdown}" AutoGenerateColumns="False" CanUserAddRows="False" RowHeight="42">
+        <!-- Content Area: Soft Sky Blue & Cream Light Building Breakdown Cards Grid View (Default) or DataGrid View -->
+        <Grid Grid.Row="2">
+            <!-- 1. SOFT SKY BLUE & CREAM LIGHT BUILDING BREAKDOWN CARDS GRID VIEW -->
+            <ScrollViewer VerticalScrollBarVisibility="Auto" Visibility="{Binding IsCardView, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <ItemsControl ItemsSource="{Binding Statistics.BuildingBreakdown}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <UniformGrid Columns="3"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Background="#FFFFFF" BorderBrush="#CBD5E1" BorderThickness="1" CornerRadius="12" Margin="0,0,14,14" Padding="16">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+
+                                    <!-- Card Header: Code Badge, Name, Status -->
+                                    <DockPanel Grid.Row="0" Margin="0,0,0,12">
+                                        <!-- Status Badge Right -->
+                                        <Border DockPanel.Dock="Right" Background="{Binding Status, Converter={StaticResource StatusColorConverter}}" CornerRadius="12" Padding="10,4" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Status, Converter={StaticResource StatusVietnameseConverter}}" Foreground="White" FontWeight="Bold" FontSize="11"/>
+                                        </Border>
+
+                                        <!-- Code Badge & Name Left -->
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Border Background="#E0F2FE" BorderBrush="#BAE6FD" BorderThickness="1" CornerRadius="6" Padding="10,4" Margin="0,0,10,0">
+                                                <TextBlock Text="{Binding BuildingCode}" FontWeight="Bold" FontSize="13" Foreground="#0284C7"/>
+                                            </Border>
+                                            <TextBlock Text="{Binding BuildingName}" FontWeight="Bold" FontSize="16" Foreground="#0F172A" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                                        </StackPanel>
+                                    </DockPanel>
+
+                                    <!-- Address Line -->
+                                    <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,14">
+                                        <TextBlock Text="📍 " FontSize="12" Foreground="#0284C7"/>
+                                        <TextBlock Text="{Binding Address, TargetNullValue='Ký túc xá sinh viên'}" FontSize="12" Foreground="#475569" TextTrimming="CharacterEllipsis"/>
+                                    </StackPanel>
+
+                                    <!-- 3-Column Mini Metrics Box (Soft Light Sky Panel) -->
+                                    <Border Grid.Row="2" Background="#F0F9FF" BorderBrush="#BAE6FD" BorderThickness="1" CornerRadius="8" Padding="12,10" Margin="0,0,0,14">
+                                        <UniformGrid Columns="3">
+                                            <StackPanel HorizontalAlignment="Center">
+                                                <TextBlock Text="Quy Mô" FontSize="11" FontWeight="SemiBold" Foreground="#0369A1" HorizontalAlignment="Center"/>
+                                                <TextBlock Text="{Binding NumberOfFloors, StringFormat='{}{0} tầng'}" FontSize="13" FontWeight="Bold" Foreground="#0F172A" HorizontalAlignment="Center" Margin="0,2,0,0"/>
+                                            </StackPanel>
+
+                                            <StackPanel HorizontalAlignment="Center">
+                                                <TextBlock Text="Tổng Phòng" FontSize="11" FontWeight="SemiBold" Foreground="#0369A1" HorizontalAlignment="Center"/>
+                                                <TextBlock Text="{Binding TotalRooms, StringFormat='{}{0} phòng'}" FontSize="13" FontWeight="Bold" Foreground="#0F172A" HorizontalAlignment="Center" Margin="0,2,0,0"/>
+                                            </StackPanel>
+
+                                            <StackPanel HorizontalAlignment="Center">
+                                                <TextBlock Text="Tổng Giường" FontSize="11" FontWeight="SemiBold" Foreground="#0369A1" HorizontalAlignment="Center"/>
+                                                <TextBlock Text="{Binding TotalBeds, StringFormat='{}{0} giường'}" FontSize="13" FontWeight="Bold" Foreground="#0284C7" HorizontalAlignment="Center" Margin="0,2,0,0"/>
+                                            </StackPanel>
+                                        </UniformGrid>
+                                    </Border>
+
+                                    <!-- Detailed Bed Status Breakdown Row -->
+                                    <Grid Grid.Row="3" Margin="0,0,0,14">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="1*"/>
+                                            <ColumnDefinition Width="1*"/>
+                                            <ColumnDefinition Width="1*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Center">
+                                            <TextBlock Text="👤 Đang ở: " FontSize="11" Foreground="#475569"/>
+                                            <TextBlock Text="{Binding OccupiedBeds}" FontSize="12" FontWeight="Bold" Foreground="#0284C7"/>
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center">
+                                            <TextBlock Text="🛏️ Trống: " FontSize="11" Foreground="#475569"/>
+                                            <TextBlock Text="{Binding AvailableBeds}" FontSize="12" FontWeight="Bold" Foreground="#059669"/>
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Center">
+                                            <TextBlock Text="🛠️ Bảo trì: " FontSize="11" Foreground="#475569"/>
+                                            <TextBlock Text="{Binding MaintenanceBeds}" FontSize="12" FontWeight="Bold" Foreground="#D97706"/>
+                                        </StackPanel>
+                                    </Grid>
+
+                                    <!-- Occupancy Rate Progress Bar Footer -->
+                                    <StackPanel Grid.Row="4">
+                                        <DockPanel Margin="0,0,0,6">
+                                            <TextBlock Text="TỶ LỆ LẤP ĐẦY TÒA NHÀ" FontSize="11" FontWeight="Bold" Foreground="#334155"/>
+                                            <TextBlock Text="{Binding OccupancyRate, StringFormat='{}{0:F1}%'}" FontSize="12" FontWeight="Bold" Foreground="#0284C7" HorizontalAlignment="Right"/>
+                                        </DockPanel>
+                                        <Grid Height="8">
+                                            <Border Background="#E0F2FE" CornerRadius="4"/>
+                                            <ProgressBar Value="{Binding OccupancyRate, Mode=OneWay}" Minimum="0" Maximum="100" Height="8" BorderThickness="0" Background="Transparent" Foreground="#0284C7"/>
+                                        </Grid>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+
+            <!-- 2. DATA GRID VIEW (Alternative Table Mode) -->
+            <Border Background="#FFFFFF" BorderBrush="#CBD5E1" BorderThickness="1" CornerRadius="12" Visibility="{Binding IsTableView, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <DataGrid ItemsSource="{Binding Statistics.BuildingBreakdown}" AutoGenerateColumns="False" CanUserAddRows="False" IsReadOnly="True" Style="{StaticResource ModernDataGrid}">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Mã Tòa" Binding="{Binding BuildingCode}" Width="100"/>
-                        <DataGridTextColumn Header="Tên Tòa Nhà" Binding="{Binding BuildingName}" Width="180" FontWeight="Bold"/>
-                        <DataGridTextColumn Header="Số Tầng" Binding="{Binding NumberOfFloors}" Width="90"/>
+                        <DataGridTextColumn Header="Mã Tòa" Binding="{Binding BuildingCode}" Width="90" FontWeight="Bold"/>
+                        <DataGridTextColumn Header="Tên Tòa Nhà" Binding="{Binding BuildingName}" Width="160" FontWeight="Bold"/>
+                        <DataGridTextColumn Header="Số Tầng" Binding="{Binding NumberOfFloors}" Width="80"/>
                         <DataGridTextColumn Header="Tổng Số Phòng" Binding="{Binding TotalRooms}" Width="120"/>
                         <DataGridTextColumn Header="Tổng Số Giường" Binding="{Binding TotalBeds}" Width="130"/>
-                        <DataGridTextColumn Header="Đang Sử Dụng" Binding="{Binding OccupiedBeds}" Width="120" FontWeight="Bold" Foreground="#3B82F6"/>
-                        <DataGridTextColumn Header="Còn Trống" Binding="{Binding AvailableBeds}" Width="110" FontWeight="Bold" Foreground="{StaticResource KinpakuGoldBrush}"/>
-                        <DataGridTextColumn Header="Bảo Trì" Binding="{Binding MaintenanceBeds}" Width="100" Foreground="#F59E0B"/>
-                        <DataGridTextColumn Header="Tỷ Lệ Lấp Đầy (%)" Binding="{Binding OccupancyRate, StringFormat='{}{0:F1}%'}" Width="150" FontWeight="Bold" Foreground="{StaticResource KinpakuGoldBrush}"/>
-                        <DataGridTemplateColumn Header="Trạng Thái Tòa" Width="140">
+                        <DataGridTextColumn Header="Đang Sử Dụng" Binding="{Binding OccupiedBeds}" Width="110" FontWeight="Bold" Foreground="#0284C7"/>
+                        <DataGridTextColumn Header="Còn Trống" Binding="{Binding AvailableBeds}" Width="110" FontWeight="Bold" Foreground="#059669"/>
+                        <DataGridTextColumn Header="Bảo Trì" Binding="{Binding MaintenanceBeds}" Width="90" Foreground="#D97706"/>
+                        <DataGridTextColumn Header="Tỷ Lệ Lấp Đầy (%)" Binding="{Binding OccupancyRate, StringFormat='{}{0:F1}%'}" Width="140" FontWeight="Bold" Foreground="#0284C7"/>
+                        <DataGridTemplateColumn Header="Trạng Thái Tòa" Width="*">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
-                                    <Border Background="{Binding Status, Converter={StaticResource StatusColorConverter}}"
-                                            CornerRadius="12" Padding="10,4" HorizontalAlignment="Left" VerticalAlignment="Center">
-                                        <TextBlock Text="{Binding Status, Converter={StaticResource StatusVietnameseConverter}}" Foreground="White" FontWeight="Bold" FontSize="12"/>
+                                    <Border Background="{Binding Status, Converter={StaticResource StatusColorConverter}}" CornerRadius="12" Padding="10,4" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Status, Converter={StaticResource StatusVietnameseConverter}}" Foreground="White" FontWeight="Bold" FontSize="11"/>
                                     </Border>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
                     </DataGrid.Columns>
                 </DataGrid>
-            </StackPanel>
-        </Border>
+            </Border>
+        </Grid>
     </Grid>
 </UserControl>

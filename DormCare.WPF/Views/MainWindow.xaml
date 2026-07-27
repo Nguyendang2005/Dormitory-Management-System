@@ -3,96 +3,102 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="clr-namespace:DormCare.WPF.ViewModels"
         xmlns:views="clr-namespace:DormCare.WPF.Views"
-        xmlns:studentViews="clr-namespace:DormCare.WPF.Views.Student"
-        xmlns:managerViews="clr-namespace:DormCare.WPF.Views.Manager"
         xmlns:conv="clr-namespace:DormCare.WPF.Converters"
-        Title="{Binding Title}" Height="800" Width="1280"
+        Title="{Binding Title}" Height="850" Width="1360"
         WindowStartupLocation="CenterScreen"
         Style="{StaticResource ModernWindow}">
 
     <Window.Resources>
         <conv:BoolToVisibilityConverter x:Key="BoolToVisConverter"/>
-
-        <DataTemplate DataType="{x:Type vm:StudentDashboardViewModel}">
-            <studentViews:StudentDashboard/>
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type vm:BuildingViewModel}">
-            <managerViews:BuildingManagement/>
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type vm:RoomViewModel}">
-            <managerViews:RoomManagement/>
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type vm:BedViewModel}">
-            <managerViews:BedManagement/>
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type vm:StudentViewModel}">
-            <managerViews:StudentManagement/>
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type vm:ApplicationViewModel}">
-            <managerViews:ApplicationManagement/>
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type vm:InvoiceViewModel}">
-            <managerViews:InvoiceManagement/>
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type vm:MaintenanceViewModel}">
-            <managerViews:MaintenanceManagement/>
-        </DataTemplate>
     </Window.Resources>
 
-    <Grid>
+    <Grid Background="#F3F5F7">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="260"/>
+            <ColumnDefinition Width="250"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <!-- Left Sidebar Navigation -->
-        <Border Grid.Column="0" Background="{StaticResource CardBgBrush}" BorderBrush="{StaticResource CardBorderBrush}" BorderThickness="0,0,1,0">
-            <DockPanel Margin="16">
-                <!-- App Header -->
-                <StackPanel DockPanel.Dock="Top" Margin="8,12,8,24">
+        <!-- Left Navigation Sidebar (Matching Mockup) -->
+        <Border Grid.Column="0" Background="#131F28">
+            <DockPanel Margin="16,20">
+                <!-- App Brand Header -->
+                <StackPanel DockPanel.Dock="Top" Margin="4,0,4,16">
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <Border Width="36" Height="36" CornerRadius="8" Background="{StaticResource PrimaryBrush}" Margin="0,0,12,0">
-                            <TextBlock Text="🏠" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        <Border Width="40" Height="40" CornerRadius="8" Background="#FFFFFF" Margin="0,0,12,0">
+                            <TextBlock Text="🏢" FontSize="22" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
-                        <StackPanel>
-                            <TextBlock Text="DormCare" FontSize="20" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}"/>
-                            <TextBlock Text="Management System" FontSize="11" Foreground="{StaticResource TextMutedBrush}"/>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="DormCare" FontSize="20" FontWeight="Bold" Foreground="#FFFFFF"/>
+                            <TextBlock Text="Hệ Thống Quản Lý Ký Túc Xá" FontSize="11" Foreground="#94A3B8"/>
                         </StackPanel>
                     </StackPanel>
-                    <Border Height="1" Background="{StaticResource CardBorderBrush}" Margin="0,16,0,0"/>
+
+                    <!-- Manager Profile Header Badge -->
+                    <Border Background="#1C2B36" CornerRadius="8" Padding="10,8" Margin="0,16,0,0">
+                        <DockPanel>
+                            <TextBlock DockPanel.Dock="Right" Text="⚙️" Foreground="#64748B" VerticalAlignment="Center" Cursor="Hand"/>
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <Border Width="30" Height="30" CornerRadius="15" Background="#334155" Margin="0,0,10,0">
+                                    <TextBlock Text="👤" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding CurrentUser.Username}" Foreground="#FFFFFF" FontWeight="Bold" FontSize="13"/>
+                                    <TextBlock Text="{Binding CurrentUser.Role}" Foreground="#94A3B8" FontSize="11"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </DockPanel>
+                    </Border>
                 </StackPanel>
 
-                <!-- Logout Button Docked Bottom -->
-                <Button DockPanel.Dock="Bottom" Content="🚪 Đăng Xuất" Style="{StaticResource DangerButton}" Command="{Binding LogoutCommand}" Margin="0,16,0,0"/>
+                <!-- Bottom Logout Button Dock -->
+                <StackPanel DockPanel.Dock="Bottom" Margin="0,12,0,0">
+                    <Border Background="#1C2B36" CornerRadius="8" Padding="10,8">
+                        <DockPanel>
+                            <Button DockPanel.Dock="Right" Content="🚪" Command="{Binding LogoutCommand}" Style="{StaticResource SidebarNavButton}" Foreground="#EF4444" Padding="6,2" VerticalAlignment="Center"/>
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <Border Width="28" Height="28" CornerRadius="14" Background="#334155" Margin="0,0,8,0">
+                                    <TextBlock Text="👤" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding CurrentUser.Username}" Foreground="#FFFFFF" FontWeight="Bold" FontSize="12"/>
+                                    <TextBlock Text="{Binding CurrentUser.Role}" Foreground="#94A3B8" FontSize="10"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </DockPanel>
+                    </Border>
+                </StackPanel>
 
-                <!-- Navigation Menu -->
+                <!-- Scrollable Navigation Menu -->
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel>
-                        <!-- Common / Student Dashboard -->
-                        <Button Content="📊 Trang Chủ" Style="{StaticResource PrimaryButton}" Command="{Binding NavigateDashboardCommand}" Margin="0,0,0,8" HorizontalContentAlignment="Left" Padding="14,10"/>
+                        <!-- CƠ SỞ VẬT CHẤT SECTION -->
+                        <DockPanel Margin="8,12,8,6">
+                            <TextBlock DockPanel.Dock="Right" Text="︿" Foreground="#64748B" FontSize="10" VerticalAlignment="Center"/>
+                            <TextBlock Text="CƠ SỞ VẬT CHẤT" FontSize="11" FontWeight="Bold" Foreground="#64748B"/>
+                        </DockPanel>
 
-                        <!-- Dạng's Core Modules (Building, Room, Bed) -->
-                        <StackPanel Visibility="{Binding IsManager, Converter={StaticResource BoolToVisConverter}}">
-                            <TextBlock Text="🔵 DẠNG — PHÒNG &amp; TÒA NHÀ" FontSize="11" FontWeight="Bold" Foreground="{StaticResource PrimaryHoverBrush}" Margin="8,12,8,6"/>
-                            <Button Content="🏢 Quản Lý Tòa Nhà" Style="{StaticResource PrimaryButton}" Command="{Binding NavigateBuildingsCommand}" Margin="0,0,0,8" HorizontalContentAlignment="Left" Padding="14,10"/>
-                            <Button Content="🚪 Quản Lý &amp; Lọc Phòng" Style="{StaticResource PrimaryButton}" Command="{Binding NavigateRoomsCommand}" Margin="0,0,0,8" HorizontalContentAlignment="Left" Padding="14,10"/>
-                            <Button Content="🛏️ Quản Lý Giường" Style="{StaticResource PrimaryButton}" Command="{Binding NavigateBedsCommand}" Margin="0,0,0,8" HorizontalContentAlignment="Left" Padding="14,10"/>
+                        <Button Content="🏢  Quản Lý Tòa Nhà" Style="{StaticResource SidebarNavButtonActive}" Command="{Binding NavigateBuildingsCommand}" Margin="0,0,0,4"/>
+                        <Button Content="🚪  Quản Lý Phòng" Style="{StaticResource SidebarNavButton}" Command="{Binding NavigateRoomsCommand}" Margin="0,0,0,4"/>
+                        <Button Content="🛏️  Quản Lý Giường" Style="{StaticResource SidebarNavButton}" Command="{Binding NavigateBedsCommand}" Margin="0,0,0,4"/>
+                        <Button Content="🔍  Tìm Phòng Còn Chỗ" Style="{StaticResource SidebarNavButton}" Command="{Binding NavigateAvailableRoomsCommand}" Margin="0,0,0,4"/>
+                        <Button Content="📊  Thống Kê Sử Dụng" Style="{StaticResource SidebarNavButton}" Command="{Binding NavigateOccupancyStatisticsCommand}" Margin="0,0,0,4"/>
 
-                            <TextBlock Text="QUẢN LÝ SINH VIÊN" FontSize="11" FontWeight="Bold" Foreground="{StaticResource TextMutedBrush}" Margin="8,16,8,6"/>
-                            <Button Content="👥 Quản lý Sinh viên" Style="{StaticResource PrimaryButton}" Command="{Binding NavigateStudentsCommand}" Margin="0,0,0,8" HorizontalContentAlignment="Left" Padding="14,10"/>
-                            <Button Content="📝 Đơn Đăng Ký Phòng" Style="{StaticResource PrimaryButton}" Command="{Binding NavigateApplicationsCommand}" Margin="0,0,0,8" HorizontalContentAlignment="Left" Padding="14,10"/>
-                        </StackPanel>
+                        <!-- SINH VIÊN & DỊCH VỤ SECTION -->
+                        <DockPanel Margin="8,16,8,6">
+                            <TextBlock DockPanel.Dock="Right" Text="︿" Foreground="#64748B" FontSize="10" VerticalAlignment="Center"/>
+                            <TextBlock Text="SINH VIÊN &amp; DỊCH VỤ" FontSize="11" FontWeight="Bold" Foreground="#64748B"/>
+                        </DockPanel>
 
-                        <!-- Financial & Maintenance Links -->
-                        <TextBlock Text="TÀI CHÍNH &amp; VẬN HÀNH" FontSize="11" FontWeight="Bold" Foreground="{StaticResource TextMutedBrush}" Margin="8,16,8,6"/>
-                        <Button Content="💳 Hóa đơn &amp; Điện nước" Style="{StaticResource PrimaryButton}" Command="{Binding NavigateInvoicesCommand}" Margin="0,0,0,8" HorizontalContentAlignment="Left" Padding="14,10"/>
-                        <Button Content="🛠️ Báo cáo &amp; Sửa chữa" Style="{StaticResource PrimaryButton}" Command="{Binding NavigateMaintenanceCommand}" Margin="0,0,0,8" HorizontalContentAlignment="Left" Padding="14,10"/>
+                        <Button Content="👥  Danh Sách Sinh Viên" Style="{StaticResource SidebarNavButton}" Command="{Binding NavigateStudentsCommand}" Margin="0,0,0,4"/>
+                        <Button Content="📝  Đơn Đăng Ký Phòng" Style="{StaticResource SidebarNavButton}" Command="{Binding NavigateApplicationsCommand}" Margin="0,0,0,4"/>
+                        <Button Content="💳  Hóa Đơn Điện Nước" Style="{StaticResource SidebarNavButton}" Command="{Binding NavigateInvoicesCommand}" Margin="0,0,0,4"/>
+                        <Button Content="🛠️  Báo Cáo Sửa Chữa" Style="{StaticResource SidebarNavButton}" Command="{Binding NavigateMaintenanceCommand}" Margin="0,0,0,4"/>
                     </StackPanel>
                 </ScrollViewer>
             </DockPanel>
         </Border>
 
-        <!-- Right Content Main Frame -->
+        <!-- Right Main View Container -->
         <Grid Grid.Column="1" Margin="24">
             <ContentControl Content="{Binding CurrentChildViewModel}"/>
         </Grid>

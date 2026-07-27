@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using System.Windows;
 using DormCare.Business.Services;
 using DormCare.DataAccess.Data;
@@ -8,6 +9,7 @@ using DormCare.WPF.Services;
 using DormCare.WPF.ViewModels;
 using DormCare.WPF.Views;
 using DormCare.WPF.Views.Student;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -20,6 +22,12 @@ namespace DormCare.WPF
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
+
+            // Setup global unhandled exception handling to prevent app crash
+            DispatcherUnhandledException += App_DispatcherUnhandledException;
+            AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+            TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
+
             ShutdownMode = ShutdownMode.OnExplicitShutdown;
 
             var services = new ServiceCollection();
@@ -32,18 +40,46 @@ namespace DormCare.WPF
             ShowLoginWindow();
         }
 
+        private void App_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
+        {
+            MessageBox.Show(
+                $"Hệ thống ghi nhận lỗi:\n{e.Exception.Message}\n\nChi tiết:\n{e.Exception.InnerException?.Message}",
+                "Lỗi Hệ Thống",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
+            
+            e.Handled = true; // Prevent app shutdown
+        }
+
+        private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+        {
+            if (e.ExceptionObject is Exception ex)
+            {
+                MessageBox.Show(
+                    $"Lỗi nghiêm trọng hệ thống:\n{ex.Message}",
+                    "Lỗi Hệ Thống",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+            }
+        }
+
+        private void TaskScheduler_UnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)
+        {
+            System.Diagnostics.Debug.WriteLine($"Unobserved Task Exception: {e.Exception.Message}");
+            e.SetObserved();
+        }
+
         private void ConfigureServices(IServiceCollection services)
         {
-            // Primary SQL Server Connection String (matching DANG / localhost)
-            string connectionString = "Server=DANG;Database=DormCareDB;User Id=sa;Password=123456;TrustServerCertificate=True;Encrypt=False;";
-            
+            string connectionString = GetWorkingConnectionString();
+
             services.AddDbContext<DormCareDbContext>(options =>
             {
                 options.UseSqlServer(connectionString, sqlOptions =>
                 {
                     sqlOptions.EnableRetryOnFailure(maxRetryCount: 3, maxRetryDelay: TimeSpan.FromSeconds(5), errorNumbersToAdd: null);
                 });
-            });
+            }, ServiceLifetime.Transient, ServiceLifetime.Transient);
 
             services.AddScoped<UserRepository>();
             services.AddScoped<StudentRepository>();
@@ -81,7 +117,39 @@ namespace DormCare.WPF
             services.AddTransient<StudentDashboardViewModel>();
         }
 
-        private async System.Threading.Tasks.Task TestDbConnectionAsync()
+        private string GetWorkingConnectionString()
+        {
+            string[] connectionStrings = new string[]
+            {
+                "Server=DANG;Database=DormCareDB;User Id=sa;Password=123456;TrustServerCertificate=True;Encrypt=False;Connect Timeout=3;",
+                "Server=.;Database=DormCareDB;User Id=sa;Password=123456;TrustServerCertificate=True;Encrypt=False;Connect Timeout=3;",
+                "Server=localhost;Database=DormCareDB;User Id=sa;Password=123456;TrustServerCertificate=True;Encrypt=False;Connect Timeout=3;",
+                "Server=.\\SQLEXPRESS;Database=DormCareDB;User Id=sa;Password=123456;TrustServerCertificate=True;Encrypt=False;Connect Timeout=3;",
+                "Server=.\\SQLEXPRESS;Database=DormCareDB;Trusted_Connection=True;TrustServerCertificate=True;Connect Timeout=3;",
+                "Server=.;Database=DormCareDB;Trusted_Connection=True;TrustServerCertificate=True;Connect Timeout=3;",
+                "Server=(localdb)\\mssqllocaldb;Database=DormCareDB;Trusted_Connection=True;TrustServerCertificate=True;Connect Timeout=3;"
+            };
+
+            foreach (var connStr in connectionStrings)
+            {
+                try
+                {
+                    using var conn = new SqlConnection(connStr);
+                    conn.Open();
+                    // Remove Connect Timeout=3 constraint for production use after connection verified
+                    return connStr.Replace(";Connect Timeout=3;", ";");
+                }
+                catch
+                {
+                    // Continue trying next connection string format
+                }
+            }
+
+            // Fallback default
+            return "Server=DANG;Database=DormCareDB;User Id=sa;Password=123456;TrustServerCertificate=True;Encrypt=False;";
+        }
+
+        private async Task TestDbConnectionAsync()
         {
             try
             {
@@ -136,7 +204,7 @@ namespace DormCare.WPF
                 {
                     Shutdown();
                 };
-                
+
                 loginWindow.Hide();
                 studentWindow.Show();
             }
