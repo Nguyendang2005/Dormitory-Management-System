@@ -103,7 +103,6 @@
 
                 <!-- Clear / Filter Action Buttons -->
                 <StackPanel Grid.Column="4" VerticalAlignment="Bottom" Orientation="Horizontal">
-                    <Button Content="⚠️ Chưa Thanh Toán" Style="{StaticResource SmallDangerButton}" Height="36" Padding="12,0" Command="{Binding FilterUnpaidCommand}" Margin="0,0,8,0"/>
                     <Button Content="❌ Xóa Lọc" Style="{StaticResource SecondaryButton}" Height="36" Command="{Binding ClearDateFilterCommand}"/>
                 </StackPanel>
             </Grid>
