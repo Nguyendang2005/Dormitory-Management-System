@@ -112,7 +112,6 @@ namespace DormCare.WPF
             services.AddTransient<OccupancyStatisticsViewModel>();
             services.AddTransient<StudentViewModel>(provider => new StudentViewModel(
                 provider.GetRequiredService<StudentService>(),
-                provider.GetRequiredService<DormCareDbContext>(),
                 provider.GetRequiredService<DialogService>(),
                 new User() // Dummy user for DI registration
             ));

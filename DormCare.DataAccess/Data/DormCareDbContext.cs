@@ -10,6 +10,10 @@ namespace DormCare.DataAccess.Data
         {
         }
 
+        public DormCareDbContext()
+        {
+        }
+
         public DbSet<User> Users { get; set; } = null!;
         public DbSet<Student> Students { get; set; } = null!;
         public DbSet<Building> Buildings { get; set; } = null!;
@@ -23,18 +27,6 @@ namespace DormCare.DataAccess.Data
         public DbSet<Notification> Notifications { get; set; } = null!;
         public DbSet<AuditLog> AuditLogs { get; set; } = null!;
 
-<<<<<<< HEAD
-=======
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            if (!optionsBuilder.IsConfigured)
-            {
-                // Real SQL Server Connection String specified by user
-                optionsBuilder.UseSqlServer("Server=.\\MSSQLSERVER01;Database=DormCareDB;User Id=sa;Password=123456;TrustServerCertificate=True;Encrypt=False;");
-            }
-        }
-
->>>>>>> origin/feature/student
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -118,19 +110,12 @@ namespace DormCare.DataAccess.Data
                       .OnDelete(DeleteBehavior.Restrict);
                 entity.HasOne(a => a.Bed)
                       .WithMany(b => b.RoomAssignments)
-<<<<<<< HEAD
                       .HasForeignKey(a => a.BedId)
                       .OnDelete(DeleteBehavior.Restrict);
                 entity.HasOne(a => a.Manager)
                       .WithMany()
                       .HasForeignKey(a => a.AssignedBy)
                       .IsRequired(false)
-=======
-                      .HasForeignKey(a => a.BedId);
-                entity.HasOne(a => a.Manager)
-                      .WithMany()
-                      .HasForeignKey(a => a.AssignedBy)
->>>>>>> origin/feature/student
                       .OnDelete(DeleteBehavior.Restrict);
             });
 
@@ -151,14 +136,11 @@ namespace DormCare.DataAccess.Data
             modelBuilder.Entity<Payment>(entity =>
             {
                 entity.HasKey(e => e.PaymentId);
-<<<<<<< HEAD
                 entity.HasIndex(e => e.PaymentCode).IsUnique();
                 entity.HasOne(p => p.Invoice)
                       .WithMany(i => i.Payments)
                       .HasForeignKey(p => p.InvoiceId)
                       .OnDelete(DeleteBehavior.Cascade);
-=======
->>>>>>> origin/feature/student
                 entity.HasOne(p => p.Receiver)
                       .WithMany()
                       .HasForeignKey(p => p.ReceivedBy)
@@ -168,7 +150,6 @@ namespace DormCare.DataAccess.Data
             modelBuilder.Entity<MaintenanceRequest>(entity =>
             {
                 entity.HasKey(e => e.RequestId);
-<<<<<<< HEAD
                 entity.HasIndex(e => e.RequestCode).IsUnique();
                 entity.HasOne(m => m.Student)
                       .WithMany(s => s.MaintenanceRequests)
@@ -182,11 +163,6 @@ namespace DormCare.DataAccess.Data
                       .WithMany()
                       .HasForeignKey(m => m.AssignedTo)
                       .IsRequired(false)
-=======
-                entity.HasOne(m => m.Assignee)
-                      .WithMany()
-                      .HasForeignKey(m => m.AssignedTo)
->>>>>>> origin/feature/student
                       .OnDelete(DeleteBehavior.Restrict);
             });
 
@@ -194,7 +170,7 @@ namespace DormCare.DataAccess.Data
             {
                 entity.HasKey(e => e.NotificationId);
                 entity.HasOne(n => n.User)
-                      .WithMany(u => u.Notifications)
+                      .WithMany()
                       .HasForeignKey(n => n.UserId)
                       .OnDelete(DeleteBehavior.Cascade);
             });

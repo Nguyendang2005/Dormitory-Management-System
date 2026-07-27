@@ -114,7 +114,6 @@ namespace DormCare.Business.Services
 
             var bedsDto = room.Beds.OrderBy(b => b.BedNumber).Select(b =>
             {
-<<<<<<< HEAD
                 var activeAssign = b.RoomAssignments.FirstOrDefault(ra => ra.Status == "Active");
                 return new BedDetailDto
                 {
@@ -132,7 +131,7 @@ namespace DormCare.Business.Services
                 RoomId = room.RoomId,
                 BuildingId = room.BuildingId,
                 BuildingCode = room.Building?.BuildingCode ?? string.Empty,
-                BuildingName = room.Building?.BuildingName ?? string.Empty,
+                BuildingName = BuildingService.SanitizeBuildingName(room.Building?.BuildingName),
                 RoomNumber = room.RoomNumber,
                 FloorNumber = room.FloorNumber,
                 RoomType = room.RoomType,
@@ -146,25 +145,6 @@ namespace DormCare.Business.Services
                 MaintenanceBeds = maintenance,
                 Beds = bedsDto
             };
-=======
-                RoomId = r.RoomId,
-                BuildingId = r.BuildingId,
-                BuildingName = r.Building != null ? r.Building.BuildingName : "N/A",
-                RoomNumber = r.RoomNumber,
-                FloorNumber = r.FloorNumber,
-                RoomType = r.RoomType,
-                Capacity = r.Capacity,
-                MonthlyRent = r.MonthlyRent,
-                GenderType = r.GenderType,
-                Status = r.Status,
-                Description = r.Description ?? string.Empty,
-                OccupiedBeds = r.Beds.Count(b => b.Status == "Occupied"),
-                AvailableBeds = r.Beds.Count(b => b.Status == "Available"),
-                ReservedBeds = r.Beds.Count(b => b.Status == "Reserved"),
-                MaintenanceBeds = r.Beds.Count(b => b.Status == "Maintenance"),
-                TotalBedsCreated = r.Beds.Count
-            });
->>>>>>> origin/main
         }
 
         public async Task<ServiceResult<Room>> AddRoomAsync(Room room)

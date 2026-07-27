@@ -201,15 +201,15 @@ namespace DormCare.WPF.ViewModels
             {
                 if (IsEditMode)
                 {
-                    var student = new Student
+                    var dto = new StudentDto
                     {
-                        StudentId = _originalStudentDto!.Id,
+                        Id = _originalStudentDto!.Id,
                         StudentCode = StudentCode.Trim(),
                         FullName = FullName.Trim(),
                         DateOfBirth = DateOfBirth,
                         Gender = SelectedGender,
                         Email = Email.Trim(),
-                        Phone = Phone.Trim(),
+                        PhoneNumber = Phone.Trim(),
                         Major = Major.Trim(),
                         ClassName = ClassName.Trim(),
                         Campus = Campus.Trim(),
@@ -219,7 +219,7 @@ namespace DormCare.WPF.ViewModels
                         Status = SelectedStatus
                     };
 
-                    var result = await _studentService.UpdateStudentAsync(student);
+                    var result = await _studentService.UpdateStudentAsync(dto);
                     IsBusy = false;
 
                     if (result.IsSuccess)
@@ -233,14 +233,14 @@ namespace DormCare.WPF.ViewModels
                 }
                 else
                 {
-                    var student = new Student
+                    var dto = new StudentDto
                     {
                         StudentCode = StudentCode.Trim(),
                         FullName = FullName.Trim(),
                         DateOfBirth = DateOfBirth,
                         Gender = SelectedGender,
                         Email = Email.Trim(),
-                        Phone = Phone.Trim(),
+                        PhoneNumber = Phone.Trim(),
                         Major = Major.Trim(),
                         ClassName = ClassName.Trim(),
                         Campus = Campus.Trim(),
@@ -250,7 +250,7 @@ namespace DormCare.WPF.ViewModels
                         Status = "Active"
                     };
 
-                    var result = await _studentService.AddStudentAsync(student);
+                    var result = await _studentService.CreateStudentAsync(dto);
                     IsBusy = false;
 
                     if (result.IsSuccess)

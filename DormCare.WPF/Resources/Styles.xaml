@@ -112,13 +112,8 @@
         <Setter Property="Padding" Value="10,4" />
         <Setter Property="FontSize" Value="12" />
     </Style>
-<<<<<<< HEAD
-
     <Style x:Key="SmallDangerButton" TargetType="Button" BasedOn="{StaticResource PrimaryButton}">
         <Setter Property="Background" Value="#B91C1C" />
-=======
-    <Style x:Key="SmallDangerButton" TargetType="Button" BasedOn="{StaticResource DangerButton}">
->>>>>>> origin/main
         <Setter Property="Padding" Value="10,4" />
         <Setter Property="FontSize" Value="12" />
     </Style>
@@ -393,7 +388,6 @@
         <Setter Property="BorderThickness" Value="0" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
         <Setter Property="Padding" Value="6,0" />
->>>>>>> origin/main
     </Style>
 
     <!-- Modern DataGrid Style -->

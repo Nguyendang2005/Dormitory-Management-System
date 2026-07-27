@@ -4,6 +4,7 @@
         xmlns:vm="clr-namespace:DormCare.WPF.ViewModels"
         xmlns:views="clr-namespace:DormCare.WPF.Views"
         xmlns:managerViews="clr-namespace:DormCare.WPF.Views.Manager"
+        xmlns:studentViews="clr-namespace:DormCare.WPF.Views.Student"
         xmlns:conv="clr-namespace:DormCare.WPF.Converters"
         Title="{Binding Title}" Height="850" Width="1360"
         WindowStartupLocation="CenterScreen"
@@ -11,20 +12,21 @@
 
     <Window.Resources>
         <conv:BoolToVisibilityConverter x:Key="BoolToVisConverter"/>
-<<<<<<< HEAD
-=======
 
-        <DataTemplate DataType="{x:Type vm:StudentDashboardViewModel}">
-            <studentViews:StudentDashboard/>
-        </DataTemplate>
         <DataTemplate DataType="{x:Type vm:BuildingViewModel}">
-            <managerViews:BuildingManagement/>
+            <managerViews:BuildingManagementView/>
         </DataTemplate>
         <DataTemplate DataType="{x:Type vm:RoomViewModel}">
-            <managerViews:RoomManagement/>
+            <managerViews:RoomManagementView/>
         </DataTemplate>
         <DataTemplate DataType="{x:Type vm:BedViewModel}">
-            <managerViews:BedManagement/>
+            <managerViews:BedManagementView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:AvailableRoomViewModel}">
+            <managerViews:AvailableRoomsView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:OccupancyStatisticsViewModel}">
+            <managerViews:OccupancyStatisticsView/>
         </DataTemplate>
         <DataTemplate DataType="{x:Type vm:StudentViewModel}">
             <managerViews:StudentManagement/>
@@ -38,13 +40,6 @@
         <DataTemplate DataType="{x:Type vm:MaintenanceViewModel}">
             <managerViews:MaintenanceManagement/>
         </DataTemplate>
-        <DataTemplate DataType="{x:Type vm:AvailableRoomViewModel}">
-            <managerViews:AvailableRoomsView/>
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type vm:OccupancyStatisticsViewModel}">
-            <managerViews:OccupancyStatisticsView/>
-        </DataTemplate>
->>>>>>> origin/feature/student
     </Window.Resources>
 
     <Grid Background="#F3F5F7">
