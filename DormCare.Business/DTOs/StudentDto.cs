@@ -16,5 +16,9 @@ namespace DormCare.Business.DTOs
         public string RoomNumber { get; set; } = "Chưa nhận phòng";
         public string BuildingName { get; set; } = "N/A";
         public string BedNumber { get; set; } = "N/A";
+
+        public string DisplayName => string.IsNullOrEmpty(RoomNumber) || RoomNumber == "Chưa nhận phòng"
+            ? FullName
+            : $"{FullName} — {RoomNumber}";
     }
 }

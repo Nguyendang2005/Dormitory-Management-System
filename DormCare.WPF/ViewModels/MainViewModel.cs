@@ -1,4 +1,6 @@
 using System.Windows.Input;
+using Microsoft.Extensions.DependencyInjection;
+using DormCare.DataAccess.Data;
 using DormCare.Business.Services;
 using DormCare.Domain.Entities;
 using DormCare.WPF.Commands;
@@ -110,7 +112,11 @@ namespace DormCare.WPF.ViewModels
             NavigateStudentsCommand = new RelayCommand(() =>
             {
                 ActiveTabName = "Students";
-                CurrentView = new StudentViewModel(_studentService);
+                CurrentView = new StudentViewModel(
+                    _studentService, 
+                    App.ServiceProvider.GetRequiredService<DormCareDbContext>(), 
+                    _dialogService, 
+                    CurrentUser);
             });
 
             NavigateApplicationsCommand = new RelayCommand(() =>

@@ -1,13 +1,14 @@
-using Microsoft.EntityFrameworkCore;
 using DormCare.Domain.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace DormCare.DataAccess.Data
 {
     public class DormCareDbContext : DbContext
     {
-        public DormCareDbContext() { }
-
-        public DormCareDbContext(DbContextOptions<DormCareDbContext> options) : base(options) { }
+        public DormCareDbContext(DbContextOptions<DormCareDbContext> options)
+            : base(options)
+        {
+        }
 
         public DbSet<User> Users { get; set; } = null!;
         public DbSet<Student> Students { get; set; } = null!;
@@ -21,15 +22,6 @@ namespace DormCare.DataAccess.Data
         public DbSet<MaintenanceRequest> MaintenanceRequests { get; set; } = null!;
         public DbSet<Notification> Notifications { get; set; } = null!;
         public DbSet<AuditLog> AuditLogs { get; set; } = null!;
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            if (!optionsBuilder.IsConfigured)
-            {
-                // Real SQL Server Connection String specified by user
-                optionsBuilder.UseSqlServer("Server=DANG;Database=DormCareDB;User Id=sa;Password=123456;TrustServerCertificate=True;Encrypt=False;");
-            }
-        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -89,6 +81,11 @@ namespace DormCare.DataAccess.Data
                       .WithMany(r => r.RoomApplications)
                       .HasForeignKey(a => a.RoomId)
                       .OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(a => a.PreferredBed)
+                      .WithMany(b => b.RoomApplications)
+                      .HasForeignKey(a => a.PreferredBedId)
+                      .IsRequired(false)
+                      .OnDelete(DeleteBehavior.Restrict);
                 entity.HasOne(a => a.Reviewer)
                       .WithMany()
                       .HasForeignKey(a => a.ReviewedBy)
@@ -121,18 +118,43 @@ namespace DormCare.DataAccess.Data
             modelBuilder.Entity<Invoice>(entity =>
             {
                 entity.HasKey(e => e.InvoiceId);
-                entity.Property(e => e.TotalAmount)
-                      .HasComputedColumnSql("RoomFee + ServiceFee + OtherFee - DiscountAmount", stored: true);
+                entity.HasIndex(e => e.InvoiceCode).IsUnique();
+                entity.HasOne(i => i.Student)
+                      .WithMany(s => s.Invoices)
+                      .HasForeignKey(i => i.StudentId)
+                      .OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(i => i.Room)
+                      .WithMany(r => r.Invoices)
+                      .HasForeignKey(i => i.RoomId)
+                      .OnDelete(DeleteBehavior.Restrict);
             });
 
             modelBuilder.Entity<Payment>(entity =>
             {
                 entity.HasKey(e => e.PaymentId);
+                entity.HasIndex(e => e.PaymentCode).IsUnique();
+                entity.HasOne(p => p.Invoice)
+                      .WithMany(i => i.Payments)
+                      .HasForeignKey(p => p.InvoiceId)
+                      .OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(p => p.Receiver)
+                      .WithMany()
+                      .HasForeignKey(p => p.ReceivedBy)
+                      .OnDelete(DeleteBehavior.Restrict);
             });
 
             modelBuilder.Entity<MaintenanceRequest>(entity =>
             {
                 entity.HasKey(e => e.RequestId);
+                entity.HasIndex(e => e.RequestCode).IsUnique();
+                entity.HasOne(m => m.Student)
+                      .WithMany(s => s.MaintenanceRequests)
+                      .HasForeignKey(m => m.StudentId)
+                      .OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(m => m.Room)
+                      .WithMany(r => r.MaintenanceRequests)
+                      .HasForeignKey(m => m.RoomId)
+                      .OnDelete(DeleteBehavior.Cascade);
                 entity.HasOne(m => m.Assignee)
                       .WithMany()
                       .HasForeignKey(m => m.AssignedTo)
@@ -143,11 +165,19 @@ namespace DormCare.DataAccess.Data
             modelBuilder.Entity<Notification>(entity =>
             {
                 entity.HasKey(e => e.NotificationId);
+                entity.HasOne(n => n.User)
+                      .WithMany(u => u.Notifications)
+                      .HasForeignKey(n => n.UserId)
+                      .OnDelete(DeleteBehavior.Cascade);
             });
 
             modelBuilder.Entity<AuditLog>(entity =>
             {
                 entity.HasKey(e => e.AuditLogId);
+                entity.HasOne(a => a.User)
+                      .WithMany()
+                      .HasForeignKey(a => a.UserId)
+                      .OnDelete(DeleteBehavior.SetNull);
             });
         }
     }

@@ -35,9 +35,11 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="2*"/>
                     <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Grid.Column="0" Margin="0,0,12,0">
+<<<<<<< HEAD
                     <TextBlock Text="Tìm kiếm đơn (Mã Đơn / Mã SV / Họ tên / Số phòng)" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,4"/>
                     <TextBox Style="{StaticResource SearchTextBox}" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"/>
                 </StackPanel>
@@ -49,11 +51,28 @@
                         <ComboBoxItem Content="Chờ duyệt (Pending)" Tag="Pending"/>
                         <ComboBoxItem Content="Đã duyệt (Approved)" Tag="Approved"/>
                         <ComboBoxItem Content="Từ chối (Rejected)" Tag="Rejected"/>
+=======
+                    <TextBlock Text="Tim kiem theo ma don, ma sinh vien, ho ten, so phong" FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,4"/>
+                    <TextBox Style="{StaticResource ModernTextBox}" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Margin="0,0,12,0">
+                    <TextBlock Text="Loc trang thai" FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,4"/>
+                    <ComboBox SelectedValue="{Binding SelectedStatusFilter, Mode=TwoWay}" SelectedValuePath="Tag" Style="{StaticResource ModernComboBox}">
+                        <ComboBoxItem Content="Tat ca trang thai" Tag="All" IsSelected="True"/>
+                        <ComboBoxItem Content="Cho duyet" Tag="Pending"/>
+                        <ComboBoxItem Content="Da duyet" Tag="Approved"/>
+                        <ComboBoxItem Content="Tu choi" Tag="Rejected"/>
+                        <ComboBoxItem Content="Da huy" Tag="Cancelled"/>
+>>>>>>> origin/main
                     </ComboBox>
                 </StackPanel>
+
+                <Button Grid.Column="2" Content="Dat lai" Style="{StaticResource SecondaryButton}" Command="{Binding ResetFiltersCommand}" VerticalAlignment="Bottom"/>
             </Grid>
         </Border>
 
+<<<<<<< HEAD
         <!-- DataGrid -->
         <Border Grid.Row="2" Style="{StaticResource CardBorder}">
             <DataGrid ItemsSource="{Binding Applications}" SelectedItem="{Binding SelectedApplication}" Style="{StaticResource ModernDataGrid}">
@@ -79,5 +98,92 @@
                 </DataGrid.Columns>
             </DataGrid>
         </Border>
+=======
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1.35*"/>
+                <ColumnDefinition Width="0.9*"/>
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0" Style="{StaticResource CardFrame}" Margin="0,0,12,0">
+                <DataGrid ItemsSource="{Binding Applications}" SelectedItem="{Binding SelectedApplication}" IsReadOnly="True">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Ma don" Binding="{Binding ApplicationCode}" Width="130" FontWeight="Bold"/>
+                        <DataGridTextColumn Header="Sinh vien" Binding="{Binding Student.FullName}" Width="160"/>
+                        <DataGridTextColumn Header="Ma SV" Binding="{Binding Student.StudentCode}" Width="95"/>
+                        <DataGridTextColumn Header="Phong" Binding="{Binding Room.RoomNumber}" Width="80"/>
+                        <DataGridTextColumn Header="Toa nha" Binding="{Binding Room.Building.BuildingName}" Width="130"/>
+                        <DataGridTextColumn Header="Giuong" Binding="{Binding PreferredBed.BedCode}" Width="100"/>
+                        <DataGridTextColumn Header="Ngay dang ky" Binding="{Binding ApplicationDate, StringFormat='{}{0:dd/MM/yyyy HH:mm}'}" Width="135"/>
+                        <DataGridTemplateColumn Header="Trang thai" Width="110">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Border Background="{Binding Status, Converter={StaticResource StatusColorConverter}}"
+                                            CornerRadius="8" Padding="8,3" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Status}" Foreground="White" FontWeight="Bold" FontSize="12"/>
+                                    </Border>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Border>
+
+            <Border Grid.Column="1" Style="{StaticResource CardFrame}" Margin="12,0,0,0">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <TextBlock Text="Chi tiet yeu cau" FontSize="16" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,14"/>
+
+                        <Grid Margin="0,0,0,10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="120"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Sinh vien:" Foreground="{StaticResource TextMutedBrush}"/>
+                            <TextBlock Grid.Column="1" Text="{Binding SelectedApplication.Student.FullName}" FontWeight="Bold"/>
+                        </Grid>
+                        <Grid Margin="0,0,0,10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="120"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Phong:" Foreground="{StaticResource TextMutedBrush}"/>
+                            <TextBlock Grid.Column="1" Text="{Binding SelectedApplication.Room.RoomNumber}" FontWeight="Bold"/>
+                        </Grid>
+                        <Grid Margin="0,0,0,10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="120"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Giuong mong muon:" Foreground="{StaticResource TextMutedBrush}"/>
+                            <TextBlock Grid.Column="1" Text="{Binding SelectedApplication.PreferredBed.BedCode, TargetNullValue='Chua chon'}"/>
+                        </Grid>
+                        <TextBlock Text="Ly do dang ky:" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,4"/>
+                        <TextBlock Text="{Binding SelectedApplication.Reason}" TextWrapping="Wrap" Margin="0,0,0,12"/>
+
+                        <TextBlock Text="Chon/xac nhan giuong con trong:" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,4"/>
+                        <ComboBox ItemsSource="{Binding AvailableBeds}"
+                                  SelectedItem="{Binding SelectedBed}"
+                                  DisplayMemberPath="BedCode"
+                                  Style="{StaticResource ModernComboBox}"
+                                  Margin="0,0,0,12"/>
+
+                        <TextBlock Text="Ghi chu duyet hoac ly do tu choi:" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,4"/>
+                        <TextBox Text="{Binding ReviewNote, UpdateSourceTrigger=PropertyChanged}"
+                                 Style="{StaticResource FormTextBox}"
+                                 Height="100"
+                                 TextWrapping="Wrap"
+                                 AcceptsReturn="True"
+                                 Margin="0,0,0,12"/>
+
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                            <Button Content="Duyet" Style="{StaticResource PrimaryButton}" Command="{Binding ApproveCommand}" Margin="0,0,8,0"/>
+                            <Button Content="Tu choi" Style="{StaticResource SmallDangerButton}" Command="{Binding RejectCommand}" Padding="16,10" FontSize="14"/>
+                        </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+        </Grid>
+>>>>>>> origin/main
     </Grid>
 </UserControl>

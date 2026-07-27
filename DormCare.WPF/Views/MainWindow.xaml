@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="clr-namespace:DormCare.WPF.ViewModels"
         xmlns:views="clr-namespace:DormCare.WPF.Views"
+        xmlns:managerViews="clr-namespace:DormCare.WPF.Views.Manager"
         xmlns:conv="clr-namespace:DormCare.WPF.Converters"
         Title="{Binding Title}" Height="850" Width="1360"
         WindowStartupLocation="CenterScreen"
@@ -18,7 +19,7 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <!-- Left Navigation Sidebar (Matching Mockup) -->
+        <!-- Left Navigation Sidebar -->
         <Border Grid.Column="0" Background="#131F28">
             <DockPanel Margin="16,20">
                 <!-- App Brand Header -->
@@ -100,7 +101,7 @@
 
         <!-- Right Main View Container -->
         <Grid Grid.Column="1" Margin="24">
-            <ContentControl Content="{Binding CurrentChildViewModel}"/>
+            <ContentControl Content="{Binding CurrentView}"/>
         </Grid>
     </Grid>
 </Window>

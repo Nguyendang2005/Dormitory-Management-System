@@ -39,6 +39,14 @@ namespace DormCare.Business.Services
             if (room == null)
                 return ServiceResult<InvoiceDto>.Failure("Không tìm thấy phòng đã chọn.");
 
+            DateTime billingMonth = new DateTime(dto.BillingMonth.Year, dto.BillingMonth.Month, 1);
+
+            var existingInvoices = await _invoiceRepository.FindAsync(i => i.StudentId == dto.StudentId && i.BillingMonth == billingMonth);
+            if (existingInvoices.Any())
+            {
+                return ServiceResult<InvoiceDto>.Failure($"Sinh viên {student.FullName} đã có hóa đơn cho tháng {billingMonth:MM/yyyy} rồi!");
+            }
+
             string invoiceCode = await _invoiceRepository.GenerateNextInvoiceCodeAsync();
             decimal totalCalculated = CalculateTotalFee(dto.RoomFee, dto.ElectricityFee, dto.WaterFee + dto.OtherFee, dto.DiscountAmount);
 
@@ -47,7 +55,7 @@ namespace DormCare.Business.Services
                 InvoiceCode = invoiceCode,
                 StudentId = dto.StudentId,
                 RoomId = dto.RoomId,
-                BillingMonth = new DateTime(dto.BillingMonth.Year, dto.BillingMonth.Month, 1),
+                BillingMonth = billingMonth,
                 RoomFee = dto.RoomFee,
                 ServiceFee = dto.ElectricityFee,
                 OtherFee = dto.WaterFee + dto.OtherFee,
@@ -59,8 +67,15 @@ namespace DormCare.Business.Services
                 CreatedAt = DateTime.UtcNow
             };
 
-            await _invoiceRepository.AddAsync(invoice);
-            await _invoiceRepository.SaveChangesAsync();
+            try
+            {
+                await _invoiceRepository.AddAsync(invoice);
+                await _invoiceRepository.SaveChangesAsync();
+            }
+            catch (Exception)
+            {
+                return ServiceResult<InvoiceDto>.Failure($"Lỗi lưu hóa đơn: Hóa đơn tháng {billingMonth:MM/yyyy} của sinh viên này đã tồn tại.");
+            }
 
             var createdInvoice = await _invoiceRepository.GetByIdWithDetailsAsync(invoice.InvoiceId);
             return ServiceResult<InvoiceDto>.Success(MapToDto(createdInvoice!), "Tạo hóa đơn thành công!");
@@ -68,20 +83,53 @@ namespace DormCare.Business.Services
 
         public async Task<IEnumerable<InvoiceDto>> GetAllInvoicesAsync()
         {
-            var invoices = await _invoiceRepository.GetInvoicesWithStudentAsync();
+            var invoices = (await _invoiceRepository.GetInvoicesWithStudentAsync()).ToList();
+            await SyncInvoiceStatusesAsync(invoices);
             return invoices.Select(MapToDto);
         }
 
         public async Task<IEnumerable<InvoiceDto>> GetUnpaidInvoicesAsync()
         {
-            var invoices = await _invoiceRepository.GetUnpaidInvoicesAsync();
+            var invoices = (await _invoiceRepository.GetUnpaidInvoicesAsync()).ToList();
+            await SyncInvoiceStatusesAsync(invoices);
             return invoices.Select(MapToDto);
         }
 
         public async Task<IEnumerable<InvoiceDto>> GetInvoicesByStudentIdAsync(int studentId)
         {
-            var invoices = await _invoiceRepository.GetInvoicesByStudentIdAsync(studentId);
+            var invoices = (await _invoiceRepository.GetInvoicesByStudentIdAsync(studentId)).ToList();
+            await SyncInvoiceStatusesAsync(invoices);
             return invoices.Select(MapToDto);
+        }
+
+        private async Task SyncInvoiceStatusesAsync(IEnumerable<Invoice> invoices)
+        {
+            bool hasChanges = false;
+            foreach (var i in invoices)
+            {
+                decimal totalPaid = i.Payments != null
+                    ? i.Payments.Where(p => p.Status == "Completed").Sum(p => p.Amount)
+                    : 0;
+
+                if (totalPaid >= i.TotalAmount && i.Status != "Paid")
+                {
+                    i.Status = "Paid";
+                    if (!i.PaidAt.HasValue) i.PaidAt = DateTime.UtcNow;
+                    await _invoiceRepository.UpdateAsync(i);
+                    hasChanges = true;
+                }
+                else if (totalPaid < i.TotalAmount && i.DueDate.Date < DateTime.Today.Date && i.Status != "Overdue" && i.Status != "Paid")
+                {
+                    i.Status = "Overdue";
+                    await _invoiceRepository.UpdateAsync(i);
+                    hasChanges = true;
+                }
+            }
+
+            if (hasChanges)
+            {
+                await _invoiceRepository.SaveChangesAsync();
+            }
         }
 
         public async Task<InvoiceDetailDto?> GetInvoiceDetailsAsync(int invoiceId)
@@ -150,11 +198,58 @@ namespace DormCare.Business.Services
             return ServiceResult<bool>.Success(true, "Xác nhận thanh toán hóa đơn thành công!");
         }
 
+        public async Task<ServiceResult<bool>> DeleteInvoiceAsync(int invoiceId)
+        {
+            var invoice = await _invoiceRepository.GetByIdWithDetailsAsync(invoiceId);
+            if (invoice == null)
+                return ServiceResult<bool>.Failure("Không tìm thấy hóa đơn cần xóa.");
+
+            if (invoice.Status.Equals("Paid", StringComparison.OrdinalIgnoreCase))
+            {
+                return ServiceResult<bool>.Failure("Không thể xóa hóa đơn đã thanh toán.");
+            }
+
+            if (invoice.Status.Equals("Overdue", StringComparison.OrdinalIgnoreCase))
+            {
+                return ServiceResult<bool>.Failure("Không thể xóa hóa đơn đang trong trạng thái quá hạn.");
+            }
+
+            if (invoice.Payments != null && invoice.Payments.Any())
+            {
+                return ServiceResult<bool>.Failure("Không thể xóa hóa đơn này vì đã có giao dịch thanh toán.");
+            }
+
+            try
+            {
+                await _invoiceRepository.DeleteAsync(invoice);
+                await _invoiceRepository.SaveChangesAsync();
+                return ServiceResult<bool>.Success(true, "Xóa hóa đơn thành công!");
+            }
+            catch (Exception)
+            {
+                return ServiceResult<bool>.Failure("Không thể xóa hóa đơn này vì đã có dữ liệu liên quan.");
+            }
+        }
+
         private static InvoiceDto MapToDto(Invoice i)
         {
             decimal totalPaid = i.Payments != null
                 ? i.Payments.Where(p => p.Status == "Completed").Sum(p => p.Amount)
                 : 0;
+
+            string status = i.Status;
+            if (totalPaid >= i.TotalAmount)
+            {
+                status = "Paid";
+            }
+            else if (totalPaid > 0)
+            {
+                status = "PartiallyPaid";
+            }
+            else if (i.DueDate.Date < DateTime.Today.Date)
+            {
+                status = "Overdue";
+            }
 
             return new InvoiceDto
             {
@@ -177,7 +272,7 @@ namespace DormCare.Business.Services
                 TotalPaid = totalPaid,
                 DueDate = i.DueDate,
                 PaidAt = i.PaidAt,
-                Status = i.Status,
+                Status = status,
                 Note = i.Note ?? string.Empty,
                 CreatedAt = i.CreatedAt
             };

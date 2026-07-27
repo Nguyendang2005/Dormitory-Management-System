@@ -5,6 +5,7 @@
 
     <UserControl.Resources>
         <conv:StatusToColorConverter x:Key="StatusColorConverter"/>
+        <conv:BoolToVisibilityConverter x:Key="BoolToVisConverter"/>
     </UserControl.Resources>
 
     <Grid>
@@ -20,7 +21,9 @@
             <DockPanel>
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
                     <Button Content="➕ Tạo Hóa Đơn" Style="{StaticResource PrimaryButton}" Command="{Binding CreateInvoiceCommand}" Margin="0,0,8,0"/>
+                    <Button Content="👁️ Xem Chi Tiết" Style="{StaticResource SecondaryButton}" Command="{Binding ViewInvoiceDetailsCommand}" Margin="0,0,8,0"/>
                     <Button Content="💳 Cập Nhật Thanh Toán" Style="{StaticResource SecondaryButton}" Command="{Binding UpdatePaymentCommand}" Margin="0,0,8,0"/>
+                    <Button Content="🗑️ Xóa Hóa Đơn" Style="{StaticResource SmallDangerButton}" Command="{Binding DeleteInvoiceCommand}" Height="36" Padding="12,0" Margin="0,0,8,0"/>
                     <Button Content="🔄 Tải Lại Dữ Liệu" Style="{StaticResource SecondaryButton}" Command="{Binding RefreshCommand}"/>
                 </StackPanel>
                 <StackPanel VerticalAlignment="Center">
@@ -58,16 +61,25 @@
             </Border>
         </UniformGrid>
 
+<<<<<<< HEAD
         <!-- Search & Filter Bar -->
         <Border Grid.Row="2" Style="{StaticResource CardBorder}" Margin="0,0,0,16" Padding="16,12">
+=======
+        <!-- Date Range & Status Filter Bar -->
+        <Border Grid.Row="2" Style="{StaticResource CardFrame}" Margin="0,0,0,16" Padding="16,12">
+>>>>>>> origin/main
             <Grid>
                 <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="2*"/>
                     <ColumnDefinition Width="1.2*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
+                <!-- From Date -->
                 <StackPanel Grid.Column="0" Margin="0,0,12,0">
+<<<<<<< HEAD
                     <TextBlock Text="Tìm kiếm hóa đơn (Mã HĐ / Họ tên / Mã SV / Phòng)" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,4"/>
                     <TextBox Style="{StaticResource SearchTextBox}" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"/>
                 </StackPanel>
@@ -75,18 +87,46 @@
                 <StackPanel Grid.Column="1" Margin="0,0,12,0">
                     <TextBlock Text="Trạng Thái Thanh Toán" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,4"/>
                     <ComboBox SelectedValue="{Binding SelectedStatusFilter, Mode=TwoWay}" SelectedValuePath="Tag" Style="{StaticResource ModernComboBox}" Height="36">
+=======
+                    <TextBlock Text="📅 Từ tháng/năm" FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,4"/>
+                    <DatePicker SelectedDate="{Binding FromDate, Mode=TwoWay}" Width="140" Height="38"/>
+                </StackPanel>
+
+                <!-- To Date -->
+                <StackPanel Grid.Column="1" Margin="0,0,16,0">
+                    <TextBlock Text="📅 Đến tháng/năm" FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,4"/>
+                    <DatePicker SelectedDate="{Binding ToDate, Mode=TwoWay}" Width="140" Height="38"/>
+                </StackPanel>
+
+                <!-- Keyword Search -->
+                <StackPanel Grid.Column="2" Margin="0,0,16,0">
+                    <TextBlock Text="🔍 Tìm kiếm (Mã HĐ / Họ tên / Mã SV / Phòng)" FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,4"/>
+                    <TextBox Style="{StaticResource ModernTextBox}" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"/>
+                </StackPanel>
+
+                <!-- Status Filter -->
+                <StackPanel Grid.Column="3" Margin="0,0,16,0">
+                    <TextBlock Text="⚡ Trạng Thái" FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,4"/>
+                    <ComboBox SelectedValue="{Binding SelectedStatusFilter, Mode=TwoWay}" SelectedValuePath="Tag" Height="38" Background="#0F172A" Foreground="White" BorderBrush="{StaticResource CardBorderBrush}">
+>>>>>>> origin/main
                         <ComboBoxItem Content="Tất cả trạng thái" Tag="All" IsSelected="True"/>
                         <ComboBoxItem Content="⚠️ Chưa thanh toán (Unpaid)" Tag="Unpaid"/>
-                        <ComboBoxItem Content="⏳ Thanh toán một phần (PartiallyPaid)" Tag="PartiallyPaid"/>
+                        <ComboBoxItem Content="⏳ Thanh toán 1 phần (PartiallyPaid)" Tag="PartiallyPaid"/>
                         <ComboBoxItem Content="✅ Đã thanh toán (Paid)" Tag="Paid"/>
                         <ComboBoxItem Content="🛑 Quá hạn (Overdue)" Tag="Overdue"/>
                     </ComboBox>
                 </StackPanel>
 
+<<<<<<< HEAD
                 <!-- Quick Filter Buttons -->
                 <StackPanel Grid.Column="2" VerticalAlignment="Bottom" Orientation="Horizontal">
                     <Button Content="⚠️ Lọc Chưa Thanh Toán" Style="{StaticResource SmallDangerButton}" Height="36" Padding="12,0" Command="{Binding FilterUnpaidCommand}" Margin="0,0,8,0"/>
                     <Button Content="📋 Tất Cả" Style="{StaticResource SmallSecondaryButton}" Height="36" Padding="12,0" Command="{Binding FilterAllCommand}"/>
+=======
+                <!-- Clear Button -->
+                <StackPanel Grid.Column="4" VerticalAlignment="Bottom">
+                    <Button Content="❌ Xóa Lọc" Style="{StaticResource SecondaryButton}" Height="38" Command="{Binding ClearDateFilterCommand}"/>
+>>>>>>> origin/main
                 </StackPanel>
             </Grid>
         </Border>

@@ -110,7 +110,12 @@ namespace DormCare.WPF
             services.AddTransient<BedViewModel>();
             services.AddTransient<AvailableRoomViewModel>();
             services.AddTransient<OccupancyStatisticsViewModel>();
-            services.AddTransient<StudentViewModel>();
+            services.AddTransient<StudentViewModel>(provider => new StudentViewModel(
+                provider.GetRequiredService<StudentService>(),
+                provider.GetRequiredService<DormCareDbContext>(),
+                provider.GetRequiredService<DialogService>(),
+                new User() // Dummy user for DI registration
+            ));
             services.AddTransient<ApplicationViewModel>();
             services.AddTransient<InvoiceViewModel>();
             services.AddTransient<MaintenanceViewModel>();
@@ -190,6 +195,11 @@ namespace DormCare.WPF
             {
                 var studentVm = new StudentDashboardViewModel(
                     ServiceProvider.GetRequiredService<StudentService>(),
+                    ServiceProvider.GetRequiredService<RoomService>(),
+                    ServiceProvider.GetRequiredService<ApplicationService>(),
+                    ServiceProvider.GetRequiredService<InvoiceService>(),
+                    ServiceProvider.GetRequiredService<PaymentService>(),
+                    ServiceProvider.GetRequiredService<DialogService>(),
                     user
                 );
                 var studentWindow = new Window

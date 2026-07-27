@@ -17,7 +17,9 @@ namespace DormCare.Business.DTOs
 
         public int OccupiedBeds { get; set; }
         public int AvailableBeds { get; set; }
+        public int ReservedBeds { get; set; }
         public int MaintenanceBeds { get; set; }
+        public int TotalBedsCreated { get; set; }
         public int TotalBeds => Capacity;
 
         public string OccupancySummary => $"{OccupiedBeds}/{Capacity} đang ở";

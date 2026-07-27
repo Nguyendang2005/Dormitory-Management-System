@@ -52,7 +52,7 @@ namespace DormCare.WPF.ViewModels
             {
                 if (SetProperty(ref _selectedRoom, value))
                 {
-                    if (_selectedRoom != null && RoomFee == 0)
+                    if (_selectedRoom != null)
                     {
                         RoomFee = _selectedRoom.MonthlyRent;
                     }
@@ -210,6 +210,13 @@ namespace DormCare.WPF.ViewModels
             }
         }
 
+        private DateTime _minDueDate = DateTime.Today;
+        public DateTime MinDueDate
+        {
+            get => _minDueDate;
+            set => SetProperty(ref _minDueDate, value);
+        }
+
         private async Task ExecuteSaveAsync()
         {
             if (SelectedStudent == null)
@@ -220,13 +227,19 @@ namespace DormCare.WPF.ViewModels
 
             if (SelectedRoom == null)
             {
-                ErrorMessage = "Vui lòng chọn phòng.";
+                ErrorMessage = "Sinh viên được chọn chưa được phân phòng ký túc xá.";
                 return;
             }
 
             if (Month < 1 || Month > 12)
             {
                 ErrorMessage = "Tháng không hợp lệ (1 - 12).";
+                return;
+            }
+
+            if (DueDate.Date < DateTime.Today)
+            {
+                ErrorMessage = "Hạn thanh toán không được nằm trong quá khứ (phải từ ngày hôm nay trở đi).";
                 return;
             }
 

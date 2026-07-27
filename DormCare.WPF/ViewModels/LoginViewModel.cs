@@ -184,16 +184,24 @@ namespace DormCare.WPF.ViewModels
             SuccessMessage = string.Empty;
             IsBusy = true;
 
-            var result = await _authService.LoginAsync(Username, Password);
-            IsBusy = false;
+            try
+            {
+                var result = await _authService.LoginAsync(Username, Password);
+                IsBusy = false;
 
-            if (result.IsSuccess && result.Data != null)
-            {
-                LoginSuccess?.Invoke(result.Data);
+                if (result.IsSuccess && result.Data != null)
+                {
+                    LoginSuccess?.Invoke(result.Data);
+                }
+                else
+                {
+                    ErrorMessage = result.Message;
+                }
             }
-            else
+            catch (System.Exception ex)
             {
-                ErrorMessage = result.Message;
+                IsBusy = false;
+                ErrorMessage = $"Lỗi kết nối cơ sở dữ liệu: {ex.Message}";
             }
         }
 
