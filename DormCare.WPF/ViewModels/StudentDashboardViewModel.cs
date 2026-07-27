@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using System.Linq;
 using System.Windows.Input;
 using DormCare.Business.Services;
 using DormCare.Domain.Entities;
@@ -267,6 +268,12 @@ namespace DormCare.WPF.ViewModels
                 await LoadStudentDataAsync();
             }
 
+            if (StudentHasActiveAssignment())
+            {
+                _dialogService.ShowError(BuildActiveAssignmentMessage());
+                return;
+            }
+
             ActiveTabName = "RoomRegistration";
             RoomRegistrationViewModel = new StudentRoomRegistrationViewModel(
                 _roomService,
@@ -281,6 +288,22 @@ namespace DormCare.WPF.ViewModels
             IsInvoiceVisible = false;
             IsMaintenanceVisible = false;
             IsNotificationsVisible = false;
+        }
+
+        private bool StudentHasActiveAssignment()
+        {
+            return Student?.RoomAssignments.Any(a => a.Status == "Active") == true;
+        }
+
+        private string BuildActiveAssignmentMessage()
+        {
+            var activeAssignment = Student?.RoomAssignments.FirstOrDefault(a => a.Status == "Active");
+            if (activeAssignment?.Room != null && activeAssignment.Bed != null)
+            {
+                return $"Ban hien dang o phong {activeAssignment.Room.RoomNumber}, giuong {activeAssignment.Bed.BedCode}. Vui long check-out phong hien tai truoc khi dang ky phong moi.";
+            }
+
+            return "Ban dang co phong trong ky tuc xa. Vui long hoan thanh thu tuc tra phong truoc khi dang ky phong moi.";
         }
 
         private async Task LoadNotificationsCountAsync()

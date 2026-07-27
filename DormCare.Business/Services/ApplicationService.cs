@@ -86,8 +86,14 @@ namespace DormCare.Business.Services
             }
 
             var activeAssignment = await _context.RoomAssignments
-                .AnyAsync(a => a.StudentId == studentId && a.Status == "Active");
-            if (activeAssignment)
+                .Include(a => a.Room)
+                .Include(a => a.Bed)
+                .FirstOrDefaultAsync(a => a.StudentId == studentId && a.Status == "Active");
+            if (activeAssignment != null)
+            {
+                return ServiceResult<bool>.Failure(BuildActiveAssignmentMessage(activeAssignment));
+            }
+            if (activeAssignment != null)
             {
                 return ServiceResult<bool>.Failure("Sinh viên đã có chỗ ở đang hoạt động.");
             }
@@ -178,6 +184,15 @@ namespace DormCare.Business.Services
                     if (app.Status != "Pending")
                     {
                         return ServiceResult<bool>.Failure("Đơn đăng ký đã được xử lý trước đó.");
+                    }
+
+                    var activeAssignmentForApproval = await _context.RoomAssignments
+                        .Include(a => a.Room)
+                        .Include(a => a.Bed)
+                        .FirstOrDefaultAsync(a => a.StudentId == app.StudentId && a.Status == "Active");
+                    if (activeAssignmentForApproval != null)
+                    {
+                        return ServiceResult<bool>.Failure(BuildActiveAssignmentMessage(activeAssignmentForApproval));
                     }
 
                     var hasActiveAssignment = await _context.RoomAssignments
@@ -335,6 +350,16 @@ namespace DormCare.Business.Services
         private static string BuildApplicationCode(int studentId, DateTime dt)
         {
             return $"APP-{studentId}-{dt:yyyyMMdd-HHmmss}";
+        }
+
+        private static string BuildActiveAssignmentMessage(RoomAssignment assignment)
+        {
+            if (assignment.Room != null && assignment.Bed != null)
+            {
+                return $"Ban hien dang o phong {assignment.Room.RoomNumber}, giuong {assignment.Bed.BedCode}. Vui long check-out phong hien tai truoc khi dang ky phong moi.";
+            }
+
+            return "Ban dang co phong trong ky tuc xa. Vui long hoan thanh thu tuc tra phong truoc khi dang ky phong moi.";
         }
     }
 }
