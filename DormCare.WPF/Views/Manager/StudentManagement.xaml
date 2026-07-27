@@ -27,25 +27,44 @@
             </StackPanel>
         </DockPanel>
 
-        <!-- Search + Room Filter -->
+        <!-- Advanced Search & Multi-Filter Bar -->
         <Border Grid.Row="1" Style="{StaticResource CardFrame}" Margin="0,0,0,16" Padding="16,12">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="2*"/>
-                    <ColumnDefinition Width="16"/>
-                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="1.2*"/>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <StackPanel Grid.Column="0">
+                <!-- Search Keyword -->
+                <StackPanel Grid.Column="0" Margin="0,0,12,0">
                     <TextBlock Text="🔍 Tìm kiếm sinh viên (Họ tên / Mã SV / Email / SĐT / Ngành / Lớp)" FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,4"/>
                     <TextBox Style="{StaticResource ModernTextBox}" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"/>
                 </StackPanel>
 
-                <StackPanel Grid.Column="2">
-                    <TextBlock Text="🚪 Xem sinh viên theo phòng" FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,4"/>
-                    <ComboBox ItemsSource="{Binding RoomFilterOptions}"
-                              SelectedItem="{Binding SelectedRoomFilter}"
-                              FontSize="14" Padding="10,8"/>
+                <!-- Room Filter -->
+                <StackPanel Grid.Column="1" Margin="0,0,12,0">
+                    <TextBlock Text="🚪 Phòng ở" FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,4"/>
+                    <ComboBox ItemsSource="{Binding RoomFilterOptions}" SelectedItem="{Binding SelectedRoomFilter}" Style="{StaticResource ModernComboBox}"/>
+                </StackPanel>
+
+                <!-- Gender Filter -->
+                <StackPanel Grid.Column="2" Margin="0,0,12,0">
+                    <TextBlock Text="👤 Giới tính" FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,4"/>
+                    <ComboBox ItemsSource="{Binding GenderFilterOptions}" SelectedItem="{Binding SelectedGenderFilter}" Style="{StaticResource ModernComboBox}"/>
+                </StackPanel>
+
+                <!-- Status Filter -->
+                <StackPanel Grid.Column="3" Margin="0,0,12,0">
+                    <TextBlock Text="⚡ Trạng thái" FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,4"/>
+                    <ComboBox ItemsSource="{Binding StatusFilterOptions}" SelectedItem="{Binding SelectedStatusFilter}" Style="{StaticResource ModernComboBox}"/>
+                </StackPanel>
+
+                <!-- Clear Filters Button -->
+                <StackPanel Grid.Column="4" VerticalAlignment="Bottom">
+                    <Button Content="❌ Xóa Lọc" Style="{StaticResource SecondaryButton}" Height="38" Command="{Binding ClearFiltersCommand}"/>
                 </StackPanel>
             </Grid>
         </Border>

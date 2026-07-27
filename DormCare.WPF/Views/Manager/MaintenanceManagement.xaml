@@ -30,28 +30,45 @@
             </DockPanel>
         </Border>
 
-        <!-- Search & Filter Bar -->
+        <!-- Search & Multi-Filter Bar -->
         <Border Grid.Row="1" Style="{StaticResource CardBorder}" Margin="0,0,0,16" Padding="16,12">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="2*"/>
                     <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Grid.Column="0" Margin="0,0,12,0">
-                    <TextBlock Text="Tìm kiếm yêu cầu (Tiêu đề / Mã YC / Sinh viên / Phòng)" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,4"/>
+                    <TextBlock Text="🔍 Tìm kiếm yêu cầu (Tiêu đề / Mã YC / Sinh viên / Phòng)" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,4"/>
                     <TextBox Style="{StaticResource SearchTextBox}" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"/>
                 </StackPanel>
 
-                <StackPanel Grid.Column="1">
-                    <TextBlock Text="Lọc Mức Độ Ưu Tiên" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,4"/>
-                    <ComboBox SelectedValue="{Binding SelectedPriorityFilter, Mode=TwoWay}" SelectedValuePath="Tag" Style="{StaticResource ModernComboBox}" Height="36">
+                <StackPanel Grid.Column="1" Margin="0,0,12,0">
+                    <TextBlock Text="⚡ Mức Độ Ưu Tiên" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,4"/>
+                    <ComboBox SelectedValue="{Binding SelectedPriorityFilter, Mode=TwoWay}" SelectedValuePath="Tag" Style="{StaticResource ModernComboBox}">
                         <ComboBoxItem Content="Tất cả mức độ" Tag="All" IsSelected="True"/>
                         <ComboBoxItem Content="Thấp (Low)" Tag="Low"/>
                         <ComboBoxItem Content="Trung bình (Medium)" Tag="Medium"/>
                         <ComboBoxItem Content="Cao (High)" Tag="High"/>
                         <ComboBoxItem Content="Khẩn cấp (Critical)" Tag="Critical"/>
                     </ComboBox>
+                </StackPanel>
+
+                <StackPanel Grid.Column="2" Margin="0,0,12,0">
+                    <TextBlock Text="📌 Trạng Thái Xử Lý" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,4"/>
+                    <ComboBox SelectedValue="{Binding SelectedStatusFilter, Mode=TwoWay}" SelectedValuePath="Tag" Style="{StaticResource ModernComboBox}">
+                        <ComboBoxItem Content="Tất cả trạng thái" Tag="All" IsSelected="True"/>
+                        <ComboBoxItem Content="⏳ Chờ xử lý (Pending)" Tag="Pending"/>
+                        <ComboBoxItem Content="⚙️ Đang sửa (InProgress)" Tag="InProgress"/>
+                        <ComboBoxItem Content="✅ Hoàn thành (Completed)" Tag="Completed"/>
+                        <ComboBoxItem Content="❌ Đã hủy (Cancelled)" Tag="Cancelled"/>
+                    </ComboBox>
+                </StackPanel>
+
+                <StackPanel Grid.Column="3" VerticalAlignment="Bottom">
+                    <Button Content="❌ Xóa Lọc" Style="{StaticResource SecondaryButton}" Height="36" Command="{Binding ClearFiltersCommand}"/>
                 </StackPanel>
             </Grid>
         </Border>

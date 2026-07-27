@@ -70,6 +70,34 @@ namespace DormCare.WPF.ViewModels
             }
         }
 
+        public ObservableCollection<string> GenderFilterOptions { get; } = new() { "Tất cả giới tính", "Nam", "Nữ" };
+        private string _selectedGenderFilter = "Tất cả giới tính";
+        public string SelectedGenderFilter
+        {
+            get => _selectedGenderFilter;
+            set
+            {
+                if (SetProperty(ref _selectedGenderFilter, value))
+                {
+                    ApplyFilters();
+                }
+            }
+        }
+
+        public ObservableCollection<string> StatusFilterOptions { get; } = new() { "Tất cả trạng thái", "Active", "Graduated", "Suspended", "CheckedOut" };
+        private string _selectedStatusFilter = "Tất cả trạng thái";
+        public string SelectedStatusFilter
+        {
+            get => _selectedStatusFilter;
+            set
+            {
+                if (SetProperty(ref _selectedStatusFilter, value))
+                {
+                    ApplyFilters();
+                }
+            }
+        }
+
         private string _summaryText = string.Empty;
         public string SummaryText
         {
@@ -78,6 +106,7 @@ namespace DormCare.WPF.ViewModels
         }
 
         public ICommand RefreshCommand { get; }
+        public ICommand ClearFiltersCommand { get; }
         public ICommand AddCommand { get; }
         public ICommand EditCommand { get; }
         public ICommand DeleteCommand { get; }
@@ -92,6 +121,7 @@ namespace DormCare.WPF.ViewModels
             _currentUser = currentUser;
 
             RefreshCommand = new AsyncRelayCommand(LoadStudentsAsync);
+            ClearFiltersCommand = new RelayCommand(_ => ExecuteClearFilters());
             AddCommand = new RelayCommand(ExecuteAdd);
             EditCommand = new RelayCommand(ExecuteEdit, () => SelectedStudent != null);
             DeleteCommand = new AsyncRelayCommand(ExecuteDeleteAsync, () => SelectedStudent != null);
@@ -99,6 +129,14 @@ namespace DormCare.WPF.ViewModels
             CheckOutCommand = new AsyncRelayCommand(ExecuteCheckOutAsync, () => SelectedStudent is { HasRoom: true });
 
             _ = LoadStudentsAsync();
+        }
+
+        private void ExecuteClearFilters()
+        {
+            SearchText = string.Empty;
+            SelectedRoomFilter = FilterAll;
+            SelectedGenderFilter = "Tất cả giới tính";
+            SelectedStatusFilter = "Tất cả trạng thái";
         }
 
         public async Task LoadStudentsAsync()
@@ -163,6 +201,16 @@ namespace DormCare.WPF.ViewModels
             else if (SelectedRoomFilter != FilterAll)
             {
                 query = query.Where(s => s.RoomDisplay == SelectedRoomFilter);
+            }
+
+            if (SelectedGenderFilter != "Tất cả giới tính")
+            {
+                query = query.Where(s => string.Equals(s.Gender, SelectedGenderFilter, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (SelectedStatusFilter != "Tất cả trạng thái")
+            {
+                query = query.Where(s => string.Equals(s.Status, SelectedStatusFilter, StringComparison.OrdinalIgnoreCase));
             }
 
             Students = new ObservableCollection<StudentDto>(query);
