@@ -12,13 +12,13 @@
     <!-- Header Card Style -->
     <Style x:Key="HeaderCard" TargetType="Border">
         <Setter Property="Background" Value="#FFFFFF" />
-        <Setter Property="BorderBrush" Value="#E2E8F0" />
+        <Setter Property="BorderBrush" Value="#CBD5E1" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="CornerRadius" Value="14" />
         <Setter Property="Padding" Value="24,18" />
         <Setter Property="Effect">
             <Setter.Value>
-                <DropShadowEffect BlurRadius="12" Color="#0F172A" Opacity="0.04" ShadowDepth="2"/>
+                <DropShadowEffect BlurRadius="14" Color="#0F172A" Opacity="0.08" ShadowDepth="3"/>
             </Setter.Value>
         </Setter>
     </Style>
@@ -26,13 +26,13 @@
     <!-- Metric Summary Card Style -->
     <Style x:Key="MetricCard" TargetType="Border">
         <Setter Property="Background" Value="#FFFFFF" />
-        <Setter Property="BorderBrush" Value="#E2E8F0" />
+        <Setter Property="BorderBrush" Value="#CBD5E1" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="CornerRadius" Value="12" />
         <Setter Property="Padding" Value="18,14" />
         <Setter Property="Effect">
             <Setter.Value>
-                <DropShadowEffect BlurRadius="8" Color="#0F172A" Opacity="0.03" ShadowDepth="1"/>
+                <DropShadowEffect BlurRadius="10" Color="#0F172A" Opacity="0.07" ShadowDepth="2"/>
             </Setter.Value>
         </Setter>
     </Style>
@@ -40,13 +40,13 @@
     <!-- Card Frame Style -->
     <Style x:Key="CardFrame" TargetType="Border">
         <Setter Property="Background" Value="#FFFFFF" />
-        <Setter Property="BorderBrush" Value="#E2E8F0" />
+        <Setter Property="BorderBrush" Value="#CBD5E1" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="CornerRadius" Value="14" />
         <Setter Property="Padding" Value="20" />
         <Setter Property="Effect">
             <Setter.Value>
-                <DropShadowEffect BlurRadius="12" Color="#0F172A" Opacity="0.04" ShadowDepth="2"/>
+                <DropShadowEffect BlurRadius="14" Color="#0F172A" Opacity="0.08" ShadowDepth="3"/>
             </Setter.Value>
         </Setter>
     </Style>
