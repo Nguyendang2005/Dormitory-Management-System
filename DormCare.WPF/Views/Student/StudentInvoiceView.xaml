@@ -1,0 +1,206 @@
+<UserControl x:Class="DormCare.WPF.Views.Student.StudentInvoiceView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:conv="clr-namespace:DormCare.WPF.Converters">
+
+    <UserControl.Resources>
+        <conv:StatusToColorConverter x:Key="StatusColorConverter"/>
+        <conv:BoolToVisibilityConverter x:Key="BoolToVisConverter"/>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- 1. Header Banner & Student Profile Status -->
+        <Border Grid.Row="0" Style="{StaticResource HeaderCard}" Margin="0,0,0,16" Padding="20">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Left">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="👋 Xin chào, " FontSize="22" FontWeight="Bold" Foreground="{StaticResource KinpakuGoldBrush}"/>
+                        <TextBlock Text="{Binding StudentFullName}" FontSize="22" FontWeight="Bold" Foreground="White"/>
+                    </StackPanel>
+                    <TextBlock Text="{Binding StudentRoomInfo}" FontSize="13" Foreground="{StaticResource TextMutedBrush}" Margin="0,4,0,0"/>
+                </StackPanel>
+
+                <StackPanel DockPanel.Dock="Right" VerticalAlignment="Center" HorizontalAlignment="Right">
+                    <!-- Debt Status Badge -->
+                    <Border Background="#1E293B" BorderBrush="{StaticResource CardBorderBrush}" BorderThickness="1" CornerRadius="20" Padding="16,8">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Ellipse Width="12" Height="12" Margin="0,0,8,0">
+                                <Ellipse.Style>
+                                    <Style TargetType="Ellipse">
+                                        <Setter Property="Fill" Value="#10B981"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding HasUnpaidInvoices}" Value="True">
+                                                <Setter Property="Fill" Value="#EF4444"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Ellipse.Style>
+                            </Ellipse>
+
+                            <TextBlock FontSize="14" FontWeight="Bold">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Text" Value="🟢 Không có nợ (Đã hoàn tất thanh toán)"/>
+                                        <Setter Property="Foreground" Value="#10B981"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding HasUnpaidInvoices}" Value="True">
+                                                <Setter Property="Text" Value="{Binding UnpaidAmountSum, StringFormat='🔴 Còn nợ: {0:N0} VNĐ'}"/>
+                                                <Setter Property="Foreground" Value="#EF4444"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <!-- 2. Notification / Alert Message Banner -->
+        <Border Grid.Row="1" CornerRadius="8" Padding="14,10" Margin="0,0,0,16">
+            <Border.Style>
+                <Style TargetType="Border">
+                    <Setter Property="Background" Value="#1E10B981"/>
+                    <Setter Property="BorderBrush" Value="#10B981"/>
+                    <Setter Property="BorderThickness" Value="1"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding HasUnpaidInvoices}" Value="True">
+                            <Setter Property="Background" Value="#33EF4444"/>
+                            <Setter Property="BorderBrush" Value="#EF4444"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <TextBlock Text="{Binding StatusAlertText}" FontSize="13" FontWeight="SemiBold" Foreground="White" TextWrapping="Wrap"/>
+            </StackPanel>
+        </Border>
+
+        <!-- 3. Stat Cards Summary -->
+        <UniformGrid Grid.Row="2" Columns="4" Margin="0,0,0,16">
+            <Border Style="{StaticResource CardFrame}" Margin="0,0,8,0" Padding="16,12">
+                <StackPanel>
+                    <TextBlock Text="📊 TỔNG HÓA ĐƠN" FontSize="11" FontWeight="Bold" Foreground="{StaticResource TextMutedBrush}"/>
+                    <TextBlock Text="{Binding TotalAmountSum, StringFormat='{}{0:N0} VNĐ'}" FontSize="20" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,4,0,0"/>
+                </StackPanel>
+            </Border>
+            <Border Style="{StaticResource CardFrame}" Margin="4,0,4,0" Padding="16,12">
+                <StackPanel>
+                    <TextBlock Text="🟢 ĐÃ THANH TOÁN" FontSize="11" FontWeight="Bold" Foreground="{StaticResource TextMutedBrush}"/>
+                    <TextBlock Text="{Binding PaidAmountSum, StringFormat='{}{0:N0} VNĐ'}" FontSize="20" FontWeight="Bold" Foreground="{StaticResource SuccessBrush}" Margin="0,4,0,0"/>
+                </StackPanel>
+            </Border>
+            <Border Style="{StaticResource CardFrame}" Margin="4,0,4,0" Padding="16,12">
+                <StackPanel>
+                    <TextBlock Text="🔴 CÒN PHẢI TRẢ" FontSize="11" FontWeight="Bold" Foreground="{StaticResource TextMutedBrush}"/>
+                    <TextBlock Text="{Binding UnpaidAmountSum, StringFormat='{}{0:N0} VNĐ'}" FontSize="20" FontWeight="Bold" Foreground="#EF4444" Margin="0,4,0,0"/>
+                </StackPanel>
+            </Border>
+            <Border Style="{StaticResource CardFrame}" Margin="8,0,0,0" Padding="16,12">
+                <StackPanel>
+                    <TextBlock Text="⏰ HẠN THU GẦN NHẤT" FontSize="11" FontWeight="Bold" Foreground="{StaticResource TextMutedBrush}"/>
+                    <TextBlock Text="{Binding NearestDueDate}" FontSize="20" FontWeight="Bold" Foreground="{StaticResource KinpakuGoldBrush}" Margin="0,4,0,0"/>
+                </StackPanel>
+            </Border>
+        </UniformGrid>
+
+        <!-- 4. Date Range & Status Filter Bar -->
+        <Border Grid.Row="3" Style="{StaticResource CardFrame}" Margin="0,0,0,16" Padding="16,12">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="1.5*"/>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- From Month/Year -->
+                <StackPanel Grid.Column="0" Margin="0,0,12,0">
+                    <TextBlock Text="📅 Từ tháng/năm" FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,4"/>
+                    <DatePicker SelectedDate="{Binding FromDate, Mode=TwoWay}" Width="140" Height="38"/>
+                </StackPanel>
+
+                <!-- To Month/Year -->
+                <StackPanel Grid.Column="1" Margin="0,0,16,0">
+                    <TextBlock Text="📅 Đến tháng/năm" FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,4"/>
+                    <DatePicker SelectedDate="{Binding ToDate, Mode=TwoWay}" Width="140" Height="38"/>
+                </StackPanel>
+
+                <!-- Keyword Search -->
+                <StackPanel Grid.Column="2" Margin="0,0,16,0">
+                    <TextBlock Text="🔍 Mã HĐ / Từ khóa" FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,4"/>
+                    <TextBox Style="{StaticResource ModernTextBox}" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"/>
+                </StackPanel>
+
+                <!-- Status Filter -->
+                <StackPanel Grid.Column="3" Margin="0,0,16,0">
+                    <TextBlock Text="⚡ Trạng Thái" FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,4"/>
+                    <ComboBox SelectedValue="{Binding SelectedStatusFilter, Mode=TwoWay}" SelectedValuePath="Tag" Height="38" Background="#0F172A" Foreground="White" BorderBrush="{StaticResource CardBorderBrush}">
+                        <ComboBoxItem Content="Tất cả trạng thái" Tag="All" IsSelected="True"/>
+                        <ComboBoxItem Content="⚠️ Chưa thanh toán" Tag="Unpaid"/>
+                        <ComboBoxItem Content="⏳ Thanh toán 1 phần" Tag="PartiallyPaid"/>
+                        <ComboBoxItem Content="✅ Đã thanh toán" Tag="Paid"/>
+                        <ComboBoxItem Content="🛑 Quá hạn" Tag="Overdue"/>
+                    </ComboBox>
+                </StackPanel>
+
+                <!-- Action Buttons -->
+                <StackPanel Grid.Column="4" Orientation="Horizontal" VerticalAlignment="Bottom">
+                    <Button Content="❌ Xóa Lọc" Style="{StaticResource SecondaryButton}" Height="38" Command="{Binding ClearDateFilterCommand}" Margin="0,0,8,0"/>
+                    <Button Content="🔄 Tải lại" Style="{StaticResource PrimaryButton}" Height="38" Command="{Binding RefreshCommand}"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- 5. Invoice List DataGrid -->
+        <Border Grid.Row="4" Style="{StaticResource CardFrame}">
+            <DataGrid ItemsSource="{Binding Invoices}" SelectedItem="{Binding SelectedInvoice}" AutoGenerateColumns="False" IsReadOnly="True" Style="{StaticResource ModernDataGrid}">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Mã HĐ" Binding="{Binding InvoiceCode}" Width="120" FontWeight="Bold"/>
+                    <DataGridTextColumn Header="Kỳ Thu" Binding="{Binding BillingMonth, StringFormat='Tháng {0}'}" Width="110" FontWeight="SemiBold"/>
+                    <DataGridTextColumn Header="Tiền Phòng" Binding="{Binding RoomFee, StringFormat='{}{0:N0}'}" Width="110"/>
+                    <DataGridTextColumn Header="Tiền Điện" Binding="{Binding ElectricityFee, StringFormat='{}{0:N0}'}" Width="95"/>
+                    <DataGridTextColumn Header="Nước &amp; Khác" Binding="{Binding WaterFee, StringFormat='{}{0:N0}'}" Width="105"/>
+                    <DataGridTextColumn Header="Chiết Khấu" Binding="{Binding DiscountAmount, StringFormat='-{0:N0}'}" Width="95" Foreground="#EF4444"/>
+                    <DataGridTextColumn Header="Tổng Tiền" Binding="{Binding TotalAmount, StringFormat='{}{0:N0}'}" Width="115" FontWeight="Bold" Foreground="{StaticResource KinpakuGoldBrush}"/>
+                    <DataGridTextColumn Header="Đã Nộp" Binding="{Binding TotalPaid, StringFormat='{}{0:N0}'}" Width="110" Foreground="{StaticResource SuccessBrush}"/>
+                    <DataGridTextColumn Header="Còn Nợ" Binding="{Binding RemainingBalance, StringFormat='{}{0:N0}'}" Width="110" FontWeight="Bold" Foreground="#F59E0B"/>
+                    <DataGridTextColumn Header="Hạn Thu" Binding="{Binding DueDate, StringFormat='{}{0:dd/MM/yyyy}'}" Width="105"/>
+
+                    <!-- Status Column -->
+                    <DataGridTemplateColumn Header="Trạng Thái" Width="120">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Border Background="{Binding Status, Converter={StaticResource StatusColorConverter}}" CornerRadius="12" Padding="8,4" HorizontalAlignment="Center">
+                                    <TextBlock Text="{Binding Status}" Foreground="White" FontSize="11" FontWeight="Bold"/>
+                                </Border>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <!-- Actions Column -->
+                    <DataGridTemplateColumn Header="Thao Tác" Width="*">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <Button Content="👁️ Chi Tiết" Style="{StaticResource SmallSecondaryButton}" Command="{Binding DataContext.ViewInvoiceDetailsCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" Margin="0,0,6,0"/>
+                                    <Button Content="💳 Thanh Toán" Style="{StaticResource SmallPrimaryButton}" Command="{Binding DataContext.UpdatePaymentCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
+    </Grid>
+</UserControl>

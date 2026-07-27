@@ -1,9 +1,10 @@
 <UserControl x:Class="DormCare.WPF.Views.Student.StudentDashboard"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:conv="clr-namespace:DormCare.WPF.Converters">
+             xmlns:conv="clr-namespace:DormCare.WPF.Converters"
+             xmlns:studentViews="clr-namespace:DormCare.WPF.Views.Student">
     <UserControl.Resources>
-        <conv:StatusToColorConverter x:Key="StatusColorConverter"/>
+        <conv:BoolToVisibilityConverter x:Key="BoolToVisConverter"/>
     </UserControl.Resources>
 
     <Grid>
@@ -13,72 +14,93 @@
         </Grid.RowDefinitions>
 
         <!-- Header -->
-        <StackPanel Grid.Row="0" Margin="0,0,0,24">
-            <TextBlock Text="Trang Chủ Sinh Viên" FontSize="26" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}"/>
-            <TextBlock Text="Thông tin cá nhân &amp; tình trạng chỗ ở ký túc xá" FontSize="14" Foreground="{StaticResource TextMutedBrush}" Margin="0,4,0,0"/>
-        </StackPanel>
+        <Border Grid.Row="0" Style="{StaticResource HeaderCard}" Margin="0,0,0,16">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Left" VerticalAlignment="Center">
+                    <TextBlock Text="🎓 CỔNG THÔNG TIN SINH VIÊN KÝ TÚC XÁ" FontSize="20" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}"/>
+                    <TextBlock Text="Thông tin cá nhân, đăng ký phòng và xem hóa đơn KTX" FontSize="13" Foreground="{StaticResource TextMutedBrush}" Margin="0,4,0,0"/>
+                </StackPanel>
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button Content="👤 Thông tin cá nhân" Style="{StaticResource SecondaryButton}" Command="{Binding NavigateProfileCommand}" Margin="0,0,8,0"/>
+                    <Button Content="📝 Đăng ký phòng" Style="{StaticResource SecondaryButton}" Command="{Binding NavigateRoomRegistrationCommand}" Margin="0,0,8,0"/>
+                    <Button Content="💳 Hóa Đơn &amp; Thanh Toán" Style="{StaticResource PrimaryButton}" Command="{Binding NavigateInvoiceCommand}" Margin="0,0,8,0"/>
+                    <Button Content="🚪 Đăng Xuất" Style="{StaticResource SmallDangerButton}" Height="36" Padding="12,0" Command="{Binding LogoutCommand}" ToolTip="Đăng xuất khỏi hệ thống"/>
+                </StackPanel>
+            </DockPanel>
+        </Border>
 
         <Grid Grid.Row="1">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="1*"/>
-                <ColumnDefinition Width="1.2*"/>
-            </Grid.ColumnDefinitions>
+            <Grid Visibility="{Binding IsProfileVisible, Converter={StaticResource BoolToVisConverter}}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1.2*"/>
+                </Grid.ColumnDefinitions>
 
-            <!-- Personal Info Card -->
-            <Border Grid.Column="0" Style="{StaticResource CardFrame}" Margin="0,0,12,0">
-                <StackPanel>
-                    <TextBlock Text="👤 THÔNG TIN SINH VIÊN" FontSize="16" FontWeight="Bold" Foreground="{StaticResource PrimaryHoverBrush}" Margin="0,0,0,16"/>
+                <!-- Personal Info Card -->
+                <Border Grid.Column="0" Style="{StaticResource CardBorder}" Margin="0,0,8,0">
+                    <StackPanel>
+                        <TextBlock Text="👤 THÔNG TIN SINH VIÊN" FontSize="15" FontWeight="Bold" Foreground="{StaticResource PrimaryBrush}" Margin="0,0,0,16"/>
 
-                    <Grid Margin="0,0,0,12">
-                        <TextBlock Text="Mã Sinh Viên:" Foreground="{StaticResource TextMutedBrush}"/>
-                        <TextBlock Text="{Binding Student.StudentCode}" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Right"/>
-                    </Grid>
-                    <Grid Margin="0,0,0,12">
-                        <TextBlock Text="Họ và Tên:" Foreground="{StaticResource TextMutedBrush}"/>
-                        <TextBlock Text="{Binding Student.User.FullName}" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Right"/>
-                    </Grid>
-                    <Grid Margin="0,0,0,12">
-                        <TextBlock Text="Ngành Học:" Foreground="{StaticResource TextMutedBrush}"/>
-                        <TextBlock Text="{Binding Student.Major}" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Right"/>
-                    </Grid>
-                    <Grid Margin="0,0,0,12">
-                        <TextBlock Text="Lớp Biến Chế:" Foreground="{StaticResource TextMutedBrush}"/>
-                        <TextBlock Text="{Binding Student.ClassName}" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Right"/>
-                    </Grid>
-                    <Grid Margin="0,0,0,12">
-                        <TextBlock Text="Số Điện Thoại:" Foreground="{StaticResource TextMutedBrush}"/>
-                        <TextBlock Text="{Binding Student.User.PhoneNumber}" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Right"/>
-                    </Grid>
-                    <Grid Margin="0,0,0,12">
-                        <TextBlock Text="Email Liên Hệ:" Foreground="{StaticResource TextMutedBrush}"/>
-                        <TextBlock Text="{Binding Student.User.Email}" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Right"/>
-                    </Grid>
-                </StackPanel>
-            </Border>
+                        <Grid Margin="0,0,0,12">
+                            <TextBlock Text="Mã Sinh Viên:" Foreground="{StaticResource TextMutedBrush}"/>
+                            <TextBlock Text="{Binding Student.StudentCode}" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Right"/>
+                        </Grid>
+                        <Grid Margin="0,0,0,12">
+                            <TextBlock Text="Họ và Tên:" Foreground="{StaticResource TextMutedBrush}"/>
+                            <TextBlock Text="{Binding Student.FullName}" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Right"/>
+                        </Grid>
+                        <Grid Margin="0,0,0,12">
+                            <TextBlock Text="Giới Tính:" Foreground="{StaticResource TextMutedBrush}"/>
+                            <TextBlock Text="{Binding Student.Gender}" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Right"/>
+                        </Grid>
+                        <Grid Margin="0,0,0,12">
+                            <TextBlock Text="Ngành Học:" Foreground="{StaticResource TextMutedBrush}"/>
+                            <TextBlock Text="{Binding Student.Major}" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Right"/>
+                        </Grid>
+                        <Grid Margin="0,0,0,12">
+                            <TextBlock Text="Lớp Sinh Hoạt:" Foreground="{StaticResource TextMutedBrush}"/>
+                            <TextBlock Text="{Binding Student.ClassName}" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Right"/>
+                        </Grid>
+                        <Grid Margin="0,0,0,12">
+                            <TextBlock Text="Số Điện Thoại:" Foreground="{StaticResource TextMutedBrush}"/>
+                            <TextBlock Text="{Binding Student.Phone}" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Right"/>
+                        </Grid>
+                        <Grid Margin="0,0,0,12">
+                            <TextBlock Text="Email Liên Hệ:" Foreground="{StaticResource TextMutedBrush}"/>
+                            <TextBlock Text="{Binding Student.Email}" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Right"/>
+                        </Grid>
+                    </StackPanel>
+                </Border>
 
-            <!-- Current Bed / Room Card -->
-            <Border Grid.Column="1" Style="{StaticResource CardFrame}" Margin="12,0,0,0">
-                <StackPanel>
-                    <TextBlock Text="🛏️ THÔNG TIN CHỖ Ở HIỆN TẠI" FontSize="16" FontWeight="Bold" Foreground="{StaticResource PrimaryHoverBrush}" Margin="0,0,0,16"/>
+                <!-- Current Bed / Room Card -->
+                <Border Grid.Column="1" Style="{StaticResource CardBorder}" Margin="8,0,0,0">
+                    <StackPanel>
+                        <TextBlock Text="🛏️ THÔNG TIN CHỖ Ở HIỆN TẠI" FontSize="15" FontWeight="Bold" Foreground="{StaticResource PrimaryBrush}" Margin="0,0,0,16"/>
+                        <TextBlock Text="Nếu chưa có phòng, hãy mở Đăng ký phòng để chọn phòng và gửi yêu cầu." Foreground="{StaticResource TextMutedBrush}" TextWrapping="Wrap" Margin="0,0,0,16"/>
 
-                    <Grid Margin="0,0,0,12">
-                        <TextBlock Text="Khu / Tòa Nhà:" Foreground="{StaticResource TextMutedBrush}"/>
-                        <TextBlock Text="{Binding Student.CurrentBed.Room.Building.Name, TargetNullValue='Chưa nhận phòng', FallbackValue='Chưa nhận phòng'}" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Right"/>
-                    </Grid>
-                    <Grid Margin="0,0,0,12">
-                        <TextBlock Text="Số Phòng:" Foreground="{StaticResource TextMutedBrush}"/>
-                        <TextBlock Text="{Binding Student.CurrentBed.Room.RoomNumber, TargetNullValue='N/A', FallbackValue='N/A'}" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Right"/>
-                    </Grid>
-                    <Grid Margin="0,0,0,12">
-                        <TextBlock Text="Số Giường:" Foreground="{StaticResource TextMutedBrush}"/>
-                        <TextBlock Text="{Binding Student.CurrentBed.BedNumber, TargetNullValue='N/A', FallbackValue='N/A'}" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Right"/>
-                    </Grid>
-                    <Grid Margin="0,0,0,12">
-                        <TextBlock Text="Giá Thuê / Tháng:" Foreground="{StaticResource TextMutedBrush}"/>
-                        <TextBlock Text="{Binding Student.CurrentBed.Room.PricePerMonth, StringFormat='{}{0:N0} VNĐ', TargetNullValue='0 VNĐ', FallbackValue='0 VNĐ'}" FontWeight="Bold" Foreground="{StaticResource SuccessBrush}" HorizontalAlignment="Right"/>
-                    </Grid>
-                </StackPanel>
-            </Border>
+                        <DataGrid ItemsSource="{Binding Student.RoomAssignments}" Style="{StaticResource ModernDataGrid}" Height="260">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Trạng Thái" Binding="{Binding Status}" Width="100"/>
+                                <DataGridTextColumn Header="Phòng" Binding="{Binding Room.RoomNumber}" Width="90"/>
+                                <DataGridTextColumn Header="Tòa Nhà" Binding="{Binding Room.Building.BuildingName}" Width="160"/>
+                                <DataGridTextColumn Header="Giường" Binding="{Binding Bed.BedCode}" Width="120"/>
+                                <DataGridTextColumn Header="Ngày Bắt Đầu" Binding="{Binding StartDate, StringFormat='{}{0:dd/MM/yyyy}'}" Width="120"/>
+                                <DataGridTextColumn Header="Ghi Chú" Binding="{Binding Note}" Width="*"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <!-- Room Registration Tab -->
+            <Grid Visibility="{Binding IsRoomRegistrationVisible, Converter={StaticResource BoolToVisConverter}}">
+                <ContentControl Content="{Binding RoomRegistrationViewModel}"/>
+            </Grid>
+
+            <!-- Invoice Tab -->
+            <Grid Visibility="{Binding IsInvoiceVisible, Converter={StaticResource BoolToVisConverter}}">
+                <studentViews:StudentInvoiceView DataContext="{Binding InvoiceViewModel}"/>
+            </Grid>
         </Grid>
     </Grid>
 </UserControl>

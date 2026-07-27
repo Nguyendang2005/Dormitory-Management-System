@@ -1,0 +1,147 @@
+<Window x:Class="DormCare.WPF.Views.Manager.BuildingWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:conv="clr-namespace:DormCare.WPF.Converters"
+        Title="{Binding WindowTitle}" Height="580" Width="520"
+        WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
+        Background="#FFFFFF" Foreground="#0F172A">
+
+    <Window.Resources>
+        <conv:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+    </Window.Resources>
+
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Border Grid.Row="0" Margin="0,0,0,16" Padding="0,0,0,12" BorderBrush="#E2E8F0" BorderThickness="0,0,0,1">
+            <DockPanel>
+                <Border Width="40" Height="40" CornerRadius="10" Background="#F0F9FF" BorderBrush="#BAE6FD" BorderThickness="1" Margin="0,0,12,0" DockPanel.Dock="Left">
+                    <TextBlock Text="{Binding HeaderIcon}" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Border>
+                <StackPanel VerticalAlignment="Center">
+                    <TextBlock Text="{Binding WindowTitle}" FontSize="18" FontWeight="Bold" Foreground="#0F172A"/>
+                    <TextBlock Text="{Binding WindowSubtitle}" FontSize="12" Foreground="#64748B" Margin="0,2,0,0"/>
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <!-- Content Scroll -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <!-- Error Banner -->
+                <Border Background="#FEF2F2" BorderBrush="#FCA5A5" BorderThickness="1" CornerRadius="8" Padding="12" Margin="0,0,0,16"
+                        Visibility="{Binding ErrorMessage, Converter={StaticResource StringToVisibilityConverter}, FallbackValue=Collapsed}">
+                    <DockPanel>
+                        <TextBlock Text="⚠️ " FontSize="14" VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding ErrorMessage}" Foreground="#DC2626" FontWeight="SemiBold" TextWrapping="Wrap" VerticalAlignment="Center"/>
+                    </DockPanel>
+                </Border>
+
+                <!-- Building Code -->
+                <StackPanel Margin="0,0,0,14">
+                    <DockPanel Margin="0,0,0,6">
+                        <TextBlock Text="Mã Tòa Nhà (*)" FontSize="12" FontWeight="Bold" Foreground="#334155"/>
+                        <TextBlock Text="{Binding BuildingCodeHint}" FontSize="11" Foreground="#64748B" HorizontalAlignment="Right"/>
+                    </DockPanel>
+                    <TextBox Text="{Binding BuildingCode, UpdateSourceTrigger=PropertyChanged}" 
+                             IsReadOnly="{Binding IsEditMode}"
+                             Background="#F8FAFC" Foreground="#0F172A" BorderBrush="#CBD5E1" BorderThickness="1" 
+                             Height="38" Padding="10,0" VerticalContentAlignment="Center" FontSize="13">
+                        <TextBox.Resources>
+                            <Style TargetType="Border">
+                                <Setter Property="CornerRadius" Value="6"/>
+                            </Style>
+                        </TextBox.Resources>
+                    </TextBox>
+                    <TextBlock Text="Chỉ gồm chữ cái (A-Z, a-z), số (0-9) và dấu '-' (Ví dụ: A, A-01, D01)" FontSize="11" Foreground="#64748B" Margin="2,4,0,0"/>
+                </StackPanel>
+
+                <!-- Building Name -->
+                <StackPanel Margin="0,0,0,14">
+                    <TextBlock Text="Tên Tòa Nhà (*)" FontSize="12" FontWeight="Bold" Foreground="#334155" Margin="0,0,0,6"/>
+                    <TextBox Text="{Binding BuildingName, UpdateSourceTrigger=PropertyChanged}" 
+                             Background="#F8FAFC" Foreground="#0F172A" BorderBrush="#CBD5E1" BorderThickness="1" 
+                             Height="38" Padding="10,0" VerticalContentAlignment="Center" FontSize="13">
+                        <TextBox.Resources>
+                            <Style TargetType="Border">
+                                <Setter Property="CornerRadius" Value="6"/>
+                            </Style>
+                        </TextBox.Resources>
+                    </TextBox>
+                </StackPanel>
+
+                <!-- Address -->
+                <StackPanel Margin="0,0,0,14">
+                    <TextBlock Text="Địa Chỉ (*)" FontSize="12" FontWeight="Bold" Foreground="#334155" Margin="0,0,0,6"/>
+                    <TextBox Text="{Binding Address, UpdateSourceTrigger=PropertyChanged}" 
+                             Background="#F8FAFC" Foreground="#0F172A" BorderBrush="#CBD5E1" BorderThickness="1" 
+                             Height="38" Padding="10,0" VerticalContentAlignment="Center" FontSize="13">
+                        <TextBox.Resources>
+                            <Style TargetType="Border">
+                                <Setter Property="CornerRadius" Value="6"/>
+                            </Style>
+                        </TextBox.Resources>
+                    </TextBox>
+                </StackPanel>
+
+                <!-- Number of Floors & Status Grid -->
+                <Grid Margin="0,0,0,14">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1*"/>
+                        <ColumnDefinition Width="16"/>
+                        <ColumnDefinition Width="1*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="Số Tầng (*)" FontSize="12" FontWeight="Bold" Foreground="#334155" Margin="0,0,0,6"/>
+                        <TextBox Text="{Binding NumberOfFloorsText, UpdateSourceTrigger=PropertyChanged}" 
+                                 Background="#F8FAFC" Foreground="#0F172A" BorderBrush="#CBD5E1" BorderThickness="1" 
+                                 Height="38" Padding="10,0" VerticalContentAlignment="Center" FontSize="13">
+                            <TextBox.Resources>
+                                <Style TargetType="Border">
+                                    <Setter Property="CornerRadius" Value="6"/>
+                                </Style>
+                            </TextBox.Resources>
+                        </TextBox>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="Trạng Thái" FontSize="12" FontWeight="Bold" Foreground="#334155" Margin="0,0,0,6"/>
+                        <ComboBox ItemsSource="{Binding StatusOptions}" SelectedItem="{Binding SelectedStatus}" Style="{StaticResource ModernComboBox}" Height="38" Background="#F8FAFC" Foreground="#0F172A" BorderBrush="#CBD5E1"/>
+                    </StackPanel>
+                </Grid>
+
+                <!-- Description with Character Counter -->
+                <StackPanel Margin="0,0,0,14">
+                    <DockPanel Margin="0,0,0,6">
+                        <TextBlock Text="Mô Tả" FontSize="12" FontWeight="Bold" Foreground="#334155"/>
+                        <TextBlock Text="{Binding DescriptionCounterText}" FontSize="12" FontWeight="Bold" Foreground="{Binding DescriptionCounterColor}" HorizontalAlignment="Right"/>
+                    </DockPanel>
+                    <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}" 
+                             Background="#F8FAFC" Foreground="#0F172A" BorderBrush="#CBD5E1" BorderThickness="1" 
+                             Height="75" Padding="10" TextWrapping="Wrap" AcceptsReturn="True" FontSize="13">
+                        <TextBox.Resources>
+                            <Style TargetType="Border">
+                                <Setter Property="CornerRadius" Value="6"/>
+                            </Style>
+                        </TextBox.Resources>
+                    </TextBox>
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Actions -->
+        <Border Grid.Row="2" Margin="0,12,0,0" Padding="0,12,0,0" BorderBrush="#E2E8F0" BorderThickness="0,1,0,0">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="Hủy" Command="{Binding CancelCommand}" Style="{StaticResource SecondaryButton}" Width="95" Height="38" Margin="0,0,10,0"/>
+                <Button Content="{Binding SubmitButtonText}" Command="{Binding SaveCommand}" Style="{StaticResource PrimaryButton}" Width="140" Height="38"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>

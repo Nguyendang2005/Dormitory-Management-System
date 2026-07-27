@@ -99,7 +99,21 @@ namespace DormCare.WPF.ViewModels
             }
         }
 
+        private string _selectedStatusFilter = "All";
+        public string SelectedStatusFilter
+        {
+            get => _selectedStatusFilter;
+            set
+            {
+                if (SetProperty(ref _selectedStatusFilter, value))
+                {
+                    ApplyFilters();
+                }
+            }
+        }
+
         public ICommand RefreshCommand { get; }
+        public ICommand ClearFiltersCommand { get; }
         public ICommand CreateRequestCommand { get; }
         public ICommand CompleteRequestCommand { get; }
         public ICommand SetPriorityCommand { get; }
@@ -114,6 +128,7 @@ namespace DormCare.WPF.ViewModels
             _currentUser = currentUser;
 
             RefreshCommand = new AsyncRelayCommand(LoadRequestsAsync);
+            ClearFiltersCommand = new RelayCommand(_ => ExecuteClearFilters());
             CreateRequestCommand = new AsyncRelayCommand(ExecuteCreateRequestAsync);
             CompleteRequestCommand = new AsyncRelayCommand(ExecuteCompleteRequestAsync, () => SelectedRequest != null);
             SetPriorityCommand = new AsyncRelayCommand(ExecuteSetPriorityAsync, (_) => SelectedRequest != null);
@@ -121,6 +136,13 @@ namespace DormCare.WPF.ViewModels
             MarkInProgressCommand = new AsyncRelayCommand(ExecuteMarkInProgressAsync, () => SelectedRequest != null);
 
             _ = LoadRequestsAsync();
+        }
+
+        private void ExecuteClearFilters()
+        {
+            SearchText = string.Empty;
+            SelectedPriorityFilter = "All";
+            SelectedStatusFilter = "All";
         }
 
         public async Task LoadRequestsAsync()
@@ -155,6 +177,11 @@ namespace DormCare.WPF.ViewModels
             if (!string.IsNullOrWhiteSpace(SelectedPriorityFilter) && SelectedPriorityFilter != "All")
             {
                 query = query.Where(m => m.Priority.Equals(SelectedPriorityFilter, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (!string.IsNullOrWhiteSpace(SelectedStatusFilter) && SelectedStatusFilter != "All")
+            {
+                query = query.Where(m => m.Status.Equals(SelectedStatusFilter, StringComparison.OrdinalIgnoreCase));
             }
 
             Requests = new ObservableCollection<MaintenanceRequest>(query);

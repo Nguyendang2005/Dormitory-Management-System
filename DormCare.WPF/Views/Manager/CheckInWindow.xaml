@@ -1,0 +1,39 @@
+<Window x:Class="DormCare.WPF.Views.Manager.CheckInWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:conv="clr-namespace:DormCare.WPF.Converters"
+        Title="{Binding Title}"
+        Width="560" SizeToContent="Height"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize"
+        Style="{StaticResource ModernWindow}">
+
+    <Window.Resources>
+        <conv:BoolToVisibilityConverter x:Key="BoolToVisConverter"/>
+    </Window.Resources>
+
+    <Border Padding="28">
+        <StackPanel>
+            <TextBlock Text="{Binding HeaderText}" FontSize="22" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}"/>
+            <TextBlock Text="{Binding SubHeaderText}" FontSize="13" Foreground="{StaticResource TextMutedBrush}" Margin="0,4,0,18" TextWrapping="Wrap"/>
+
+            <Border Style="{StaticResource ValidationBanner}" Visibility="{Binding HasError, Converter={StaticResource BoolToVisConverter}}">
+                <TextBlock Text="{Binding ErrorMessage}" Foreground="#FCA5A5" FontSize="13" TextWrapping="Wrap"/>
+            </Border>
+
+            <TextBlock Text="Giường trống *" FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,4"/>
+            <ComboBox ItemsSource="{Binding AvailableBeds}"
+                      SelectedItem="{Binding SelectedBed}"
+                      DisplayMemberPath="Display"
+                      FontSize="14" Padding="10,8" Margin="0,0,0,14"/>
+
+            <TextBlock Text="Ghi chú" FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,4"/>
+            <TextBox Style="{StaticResource ModernTextBox}" Text="{Binding Note, UpdateSourceTrigger=PropertyChanged}" MinHeight="60" TextWrapping="Wrap" AcceptsReturn="True"/>
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+                <Button Content="Hủy" Style="{StaticResource SmallDangerButton}" Command="{Binding CancelCommand}" MinWidth="110" Margin="0,0,12,0"/>
+                <Button Content="✅ Xác Nhận Check-in" Style="{StaticResource PrimaryButton}" Command="{Binding ConfirmCommand}" MinWidth="180"/>
+            </StackPanel>
+        </StackPanel>
+    </Border>
+</Window>

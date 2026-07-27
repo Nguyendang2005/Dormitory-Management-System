@@ -15,67 +15,134 @@
         </Grid.RowDefinitions>
 
         <!-- Header -->
-        <DockPanel Grid.Row="0" Margin="0,0,0,16">
-            <StackPanel DockPanel.Dock="Left">
-                <TextBlock Text="Đơn Đăng Ký Phòng" FontSize="26" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}"/>
-                <TextBlock Text="Xét duyệt đơn xin ở ký túc xá của sinh viên" FontSize="14" Foreground="{StaticResource TextMutedBrush}" Margin="0,4,0,0"/>
-            </StackPanel>
-            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
-                <Button Content="✅ Duyệt Đơn" Style="{StaticResource PrimaryButton}" Command="{Binding ApproveCommand}" Margin="0,0,10,0"/>
-                <Button Content="❌ Từ Chối" Style="{StaticResource DangerButton}" Command="{Binding RejectCommand}" Margin="0,0,10,0"/>
-                <Button Content="🔄 Tải lại" Style="{StaticResource PrimaryButton}" Command="{Binding RefreshCommand}"/>
-            </StackPanel>
-        </DockPanel>
+        <Border Grid.Row="0" Style="{StaticResource HeaderCard}" Margin="0,0,0,16">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button Content="✅ Duyệt Đơn" Style="{StaticResource PrimaryButton}" Command="{Binding ApproveCommand}" Margin="0,0,8,0"/>
+                    <Button Content="❌ Từ Chối" Style="{StaticResource SmallDangerButton}" Command="{Binding RejectCommand}" Height="36" Padding="12,0" Margin="0,0,8,0"/>
+                    <Button Content="🔄 Tải Lại Dữ Liệu" Style="{StaticResource SecondaryButton}" Command="{Binding RefreshCommand}"/>
+                </StackPanel>
+                <StackPanel VerticalAlignment="Center">
+                    <TextBlock Text="📝 QUẢN LÝ ĐƠN ĐĂNG KÝ PHÒNG" FontSize="20" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}"/>
+                    <TextBlock Text="Xét duyệt hồ sơ xin lưu trú ký túc xá của sinh viên theo thời gian thực" FontSize="13" Foreground="{StaticResource TextMutedBrush}" Margin="0,4,0,0"/>
+                </StackPanel>
+            </DockPanel>
+        </Border>
 
         <!-- Search & Filter Bar -->
-        <Border Grid.Row="1" Style="{StaticResource CardFrame}" Margin="0,0,0,16" Padding="16,12">
+        <Border Grid.Row="1" Style="{StaticResource CardBorder}" Margin="0,0,0,16" Padding="16,12">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="2*"/>
                     <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Grid.Column="0" Margin="0,0,12,0">
-                    <TextBlock Text="🔍 Tìm kiếm đơn (Mã Đơn / Mã SV / Họ tên / Số phòng)" FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,4"/>
-                    <TextBox Style="{StaticResource ModernTextBox}" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"/>
+                    <TextBlock Text="Tìm kiếm đơn (Mã Đơn / Mã SV / Họ tên / Số phòng)" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,4"/>
+                    <TextBox Style="{StaticResource SearchTextBox}" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"/>
                 </StackPanel>
 
-                <StackPanel Grid.Column="1">
-                    <TextBlock Text="⚡ Lọc Trạng Thái Đơn" FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,4"/>
-                    <ComboBox SelectedValue="{Binding SelectedStatusFilter, Mode=TwoWay}" SelectedValuePath="Tag" Height="38" Background="#0F172A" Foreground="White" BorderBrush="{StaticResource CardBorderBrush}">
+                <StackPanel Grid.Column="1" Margin="0,0,12,0">
+                    <TextBlock Text="Lọc Trạng Thái Đơn" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,4"/>
+                    <ComboBox SelectedValue="{Binding SelectedStatusFilter, Mode=TwoWay}" SelectedValuePath="Tag" Style="{StaticResource ModernComboBox}">
                         <ComboBoxItem Content="Tất cả trạng thái" Tag="All" IsSelected="True"/>
                         <ComboBoxItem Content="Chờ duyệt (Pending)" Tag="Pending"/>
                         <ComboBoxItem Content="Đã duyệt (Approved)" Tag="Approved"/>
                         <ComboBoxItem Content="Từ chối (Rejected)" Tag="Rejected"/>
+                        <ComboBoxItem Content="Đã hủy (Cancelled)" Tag="Cancelled"/>
                     </ComboBox>
                 </StackPanel>
+
+                <Button Grid.Column="2" Content="Đặt lại" Style="{StaticResource SecondaryButton}" Command="{Binding ResetFiltersCommand}" VerticalAlignment="Bottom"/>
             </Grid>
         </Border>
 
-        <!-- DataGrid -->
-        <Border Grid.Row="2" Style="{StaticResource CardFrame}">
-            <DataGrid ItemsSource="{Binding Applications}" SelectedItem="{Binding SelectedApplication}">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="Mã Đơn" Binding="{Binding ApplicationId}" Width="70"/>
-                    <DataGridTextColumn Header="Mã Code" Binding="{Binding ApplicationCode}" Width="130" FontWeight="Bold"/>
-                    <DataGridTextColumn Header="Sinh Viên" Binding="{Binding Student.FullName}" Width="160"/>
-                    <DataGridTextColumn Header="Mã SV" Binding="{Binding Student.StudentCode}" Width="100"/>
-                    <DataGridTextColumn Header="Phòng ĐK" Binding="{Binding Room.RoomNumber}" Width="100"/>
-                    <DataGridTextColumn Header="Tòa Nhà" Binding="{Binding Room.Building.BuildingName}" Width="140"/>
-                    <DataGridTextColumn Header="Ngày Đăng Ký" Binding="{Binding ApplicationDate, StringFormat='{}{0:dd/MM/yyyy HH:mm}'}" Width="150"/>
-                    <DataGridTemplateColumn Header="Trạng Thái" Width="130">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <Border Background="{Binding Status, Converter={StaticResource StatusColorConverter}}"
-                                        CornerRadius="12" Padding="10,4" HorizontalAlignment="Left" VerticalAlignment="Center">
-                                    <TextBlock Text="{Binding Status}" Foreground="White" FontWeight="Bold" FontSize="12"/>
-                                </Border>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                    <DataGridTextColumn Header="Ghi Chú Admin" Binding="{Binding ReviewNote}" Width="180"/>
-                </DataGrid.Columns>
-            </DataGrid>
-        </Border>
+        <!-- Main Content: Left DataGrid + Right Application Review Detail Panel -->
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1.35*"/>
+                <ColumnDefinition Width="0.9*"/>
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0" Style="{StaticResource CardBorder}" Margin="0,0,12,0">
+                <DataGrid ItemsSource="{Binding Applications}" SelectedItem="{Binding SelectedApplication}" Style="{StaticResource ModernDataGrid}">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Mã Đơn" Binding="{Binding ApplicationCode}" Width="130" FontWeight="Bold"/>
+                        <DataGridTextColumn Header="Sinh Viên" Binding="{Binding Student.FullName}" Width="160"/>
+                        <DataGridTextColumn Header="Mã SV" Binding="{Binding Student.StudentCode}" Width="95"/>
+                        <DataGridTextColumn Header="Phòng" Binding="{Binding Room.RoomNumber}" Width="80"/>
+                        <DataGridTextColumn Header="Tòa Nhà" Binding="{Binding Room.Building.BuildingName}" Width="130"/>
+                        <DataGridTextColumn Header="Giường" Binding="{Binding PreferredBed.BedCode}" Width="100"/>
+                        <DataGridTextColumn Header="Ngày Đăng Ký" Binding="{Binding ApplicationDate, StringFormat='{}{0:dd/MM/yyyy HH:mm}'}" Width="135"/>
+                        <DataGridTemplateColumn Header="Trạng Thái" Width="110">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Border Background="{Binding Status, Converter={StaticResource StatusColorConverter}}"
+                                            CornerRadius="8" Padding="8,3" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Status}" Foreground="White" FontWeight="Bold" FontSize="12"/>
+                                    </Border>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Border>
+
+            <Border Grid.Column="1" Style="{StaticResource CardBorder}">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <TextBlock Text="Chi Tiết Đơn Đăng Ký" FontSize="18" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,16"/>
+
+                        <Grid Margin="0,0,0,10">
+                            <TextBlock Text="Mã Đơn:" Foreground="{StaticResource TextMutedBrush}"/>
+                            <TextBlock Text="{Binding SelectedApplication.ApplicationCode}" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Right"/>
+                        </Grid>
+                        <Grid Margin="0,0,0,10">
+                            <TextBlock Text="Sinh Viên:" Foreground="{StaticResource TextMutedBrush}"/>
+                            <TextBlock Text="{Binding SelectedApplication.Student.FullName}" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Right"/>
+                        </Grid>
+                        <Grid Margin="0,0,0,10">
+                            <TextBlock Text="Mã SV:" Foreground="{StaticResource TextMutedBrush}"/>
+                            <TextBlock Text="{Binding SelectedApplication.Student.StudentCode}" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Right"/>
+                        </Grid>
+                        <Grid Margin="0,0,0,10">
+                            <TextBlock Text="Phòng Đăng Ký:" Foreground="{StaticResource TextMutedBrush}"/>
+                            <TextBlock Text="{Binding SelectedApplication.Room.RoomNumber}" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Right"/>
+                        </Grid>
+                        <Grid Margin="0,0,0,10">
+                            <TextBlock Text="Tòa Nhà:" Foreground="{StaticResource TextMutedBrush}"/>
+                            <TextBlock Text="{Binding SelectedApplication.Room.Building.BuildingName}" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Right"/>
+                        </Grid>
+                        <Grid Margin="0,0,0,10">
+                            <TextBlock Text="Giường Nguyện Vọng:" Foreground="{StaticResource TextMutedBrush}"/>
+                            <TextBlock Text="{Binding SelectedApplication.PreferredBed.BedCode}" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Right"/>
+                        </Grid>
+                        <Grid Margin="0,0,0,10">
+                            <TextBlock Text="Trạng Thái Đơn:" Foreground="{StaticResource TextMutedBrush}"/>
+                            <TextBlock Text="{Binding SelectedApplication.Status}" FontWeight="Bold" Foreground="{StaticResource PrimaryBrush}" HorizontalAlignment="Right"/>
+                        </Grid>
+
+                        <TextBlock Text="Lý do / Ghi chú đăng ký:" Foreground="{StaticResource TextMutedBrush}" Margin="0,10,0,4"/>
+                        <Border Background="#F8FAFC" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="8" Padding="10" Margin="0,0,0,14">
+                            <TextBlock Text="{Binding SelectedApplication.Note}" TextWrapping="Wrap" Foreground="{StaticResource TextPrimaryBrush}"/>
+                        </Border>
+
+                        <TextBlock Text="Ghi chú xét duyệt (Admin):" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,4"/>
+                        <TextBox Style="{StaticResource ModernTextBox}"
+                                 Text="{Binding ReviewNote, UpdateSourceTrigger=PropertyChanged}"
+                                 Height="80"
+                                 TextWrapping="Wrap"
+                                 AcceptsReturn="True"
+                                 Margin="0,0,0,16"/>
+
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                            <Button Content="✅ Duyệt" Style="{StaticResource PrimaryButton}" Command="{Binding ApproveCommand}" Margin="0,0,8,0"/>
+                            <Button Content="❌ Từ Chối" Style="{StaticResource SmallDangerButton}" Command="{Binding RejectCommand}"/>
+                        </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+        </Grid>
     </Grid>
 </UserControl>

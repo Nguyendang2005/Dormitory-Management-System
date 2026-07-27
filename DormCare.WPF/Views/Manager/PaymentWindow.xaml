@@ -1,0 +1,138 @@
+<Window x:Class="DormCare.WPF.Views.Manager.PaymentWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:conv="clr-namespace:DormCare.WPF.Converters"
+        Title="{Binding Title}" Height="760" Width="620"
+        WindowStartupLocation="CenterOwner" ResizeMode="CanResize"
+        Background="#0F172A" Foreground="White">
+
+    <Window.Resources>
+        <conv:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
+        <conv:BoolToVisibilityConverter x:Key="BoolToVisConverter"/>
+    </Window.Resources>
+
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,16">
+            <TextBlock Text="💳 Cập Nhật Thanh Toán &amp; VietQR" FontSize="22" FontWeight="Bold" Foreground="{StaticResource KinpakuGoldBrush}"/>
+            <TextBlock Text="Quét mã VietQR tự động hoặc chọn phương thức thanh toán cho hóa đơn KTX" FontSize="13" Foreground="{StaticResource TextMutedBrush}" Margin="0,4,0,0"/>
+        </StackPanel>
+
+        <!-- Content -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <!-- Error Banner -->
+                <Border Background="#33EF4444" BorderBrush="#EF4444" BorderThickness="1" CornerRadius="8" Padding="12" Margin="0,0,0,16"
+                        Visibility="{Binding ErrorMessage, Converter={StaticResource StringToVisibilityConverter}, FallbackValue=Collapsed}">
+                    <TextBlock Text="{Binding ErrorMessage}" Foreground="#EF4444" FontWeight="SemiBold" TextWrapping="Wrap"/>
+                </Border>
+
+                <!-- Invoice Overview Card -->
+                <Border Style="{StaticResource CardFrame}" Padding="16" Margin="0,0,0,16">
+                    <StackPanel>
+                        <Grid Margin="0,0,0,8">
+                            <TextBlock Text="Mã Hóa Đơn:" Foreground="{StaticResource TextMutedBrush}"/>
+                            <TextBlock Text="{Binding InvoiceCode}" FontWeight="Bold" Foreground="White" HorizontalAlignment="Right"/>
+                        </Grid>
+                        <Grid Margin="0,0,0,8">
+                            <TextBlock Text="Sinh Viên:" Foreground="{StaticResource TextMutedBrush}"/>
+                            <TextBlock Text="{Binding StudentName}" FontWeight="Bold" Foreground="White" HorizontalAlignment="Right"/>
+                        </Grid>
+                        <Grid Margin="0,0,0,8">
+                            <TextBlock Text="Tổng Tiền Hóa Đơn:" Foreground="{StaticResource TextMutedBrush}"/>
+                            <TextBlock Text="{Binding TotalAmount, StringFormat='{}{0:N0} VNĐ'}" FontWeight="Bold" Foreground="{StaticResource KinpakuGoldBrush}" HorizontalAlignment="Right"/>
+                        </Grid>
+                        <Grid Margin="0,0,0,8">
+                            <TextBlock Text="Đã Thanh Toán:" Foreground="{StaticResource TextMutedBrush}"/>
+                            <TextBlock Text="{Binding TotalPaid, StringFormat='{}{0:N0} VNĐ'}" FontWeight="Bold" Foreground="{StaticResource SuccessBrush}" HorizontalAlignment="Right"/>
+                        </Grid>
+                        <Rectangle Height="1" Fill="{StaticResource CardBorderBrush}" Margin="0,4,0,8"/>
+                        <Grid Margin="0,0,0,0">
+                            <TextBlock Text="TỔNG DƯ NỢ CỦA SINH VIÊN:" FontWeight="Bold" Foreground="#F59E0B"/>
+                            <TextBlock Text="{Binding TotalStudentDebt, StringFormat='{}{0:N0} VNĐ'}" FontWeight="Bold" FontSize="15" Foreground="#F59E0B" HorizontalAlignment="Right"/>
+                        </Grid>
+                        <TextBlock Text="{Binding TotalStudentDebtText}" FontSize="11" Foreground="{StaticResource TextMutedBrush}" Margin="0,3,0,0" HorizontalAlignment="Right"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Payment Form Inputs -->
+                <StackPanel Margin="0,0,0,12">
+                    <DockPanel Margin="0,0,0,6">
+                        <TextBlock Text="💰 Số Tiền Nộp Thanh Toán (VNĐ) (*)" FontSize="12" Foreground="{StaticResource TextMutedBrush}"/>
+                        <Button DockPanel.Dock="Right" Content="⚡ Trả Đủ Dư Nợ" Style="{StaticResource PrimaryButton}" Height="24" FontSize="11" Padding="8,2" Command="{Binding PayFullCommand}" HorizontalAlignment="Right"/>
+                    </DockPanel>
+                    <TextBox Style="{StaticResource ModernTextBox}" Text="{Binding AmountToPay, StringFormat='{}{0:0.#}', UpdateSourceTrigger=PropertyChanged}" FontSize="15" FontWeight="Bold" Foreground="{StaticResource SuccessBrush}"/>
+                </StackPanel>
+
+                <StackPanel Margin="0,0,0,12">
+                    <TextBlock Text="🏦 Phương Thức Thanh Toán" FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,6"/>
+                    <ComboBox SelectedValue="{Binding PaymentMethod, Mode=TwoWay}" SelectedValuePath="Tag" Height="38" Style="{StaticResource ModernComboBox}">
+                        <ComboBoxItem Content="Chuyển Khoản Ngân Hàng (VietQR / BIDV)" Tag="BankTransfer" IsSelected="True"/>
+                        <ComboBoxItem Content="Cổng Thanh Toán MoMo / VNPay / ZaloPay" Tag="OnlineGate"/>
+                        <ComboBoxItem Content="Tiền Mặt (Cash)" Tag="Cash"/>
+                    </ComboBox>
+                </StackPanel>
+
+                <!-- VietQR Bank Info Card & Dynamic QR Code Image -->
+                <Border Style="{StaticResource CardFrame}" Padding="16" Margin="0,0,0,16" Background="#1E293B"
+                        Visibility="{Binding IsBankTransfer, Converter={StaticResource BoolToVisConverter}}">
+                    <StackPanel>
+                        <DockPanel Margin="0,0,0,10">
+                            <TextBlock Text="📲 MÃ VIETQR CHUYỂN KHOẢN TỰ ĐỘNG" FontSize="13" FontWeight="Bold" Foreground="{StaticResource KinpakuGoldBrush}"/>
+                            <Border DockPanel.Dock="Right" Background="#3310B981" CornerRadius="4" Padding="8,3" HorizontalAlignment="Right">
+                                <TextBlock Text="BIDV VietQR" Foreground="#10B981" FontSize="11" FontWeight="Bold"/>
+                            </Border>
+                        </DockPanel>
+
+                        <!-- Dynamic VietQR Image Container -->
+                        <Border Background="White" CornerRadius="12" Padding="12" HorizontalAlignment="Center" Margin="0,4,0,14" Width="210" Height="210">
+                            <Image Source="{Binding VietQrImageUrl}" Width="186" Height="186" Stretch="Uniform"/>
+                        </Border>
+
+                        <Grid Margin="0,0,0,6">
+                            <TextBlock Text="🏦 Ngân Hàng:" Foreground="{StaticResource TextMutedBrush}" FontSize="12"/>
+                            <TextBlock Text="BIDV (Ngân Hàng TMCP Đầu Tư &amp; Phát Triển)" FontWeight="Bold" Foreground="White" HorizontalAlignment="Right" FontSize="12"/>
+                        </Grid>
+
+                        <Grid Margin="0,0,0,6">
+                            <TextBlock Text="💳 Số Tài Khoản:" Foreground="{StaticResource TextMutedBrush}" FontSize="12"/>
+                            <TextBlock Text="123456789" FontWeight="Bold" Foreground="{StaticResource SuccessBrush}" HorizontalAlignment="Right" FontSize="14"/>
+                        </Grid>
+
+                        <Grid Margin="0,0,0,6">
+                            <TextBlock Text="👤 Chủ Tài Khoản:" Foreground="{StaticResource TextMutedBrush}" FontSize="12"/>
+                            <TextBlock Text="BQL KÝ TÚC XÁ DORMCARE" FontWeight="Bold" Foreground="White" HorizontalAlignment="Right" FontSize="12"/>
+                        </Grid>
+
+                        <Grid Margin="0,0,0,6">
+                            <TextBlock Text="💰 Số Tiền Cần Chuyển:" Foreground="{StaticResource TextMutedBrush}" FontSize="12"/>
+                            <TextBlock Text="{Binding AmountToPay, StringFormat='{}{0:N0} VNĐ'}" FontWeight="Bold" Foreground="{StaticResource SuccessBrush}" HorizontalAlignment="Right" FontSize="15"/>
+                        </Grid>
+
+                        <Grid Margin="0,0,0,0">
+                            <TextBlock Text="📝 Nội Dung Chuyển Khoản:" Foreground="{StaticResource TextMutedBrush}" FontSize="12"/>
+                            <TextBlock Text="{Binding TransferContent}" FontWeight="Bold" Foreground="{StaticResource KinpakuGoldBrush}" HorizontalAlignment="Right" FontSize="13"/>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <StackPanel Margin="0,0,0,12">
+                    <TextBlock Text="📝 Ghi Chú Giao Dịch" FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,6"/>
+                    <TextBox Style="{StaticResource ModernTextBox}" Text="{Binding Note, UpdateSourceTrigger=PropertyChanged}" Height="45" TextWrapping="Wrap"/>
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Footer -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+            <Button Content="Hủy Bỏ" Width="100" Height="36" Style="{StaticResource PrimaryButton}" Background="#334155" Command="{Binding CancelCommand}" Margin="0,0,10,0"/>
+            <Button Content="✅ Xác Nhận Thanh Toán" Width="170" Height="36" Style="{StaticResource PrimaryButton}" Command="{Binding SubmitCommand}"/>
+        </StackPanel>
+    </Grid>
+</Window>

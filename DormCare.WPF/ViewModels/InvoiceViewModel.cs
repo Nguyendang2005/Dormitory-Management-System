@@ -3,19 +3,27 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 using DormCare.Business.DTOs;
 using DormCare.Business.Services;
 using DormCare.WPF.Commands;
 using DormCare.WPF.Services;
+using DormCare.WPF.Views.Manager;
 
 namespace DormCare.WPF.ViewModels
 {
     public class InvoiceViewModel : BaseViewModel
     {
         private readonly InvoiceService _invoiceService;
+        private readonly PaymentService _paymentService;
+        private readonly StudentService _studentService;
+        private readonly RoomService _roomService;
         private readonly DialogService _dialogService;
         private readonly int? _studentId;
+
+        public bool IsManagerMode => !_studentId.HasValue;
+        public bool IsStudentMode => _studentId.HasValue;
 
         private ObservableCollection<InvoiceDto> _allInvoices = new();
 
@@ -59,18 +67,116 @@ namespace DormCare.WPF.ViewModels
             }
         }
 
-        public ICommand RefreshCommand { get; }
-        public ICommand PayInvoiceCommand { get; }
+        private DateTime? _fromDate;
+        public DateTime? FromDate
+        {
+            get => _fromDate;
+            set
+            {
+                if (SetProperty(ref _fromDate, value))
+                {
+                    ApplyFilters();
+                }
+            }
+        }
 
-        public InvoiceViewModel(InvoiceService invoiceService, DialogService dialogService, int? studentId = null)
+        private DateTime? _toDate;
+        public DateTime? ToDate
+        {
+            get => _toDate;
+            set
+            {
+                if (SetProperty(ref _toDate, value))
+                {
+                    ApplyFilters();
+                }
+            }
+        }
+
+        public ICommand ClearDateFilterCommand { get; }
+
+        // Summary Statistics Properties
+        private int _totalInvoiceCount;
+        public int TotalInvoiceCount
+        {
+            get => _totalInvoiceCount;
+            set
+            {
+                if (SetProperty(ref _totalInvoiceCount, value))
+                {
+                    OnPropertyChanged(nameof(TotalInvoicesCount));
+                }
+            }
+        }
+
+        public int TotalInvoicesCount => TotalInvoiceCount;
+
+        public int UnpaidInvoicesCount => _allInvoices != null ? _allInvoices.Count(i => i.RemainingBalance > 0) : 0;
+
+        private decimal _totalAmountSum;
+        public decimal TotalAmountSum
+        {
+            get => _totalAmountSum;
+            set => SetProperty(ref _totalAmountSum, value);
+        }
+
+        private decimal _unpaidAmountSum;
+        public decimal UnpaidAmountSum
+        {
+            get => _unpaidAmountSum;
+            set => SetProperty(ref _unpaidAmountSum, value);
+        }
+
+        private decimal _paidAmountSum;
+        public decimal PaidAmountSum
+        {
+            get => _paidAmountSum;
+            set => SetProperty(ref _paidAmountSum, value);
+        }
+
+        public ICommand RefreshCommand { get; }
+        public ICommand CreateInvoiceCommand { get; }
+        public ICommand ViewInvoiceDetailsCommand { get; }
+        public ICommand UpdatePaymentCommand { get; }
+        public ICommand DeleteInvoiceCommand { get; }
+        public ICommand FilterUnpaidCommand { get; }
+        public ICommand FilterAllCommand { get; }
+
+        public InvoiceViewModel(
+            InvoiceService invoiceService,
+            PaymentService paymentService,
+            StudentService studentService,
+            RoomService roomService,
+            DialogService dialogService,
+            int? studentId = null)
         {
             Title = "Quản lý Hóa đơn & Điện nước";
             _invoiceService = invoiceService;
+            _paymentService = paymentService;
+            _studentService = studentService;
+            _roomService = roomService;
             _dialogService = dialogService;
             _studentId = studentId;
 
             RefreshCommand = new AsyncRelayCommand(LoadInvoicesAsync);
-            PayInvoiceCommand = new AsyncRelayCommand(ExecutePayInvoiceAsync, () => SelectedInvoice != null);
+            CreateInvoiceCommand = new RelayCommand(ExecuteCreateInvoice);
+            ViewInvoiceDetailsCommand = new RelayCommand(ExecuteViewInvoiceDetails, () => SelectedInvoice != null);
+            UpdatePaymentCommand = new RelayCommand(ExecuteUpdatePayment, () => SelectedInvoice != null && SelectedInvoice.Status != "Paid");
+            DeleteInvoiceCommand = new AsyncRelayCommand(ExecuteDeleteInvoiceAsync, () => SelectedInvoice != null && SelectedInvoice.Status != "Paid" && SelectedInvoice.Status != "Overdue");
+            FilterUnpaidCommand = new RelayCommand(() => SelectedStatusFilter = "Unpaid");
+            FilterAllCommand = new RelayCommand(() => SelectedStatusFilter = "All");
+            ClearDateFilterCommand = new RelayCommand(() =>
+            {
+                _fromDate = null;
+                OnPropertyChanged(nameof(FromDate));
+                _toDate = null;
+                OnPropertyChanged(nameof(ToDate));
+                _searchText = string.Empty;
+                OnPropertyChanged(nameof(SearchText));
+                _selectedStatusFilter = "All";
+                OnPropertyChanged(nameof(SelectedStatusFilter));
+                ApplyFilters();
+            });
 
             _ = LoadInvoicesAsync();
         }
@@ -78,29 +184,49 @@ namespace DormCare.WPF.ViewModels
         public async Task LoadInvoicesAsync()
         {
             IsBusy = true;
-            if (_studentId.HasValue)
+            try
             {
-                var dtos = await _invoiceService.GetInvoicesByStudentIdAsync(_studentId.Value);
-                _allInvoices = new ObservableCollection<InvoiceDto>(dtos);
+                if (_studentId.HasValue)
+                {
+                    var dtos = await _invoiceService.GetInvoicesByStudentIdAsync(_studentId.Value);
+                    _allInvoices = new ObservableCollection<InvoiceDto>(dtos);
+                }
+                else
+                {
+                    var dtos = await _invoiceService.GetAllInvoicesAsync();
+                    _allInvoices = new ObservableCollection<InvoiceDto>(dtos);
+                }
+                ApplyFilters();
             }
-            else
+            finally
             {
-                var dtos = await _invoiceService.GetAllInvoicesAsync();
-                _allInvoices = new ObservableCollection<InvoiceDto>(dtos);
+                IsBusy = false;
             }
-            ApplyFilters();
-            IsBusy = false;
         }
 
         private void ApplyFilters()
         {
             var query = _allInvoices.AsEnumerable();
 
+            if (FromDate.HasValue)
+            {
+                var fromMonthStart = new DateTime(FromDate.Value.Year, FromDate.Value.Month, 1);
+                query = query.Where(i => new DateTime(i.Year, i.Month, 1) >= fromMonthStart);
+            }
+
+            if (ToDate.HasValue)
+            {
+                var toMonthEnd = new DateTime(ToDate.Value.Year, ToDate.Value.Month, 1);
+                query = query.Where(i => new DateTime(i.Year, i.Month, 1) <= toMonthEnd);
+            }
+
             if (!string.IsNullOrWhiteSpace(SearchText))
             {
                 query = query.Where(i => i.InvoiceCode.Contains(SearchText, StringComparison.OrdinalIgnoreCase) ||
                                          i.StudentName.Contains(SearchText, StringComparison.OrdinalIgnoreCase) ||
-                                         i.StudentCode.Contains(SearchText, StringComparison.OrdinalIgnoreCase));
+                                         i.StudentCode.Contains(SearchText, StringComparison.OrdinalIgnoreCase) ||
+                                         i.RoomNumber.Contains(SearchText, StringComparison.OrdinalIgnoreCase) ||
+                                         i.BuildingName.Contains(SearchText, StringComparison.OrdinalIgnoreCase));
             }
 
             if (!string.IsNullOrWhiteSpace(SelectedStatusFilter) && SelectedStatusFilter != "All")
@@ -109,20 +235,151 @@ namespace DormCare.WPF.ViewModels
             }
 
             Invoices = new ObservableCollection<InvoiceDto>(query);
+
+            // Update Summary Statistics based on total loaded invoices
+            TotalInvoiceCount = _allInvoices.Count;
+            TotalAmountSum = _allInvoices.Sum(i => i.TotalAmount);
+            PaidAmountSum = _allInvoices.Sum(i => i.TotalPaid);
+            UnpaidAmountSum = _allInvoices.Sum(i => i.RemainingBalance);
+
+            OnPropertyChanged(nameof(TotalInvoicesCount));
+            OnPropertyChanged(nameof(UnpaidInvoicesCount));
+            OnPropertyChanged(nameof(NearestDueDate));
+            OnPropertyChanged(nameof(HasUnpaidInvoices));
+            OnPropertyChanged(nameof(StudentFullName));
+            OnPropertyChanged(nameof(StudentRoomInfo));
+            OnPropertyChanged(nameof(StatusAlertText));
         }
 
-        private async Task ExecutePayInvoiceAsync()
+        public string NearestDueDate
+        {
+            get
+            {
+                var unpaidInvoices = _allInvoices.Where(i => i.RemainingBalance > 0).OrderBy(i => i.DueDate).ToList();
+                return unpaidInvoices.Any() ? unpaidInvoices.First().DueDate.ToString("dd/MM/yyyy") : "Không có nợ";
+            }
+        }
+
+        public bool HasUnpaidInvoices => UnpaidAmountSum > 0;
+
+        public string StudentRoomInfo
+        {
+            get
+            {
+                var first = _allInvoices.FirstOrDefault();
+                if (first != null)
+                {
+                    return $"Phòng: {first.RoomNumber} | Tòa: {first.BuildingName} | Mã SV: {first.StudentCode}";
+                }
+                return "Phòng KTX";
+            }
+        }
+
+        public string StudentFullName
+        {
+            get
+            {
+                var first = _allInvoices.FirstOrDefault();
+                return first != null ? first.StudentName : "Sinh viên";
+            }
+        }
+
+        public string StatusAlertText
+        {
+            get
+            {
+                if (HasUnpaidInvoices)
+                {
+                    var unpaid = _allInvoices.Where(i => i.RemainingBalance > 0).OrderBy(i => i.DueDate).FirstOrDefault();
+                    if (unpaid != null)
+                    {
+                        var daysLeft = (unpaid.DueDate.Date - DateTime.Today).Days;
+                        if (daysLeft < 0)
+                            return $"🛑 Bạn có hóa đơn {unpaid.InvoiceCode} đã quá hạn {Math.Abs(daysLeft)} ngày. Vui lòng thanh toán sớm!";
+                        return $"⚠️ Hạn thanh toán hóa đơn gần nhất ({unpaid.InvoiceCode}) còn {daysLeft} ngày (Hạn thu: {unpaid.DueDate:dd/MM/yyyy}).";
+                    }
+                }
+                return "🎉 Bạn đã thanh toán đầy đủ tất cả các khoản phí ký túc xá!";
+            }
+        }
+
+        private void ExecuteCreateInvoice()
+        {
+            var createVm = new CreateInvoiceViewModel(_invoiceService, _studentService, _roomService);
+            var dialog = new CreateInvoiceWindow
+            {
+                DataContext = createVm,
+                Owner = Application.Current?.MainWindow
+            };
+
+            createVm.RequestClose += async (success) =>
+            {
+                dialog.DialogResult = success;
+                dialog.Close();
+                if (success)
+                {
+                    _dialogService.ShowInformation("Tạo hóa đơn mới thành công!");
+                    await LoadInvoicesAsync();
+                }
+            };
+
+            dialog.ShowDialog();
+        }
+
+        private void ExecuteViewInvoiceDetails()
         {
             if (SelectedInvoice == null) return;
-            if (!_dialogService.ShowConfirmation($"Xác nhận thanh toán cho hóa đơn {SelectedInvoice.InvoiceCode} với số tiền {SelectedInvoice.TotalAmount:N0} VNĐ?")) return;
+
+            var detailVm = new InvoiceDetailViewModel(_invoiceService, SelectedInvoice.Id);
+            var dialog = new InvoiceDetailWindow
+            {
+                DataContext = detailVm,
+                Owner = Application.Current?.MainWindow
+            };
+
+            detailVm.RequestClose += () => dialog.Close();
+            dialog.ShowDialog();
+        }
+
+        private void ExecuteUpdatePayment()
+        {
+            if (SelectedInvoice == null) return;
+
+            var paymentVm = new PaymentViewModel(_paymentService, SelectedInvoice);
+            var dialog = new PaymentWindow
+            {
+                DataContext = paymentVm,
+                Owner = Application.Current?.MainWindow
+            };
+
+            paymentVm.RequestClose += async (success) =>
+            {
+                dialog.DialogResult = success;
+                dialog.Close();
+                if (success)
+                {
+                    _dialogService.ShowInformation("Cập nhật thanh toán thành công!");
+                    await LoadInvoicesAsync();
+                }
+            };
+
+            dialog.ShowDialog();
+        }
+
+        private async Task ExecuteDeleteInvoiceAsync()
+        {
+            if (SelectedInvoice == null) return;
+
+            bool confirm = _dialogService.ShowConfirmation($"Bạn có chắc chắn muốn xóa hóa đơn '{SelectedInvoice.InvoiceCode}' của sinh viên {SelectedInvoice.StudentName}?");
+            if (!confirm) return;
 
             IsBusy = true;
-            var result = await _invoiceService.MarkAsPaidAsync(SelectedInvoice.Id);
+            var result = await _invoiceService.DeleteInvoiceAsync(SelectedInvoice.Id);
             IsBusy = false;
 
             if (result.IsSuccess)
             {
-                _dialogService.ShowInformation(result.Message);
+                _dialogService.ShowInformation("Xóa hóa đơn thành công!");
                 await LoadInvoicesAsync();
             }
             else

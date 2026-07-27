@@ -8,6 +8,7 @@ namespace DormCare.Business.DTOs
         public int OccupiedBeds { get; set; }
         public int AvailableBeds { get; set; }
         public int MaintenanceBeds { get; set; }
+        public double OccupancyRate { get; set; }
         public double OverallOccupancyRate => TotalBeds > 0 ? (double)OccupiedBeds / TotalBeds * 100 : 0;
     }
 }

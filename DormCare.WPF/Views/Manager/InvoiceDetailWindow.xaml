@@ -1,0 +1,171 @@
+<Window x:Class="DormCare.WPF.Views.Manager.InvoiceDetailWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:conv="clr-namespace:DormCare.WPF.Converters"
+        Title="{Binding Title}" Height="720" Width="880"
+        WindowStartupLocation="CenterOwner" ResizeMode="CanResize"
+        Background="#0F172A" Foreground="White">
+
+    <Window.Resources>
+        <conv:StatusToColorConverter x:Key="StatusColorConverter"/>
+    </Window.Resources>
+
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <DockPanel Grid.Row="0" Margin="0,0,0,16">
+            <StackPanel DockPanel.Dock="Left">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="📄 Chi Tiết Hóa Đơn — " FontSize="22" FontWeight="Bold" Foreground="{StaticResource KinpakuGoldBrush}"/>
+                    <TextBlock Text="{Binding InvoiceDetail.InvoiceCode}" FontSize="22" FontWeight="Bold" Foreground="White"/>
+                </StackPanel>
+                <TextBlock Text="Bảng kê chi tiết các khoản phí và lịch sử giao dịch thanh toán" FontSize="13" Foreground="{StaticResource TextMutedBrush}" Margin="0,4,0,0"/>
+            </StackPanel>
+            <Border DockPanel.Dock="Right" VerticalAlignment="Center" Background="{Binding InvoiceDetail.Status, Converter={StaticResource StatusColorConverter}}" CornerRadius="14" Padding="14,6">
+                <TextBlock Text="{Binding InvoiceDetail.Status}" Foreground="White" FontWeight="Bold" FontSize="13"/>
+            </Border>
+        </DockPanel>
+
+        <!-- Content -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <!-- General Info Cards -->
+                <Grid Margin="0,0,0,16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1*"/>
+                        <ColumnDefinition Width="16"/>
+                        <ColumnDefinition Width="1*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Student Info Card -->
+                    <Border Grid.Column="0" Style="{StaticResource CardFrame}" Padding="16">
+                        <StackPanel>
+                            <TextBlock Text="👤 THÔNG TIN SINH VIÊN" FontSize="13" FontWeight="Bold" Foreground="{StaticResource PrimaryHoverBrush}" Margin="0,0,0,10"/>
+                            <Grid Margin="0,0,0,6">
+                                <TextBlock Text="Họ &amp; Tên:" Foreground="{StaticResource TextMutedBrush}"/>
+                                <TextBlock Text="{Binding InvoiceDetail.StudentName}" FontWeight="Bold" Foreground="White" HorizontalAlignment="Right"/>
+                            </Grid>
+                            <Grid Margin="0,0,0,6">
+                                <TextBlock Text="Mã Sinh Viên:" Foreground="{StaticResource TextMutedBrush}"/>
+                                <TextBlock Text="{Binding InvoiceDetail.StudentCode}" FontWeight="Bold" Foreground="White" HorizontalAlignment="Right"/>
+                            </Grid>
+                            <Grid Margin="0,0,0,0">
+                                <TextBlock Text="Số Điện Thoại:" Foreground="{StaticResource TextMutedBrush}"/>
+                                <TextBlock Text="{Binding InvoiceDetail.StudentPhone}" Foreground="White" HorizontalAlignment="Right"/>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Room & Billing Info Card -->
+                    <Border Grid.Column="2" Style="{StaticResource CardFrame}" Padding="16">
+                        <StackPanel>
+                            <TextBlock Text="🏠 PHÒNG &amp; KỲ THU" FontSize="13" FontWeight="Bold" Foreground="{StaticResource PrimaryHoverBrush}" Margin="0,0,0,10"/>
+                            <Grid Margin="0,0,0,6">
+                                <TextBlock Text="Tòa / Phòng:" Foreground="{StaticResource TextMutedBrush}"/>
+                                <TextBlock Text="{Binding InvoiceDetail.BuildingName, StringFormat='{}{0}'}" FontWeight="Bold" Foreground="White" HorizontalAlignment="Right"/>
+                            </Grid>
+                            <Grid Margin="0,0,0,6">
+                                <TextBlock Text="Số Phòng:" Foreground="{StaticResource TextMutedBrush}"/>
+                                <TextBlock Text="{Binding InvoiceDetail.RoomNumber, StringFormat='Phòng {0}'}" FontWeight="Bold" Foreground="White" HorizontalAlignment="Right"/>
+                            </Grid>
+                            <Grid Margin="0,0,0,0">
+                                <TextBlock Text="Tháng Thu Phí:" Foreground="{StaticResource TextMutedBrush}"/>
+                                <TextBlock Text="{Binding InvoiceDetail.BillingMonth, StringFormat='Tháng {0:MM/yyyy}'}" FontWeight="Bold" Foreground="White" HorizontalAlignment="Right"/>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+
+                <!-- Fee Breakdown Card -->
+                <Border Style="{StaticResource CardFrame}" Padding="16" Margin="0,0,0,16">
+                    <StackPanel>
+                        <TextBlock Text="💵 BẢNG KÊ CÁC KHOẢN PHÍ (FEE BREAKDOWN)" FontSize="14" FontWeight="Bold" Foreground="{StaticResource KinpakuGoldBrush}" Margin="0,0,0,12"/>
+
+                        <Grid Margin="0,0,0,8">
+                            <TextBlock Text="1. Tiền Thuê Phòng:" Foreground="White"/>
+                            <TextBlock Text="{Binding InvoiceDetail.RoomFee, StringFormat='{}{0:N0} VNĐ'}" FontWeight="SemiBold" Foreground="White" HorizontalAlignment="Right"/>
+                        </Grid>
+
+                        <Grid Margin="0,0,0,8">
+                            <TextBlock Text="2. Tiền Điện (Dịch vụ):" Foreground="White"/>
+                            <TextBlock Text="{Binding InvoiceDetail.ElectricityFee, StringFormat='{}{0:N0} VNĐ'}" FontWeight="SemiBold" Foreground="White" HorizontalAlignment="Right"/>
+                        </Grid>
+
+                        <Grid Margin="0,0,0,8">
+                            <TextBlock Text="3. Tiền Nước &amp; Phí Khác:" Foreground="White"/>
+                            <TextBlock Text="{Binding InvoiceDetail.WaterFee, StringFormat='{}{0:N0} VNĐ'}" FontWeight="SemiBold" Foreground="White" HorizontalAlignment="Right"/>
+                        </Grid>
+
+                        <Grid Margin="0,0,0,8">
+                            <TextBlock Text="4. Chiết Khấu / Miễn Giảm (-):" Foreground="#EF4444"/>
+                            <TextBlock Text="{Binding InvoiceDetail.DiscountAmount, StringFormat='-{0:N0} VNĐ'}" FontWeight="SemiBold" Foreground="#EF4444" HorizontalAlignment="Right"/>
+                        </Grid>
+
+                        <Rectangle Height="1" Fill="{StaticResource CardBorderBrush}" Margin="0,8,0,12"/>
+
+                        <Grid Margin="0,0,0,6">
+                            <TextBlock Text="TỔNG TIỀN NỢ (TOTAL AMOUNT):" FontWeight="Bold" FontSize="14" Foreground="{StaticResource TextPrimaryBrush}"/>
+                            <TextBlock Text="{Binding InvoiceDetail.TotalAmount, StringFormat='{}{0:N0} VNĐ'}" FontWeight="Bold" FontSize="16" Foreground="{StaticResource KinpakuGoldBrush}" HorizontalAlignment="Right"/>
+                        </Grid>
+
+                        <Grid Margin="0,0,0,6">
+                            <TextBlock Text="ĐÃ THANH TOÁN (TOTAL PAID):" FontWeight="Bold" Foreground="{StaticResource SuccessBrush}"/>
+                            <TextBlock Text="{Binding InvoiceDetail.TotalPaid, StringFormat='{}{0:N0} VNĐ'}" FontWeight="Bold" FontSize="14" Foreground="{StaticResource SuccessBrush}" HorizontalAlignment="Right"/>
+                        </Grid>
+
+                        <Grid Margin="0,0,0,0">
+                            <TextBlock Text="DƯ NỢ CÒN LẠI (REMAINING):" FontWeight="Bold" Foreground="#F59E0B"/>
+                            <TextBlock Text="{Binding InvoiceDetail.RemainingBalance, StringFormat='{}{0:N0} VNĐ'}" FontWeight="Bold" FontSize="14" Foreground="#F59E0B" HorizontalAlignment="Right"/>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- Dates & Note Summary -->
+                <Border Style="{StaticResource CardFrame}" Padding="16" Margin="0,0,0,16">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1*"/>
+                            <ColumnDefinition Width="1*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="⏰ Hạn Thu: " Foreground="{StaticResource TextMutedBrush}"/>
+                            <TextBlock Text="{Binding InvoiceDetail.DueDate, StringFormat='{}{0:dd/MM/yyyy}'}" FontWeight="Bold" Foreground="White" Margin="0,2,0,0"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="📝 Ghi chú:" Foreground="{StaticResource TextMutedBrush}"/>
+                            <TextBlock Text="{Binding InvoiceDetail.Note, TargetNullValue='Không có ghi chú'}" Foreground="White" Margin="0,2,0,0" TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- Payment Transaction History -->
+                <Border Style="{StaticResource CardFrame}" Padding="16">
+                    <StackPanel>
+                        <TextBlock Text="💳 LỊCH SỬ GIAO DỊCH THANH TOÁN (PAYMENTS)" FontSize="14" FontWeight="Bold" Foreground="{StaticResource PrimaryHoverBrush}" Margin="0,0,0,12"/>
+
+                        <DataGrid ItemsSource="{Binding InvoiceDetail.Payments}" AutoGenerateColumns="False" IsReadOnly="True" MinHeight="140" MaxHeight="220" HorizontalScrollBarVisibility="Auto" Background="#0F172A">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Mã GD" Binding="{Binding PaymentCode}" Width="190" FontWeight="Bold"/>
+                                <DataGridTextColumn Header="Ngày Nộp" Binding="{Binding PaymentDate, StringFormat='{}{0:dd/MM/yyyy HH:mm}'}" Width="140"/>
+                                <DataGridTextColumn Header="Số Tiền (VNĐ)" Binding="{Binding Amount, StringFormat='{}{0:N0} VNĐ'}" Width="130" FontWeight="Bold" Foreground="{StaticResource SuccessBrush}"/>
+                                <DataGridTextColumn Header="Hình Thức" Binding="{Binding PaymentMethod}" Width="130"/>
+                                <DataGridTextColumn Header="Mã Giao Dịch / Ngân Hàng" Binding="{Binding TransactionReference}" Width="180"/>
+                                <DataGridTextColumn Header="Ghi Chú" Binding="{Binding Note}" Width="*"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Footer -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+            <Button Content="Đóng" Width="110" Height="36" Style="{StaticResource PrimaryButton}" Command="{Binding CloseCommand}"/>
+        </StackPanel>
+    </Grid>
+</Window>

@@ -1,0 +1,120 @@
+<UserControl x:Class="DormCare.WPF.Views.Student.RoomApplicationView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0" Style="{StaticResource HeaderCard}" Margin="0,0,0,16">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Left">
+                    <TextBlock Text="Dang ky phong ky tuc xa" FontSize="20" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}"/>
+                    <TextBlock Text="Chon phong con cho, chon giuong trong va theo doi trang thai yeu cau" FontSize="13" Foreground="{StaticResource TextMutedBrush}" Margin="0,4,0,0"/>
+                </StackPanel>
+                <Button DockPanel.Dock="Right" Content="Lam moi" Style="{StaticResource SecondaryButton}" Command="{Binding RefreshCommand}" VerticalAlignment="Center"/>
+            </DockPanel>
+        </Border>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1.25*"/>
+                <ColumnDefinition Width="1*"/>
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0" Style="{StaticResource CardBorder}" Margin="0,0,12,0">
+                <DockPanel>
+                    <StackPanel DockPanel.Dock="Top" Margin="0,0,0,12">
+                        <TextBlock Text="Danh sach phong con trong" FontSize="15" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,10"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="2*"/>
+                                <ColumnDefinition Width="1*"/>
+                                <ColumnDefinition Width="1*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBox Grid.Column="0" Style="{StaticResource FormTextBox}" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" ToolTip="Tim theo toa nha hoac so phong" Margin="0,0,8,0"/>
+                            <ComboBox Grid.Column="1" SelectedValue="{Binding SelectedRoomType, Mode=TwoWay}" SelectedValuePath="Tag" Style="{StaticResource ModernComboBox}" Margin="0,0,8,0">
+                                <ComboBoxItem Content="Tat ca loai phong" Tag="All" IsSelected="True"/>
+                                <ComboBoxItem Content="Tieu chuan" Tag="Standard"/>
+                                <ComboBoxItem Content="Cao cap" Tag="Premium"/>
+                                <ComboBoxItem Content="Ho tro" Tag="Accessible"/>
+                            </ComboBox>
+                            <ComboBox Grid.Column="2" SelectedValue="{Binding SelectedGenderType, Mode=TwoWay}" SelectedValuePath="Tag" Style="{StaticResource ModernComboBox}" Margin="0,0,8,0">
+                                <ComboBoxItem Content="Tat ca gioi tinh" Tag="All" IsSelected="True"/>
+                                <ComboBoxItem Content="Nam" Tag="Male"/>
+                                <ComboBoxItem Content="Nu" Tag="Female"/>
+                                <ComboBoxItem Content="Hon hop" Tag="Mixed"/>
+                            </ComboBox>
+                            <Button Grid.Column="3" Content="Dat lai" Style="{StaticResource SecondaryButton}" Command="{Binding ResetFiltersCommand}"/>
+                        </Grid>
+                    </StackPanel>
+
+                    <DataGrid ItemsSource="{Binding AvailableRooms}"
+                              SelectedItem="{Binding SelectedRoom}"
+                              Style="{StaticResource ModernDataGrid}"
+                              IsReadOnly="True">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Phong" Binding="{Binding RoomNumber}" Width="80"/>
+                            <DataGridTextColumn Header="Toa nha" Binding="{Binding BuildingName}" Width="130"/>
+                            <DataGridTextColumn Header="Tang" Binding="{Binding FloorNumber}" Width="60"/>
+                            <DataGridTextColumn Header="Loai" Binding="{Binding RoomTypeVietnamese}" Width="110"/>
+                            <DataGridTextColumn Header="Gioi tinh" Binding="{Binding GenderTypeVietnamese}" Width="90"/>
+                            <DataGridTextColumn Header="Giuong trong" Binding="{Binding AvailableBeds}" Width="100"/>
+                            <DataGridTextColumn Header="Gia thang" Binding="{Binding MonthlyRent, StringFormat={}{0:N0} VND}" Width="*"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </DockPanel>
+            </Border>
+
+            <Border Grid.Column="1" Style="{StaticResource CardBorder}" Margin="12,0,0,0">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <TextBlock Text="Thong tin dang ky" FontSize="15" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,12"/>
+
+                        <Grid Margin="0,0,0,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="130"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Phong da chon:" Foreground="{StaticResource TextMutedBrush}"/>
+                            <TextBlock Grid.Column="1" Text="{Binding SelectedRoom.RoomNumber, TargetNullValue='Chua chon phong'}" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}"/>
+                        </Grid>
+
+                        <TextBlock Text="Giuong mong muon:" FontSize="13" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,4"/>
+                        <ComboBox ItemsSource="{Binding AvailableBeds}"
+                                  SelectedItem="{Binding SelectedBed}"
+                                  DisplayMemberPath="BedCode"
+                                  Style="{StaticResource ModernComboBox}"
+                                  Margin="0,0,0,12"/>
+
+                        <TextBlock Text="Ly do dang ky:" FontSize="13" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,4"/>
+                        <TextBox Text="{Binding Reason, UpdateSourceTrigger=PropertyChanged}"
+                                 Style="{StaticResource FormTextBox}"
+                                 Height="88"
+                                 TextWrapping="Wrap"
+                                 AcceptsReturn="True"
+                                 Margin="0,0,0,16"/>
+
+                        <Button Content="Gui yeu cau dang ky" Style="{StaticResource PrimaryButton}" Height="40" Command="{Binding SubmitCommand}" Margin="0,0,0,20"/>
+
+                        <Separator Background="{StaticResource CardBorderBrush}" Margin="0,0,0,16"/>
+
+                        <TextBlock Text="Trang thai dang ky cua ban" FontSize="15" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,12"/>
+                        <DataGrid ItemsSource="{Binding MyApplications}" Style="{StaticResource ModernDataGrid}" Height="260" IsReadOnly="True">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Ma don" Binding="{Binding ApplicationCode}" Width="120"/>
+                                <DataGridTextColumn Header="Phong" Binding="{Binding Room.RoomNumber}" Width="70"/>
+                                <DataGridTextColumn Header="Giuong" Binding="{Binding PreferredBed.BedCode}" Width="100"/>
+                                <DataGridTextColumn Header="Ngay gui" Binding="{Binding ApplicationDate, StringFormat='{}{0:dd/MM/yyyy HH:mm}'}" Width="130"/>
+                                <DataGridTextColumn Header="Trang thai" Binding="{Binding Status}" Width="90"/>
+                                <DataGridTextColumn Header="Ghi chu quan ly" Binding="{Binding ReviewNote}" Width="*"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>

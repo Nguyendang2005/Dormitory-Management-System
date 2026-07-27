@@ -1,13 +1,18 @@
-using Microsoft.EntityFrameworkCore;
 using DormCare.Domain.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace DormCare.DataAccess.Data
 {
     public class DormCareDbContext : DbContext
     {
-        public DormCareDbContext() { }
+        public DormCareDbContext(DbContextOptions<DormCareDbContext> options)
+            : base(options)
+        {
+        }
 
-        public DormCareDbContext(DbContextOptions<DormCareDbContext> options) : base(options) { }
+        public DormCareDbContext()
+        {
+        }
 
         public DbSet<User> Users { get; set; } = null!;
         public DbSet<Student> Students { get; set; } = null!;
@@ -30,7 +35,6 @@ namespace DormCare.DataAccess.Data
                 optionsBuilder.UseSqlServer("Server=LuccyKing;Database=DormCareDB;User Id=sa;Password=123456;TrustServerCertificate=True;Encrypt=False;");
             }
         }
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -89,6 +93,16 @@ namespace DormCare.DataAccess.Data
                       .WithMany(r => r.RoomApplications)
                       .HasForeignKey(a => a.RoomId)
                       .OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(a => a.PreferredBed)
+                      .WithMany(b => b.RoomApplications)
+                      .HasForeignKey(a => a.PreferredBedId)
+                      .IsRequired(false)
+                      .OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(a => a.Reviewer)
+                      .WithMany()
+                      .HasForeignKey(a => a.ReviewedBy)
+                      .IsRequired(false)
+                      .OnDelete(DeleteBehavior.Restrict);
             });
 
             modelBuilder.Entity<RoomAssignment>(entity =>
@@ -96,40 +110,86 @@ namespace DormCare.DataAccess.Data
                 entity.HasKey(e => e.AssignmentId);
                 entity.HasOne(a => a.Student)
                       .WithMany(s => s.RoomAssignments)
-                      .HasForeignKey(a => a.StudentId);
+                      .HasForeignKey(a => a.StudentId)
+                      .OnDelete(DeleteBehavior.Restrict);
                 entity.HasOne(a => a.Room)
                       .WithMany(r => r.RoomAssignments)
-                      .HasForeignKey(a => a.RoomId);
+                      .HasForeignKey(a => a.RoomId)
+                      .OnDelete(DeleteBehavior.Restrict);
                 entity.HasOne(a => a.Bed)
                       .WithMany(b => b.RoomAssignments)
-                      .HasForeignKey(a => a.BedId);
+                      .HasForeignKey(a => a.BedId)
+                      .OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(a => a.Manager)
+                      .WithMany()
+                      .HasForeignKey(a => a.AssignedBy)
+                      .IsRequired(false)
+                      .OnDelete(DeleteBehavior.Restrict);
             });
 
             modelBuilder.Entity<Invoice>(entity =>
             {
                 entity.HasKey(e => e.InvoiceId);
-                entity.Property(e => e.TotalAmount)
-                      .HasComputedColumnSql("RoomFee + ServiceFee + OtherFee - DiscountAmount", stored: true);
+                entity.HasIndex(e => e.InvoiceCode).IsUnique();
+                entity.HasOne(i => i.Student)
+                      .WithMany(s => s.Invoices)
+                      .HasForeignKey(i => i.StudentId)
+                      .OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(i => i.Room)
+                      .WithMany(r => r.Invoices)
+                      .HasForeignKey(i => i.RoomId)
+                      .OnDelete(DeleteBehavior.Restrict);
             });
 
             modelBuilder.Entity<Payment>(entity =>
             {
                 entity.HasKey(e => e.PaymentId);
+                entity.HasIndex(e => e.PaymentCode).IsUnique();
+                entity.HasOne(p => p.Invoice)
+                      .WithMany(i => i.Payments)
+                      .HasForeignKey(p => p.InvoiceId)
+                      .OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(p => p.Receiver)
+                      .WithMany()
+                      .HasForeignKey(p => p.ReceivedBy)
+                      .OnDelete(DeleteBehavior.Restrict);
             });
 
             modelBuilder.Entity<MaintenanceRequest>(entity =>
             {
                 entity.HasKey(e => e.RequestId);
+                entity.HasIndex(e => e.RequestCode).IsUnique();
+                entity.HasOne(m => m.Student)
+                      .WithMany(s => s.MaintenanceRequests)
+                      .HasForeignKey(m => m.StudentId)
+                      .OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(m => m.Room)
+                      .WithMany(r => r.MaintenanceRequests)
+                      .HasForeignKey(m => m.RoomId)
+                      .OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(m => m.Assignee)
+                      .WithMany()
+                      .HasForeignKey(m => m.AssignedTo)
+                      .IsRequired(false)
+                      .OnDelete(DeleteBehavior.Restrict);
             });
 
             modelBuilder.Entity<Notification>(entity =>
             {
                 entity.HasKey(e => e.NotificationId);
+                entity.HasOne(n => n.User)
+                      .WithMany()
+                      .HasForeignKey(n => n.UserId)
+                      .OnDelete(DeleteBehavior.Cascade);
             });
 
             modelBuilder.Entity<AuditLog>(entity =>
             {
                 entity.HasKey(e => e.AuditLogId);
+                entity.HasOne(a => a.User)
+                      .WithMany()
+                      .HasForeignKey(a => a.UserId)
+                      .OnDelete(DeleteBehavior.SetNull);
             });
         }
     }

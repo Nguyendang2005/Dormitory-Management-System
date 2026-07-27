@@ -4,6 +4,7 @@ namespace DormCare.Business.DTOs
     {
         public int RoomId { get; set; }
         public int BuildingId { get; set; }
+        public string BuildingCode { get; set; } = string.Empty;
         public string BuildingName { get; set; } = string.Empty;
         public string RoomNumber { get; set; } = string.Empty;
         public int FloorNumber { get; set; }
@@ -15,6 +16,24 @@ namespace DormCare.Business.DTOs
         public string Description { get; set; } = string.Empty;
 
         public int OccupiedBeds { get; set; }
-        public int AvailableBeds => Capacity - OccupiedBeds;
+        public int AvailableBeds { get; set; }
+        public int ReservedBeds { get; set; }
+        public int MaintenanceBeds { get; set; }
+        public int TotalBedsCreated { get; set; }
+        public int TotalBeds => Capacity;
+
+        public string OccupancySummary => $"{OccupiedBeds}/{Capacity} đang ở";
+        public double OccupancyRate => Capacity > 0 ? (double)OccupiedBeds / Capacity * 100 : 0;
+
+        public string StatusDisplay
+        {
+            get
+            {
+                if (Status == "Inactive") return "Vô hiệu";
+                if (Status == "Maintenance") return "Bảo trì";
+                if (AvailableBeds <= 0) return "Đã đầy";
+                return "Còn chỗ";
+            }
+        }
     }
 }
