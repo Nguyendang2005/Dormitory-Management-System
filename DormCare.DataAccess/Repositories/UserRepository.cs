@@ -11,6 +11,7 @@ namespace DormCare.DataAccess.Repositories
 
         public async Task<User?> GetByUsernameAsync(string username)
         {
+
             return await _dbSet
                 .Include(u => u.StudentProfile!)
                 .FirstOrDefaultAsync(u => u.Username == username);

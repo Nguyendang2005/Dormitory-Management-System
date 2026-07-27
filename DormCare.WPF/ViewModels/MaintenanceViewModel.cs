@@ -14,10 +14,25 @@ namespace DormCare.WPF.ViewModels
     public class MaintenanceViewModel : BaseViewModel
     {
         private readonly MaintenanceService _maintenanceService;
+        private readonly RoomService _roomService;
+        private readonly StudentService _studentService;
         private readonly DialogService _dialogService;
         private readonly User? _currentUser;
 
         private ObservableCollection<MaintenanceRequest> _allRequests = new();
+        private ObservableCollection<DormCare.Business.DTOs.RoomDto> _rooms = new();
+        public ObservableCollection<DormCare.Business.DTOs.RoomDto> Rooms
+        {
+            get => _rooms;
+            set => SetProperty(ref _rooms, value);
+        }
+
+        private int? _selectedNewRoomId;
+        public int? SelectedNewRoomId
+        {
+            get => _selectedNewRoomId;
+            set => SetProperty(ref _selectedNewRoomId, value);
+        }
 
         private ObservableCollection<MaintenanceRequest> _requests = new();
         public ObservableCollection<MaintenanceRequest> Requests
@@ -30,10 +45,18 @@ namespace DormCare.WPF.ViewModels
         public MaintenanceRequest? SelectedRequest
         {
             get => _selectedRequest;
-            set => SetProperty(ref _selectedRequest, value);
+            set
+            {
+                if (SetProperty(ref _selectedRequest, value))
+                {
+                    OnPropertyChanged(nameof(IsRequestSelected));
+                }
+            }
         }
 
-        private string _newTitle = string.Empty;
+        public bool IsRequestSelected => SelectedRequest != null;
+
+        private string _newTitle = "Điện (Đèn, Ổ cắm, Quạt)";
         public string NewTitle
         {
             get => _newTitle;
@@ -44,6 +67,13 @@ namespace DormCare.WPF.ViewModels
                     ValidateInput();
                 }
             }
+        }
+
+        private string _newPriority = "Medium";
+        public string NewPriority
+        {
+            get => _newPriority;
+            set => SetProperty(ref _newPriority, value);
         }
 
         private string _newDescription = string.Empty;
@@ -86,18 +116,6 @@ namespace DormCare.WPF.ViewModels
             }
         }
 
-        private string _selectedPriorityFilter = "All";
-        public string SelectedPriorityFilter
-        {
-            get => _selectedPriorityFilter;
-            set
-            {
-                if (SetProperty(ref _selectedPriorityFilter, value))
-                {
-                    ApplyFilters();
-                }
-            }
-        }
 
         private string _selectedStatusFilter = "All";
         public string SelectedStatusFilter
@@ -112,18 +130,48 @@ namespace DormCare.WPF.ViewModels
             }
         }
 
+        private string _selectedPriorityFilter = "All";
+        public string SelectedPriorityFilter
+        {
+            get => _selectedPriorityFilter;
+            set
+            {
+                if (SetProperty(ref _selectedPriorityFilter, value))
+                {
+                    ApplyFilters();
+                }
+            }
+        }
+
+        private string _selectedUpdateStatus = "InProgress";
+        public string SelectedUpdateStatus
+        {
+            get => _selectedUpdateStatus;
+            set => SetProperty(ref _selectedUpdateStatus, value);
+        }
+
+        private string _updateMessage = string.Empty;
+        public string UpdateMessage
+        {
+            get => _updateMessage;
+            set => SetProperty(ref _updateMessage, value);
+        }
+
         public ICommand RefreshCommand { get; }
         public ICommand ClearFiltersCommand { get; }
         public ICommand CreateRequestCommand { get; }
         public ICommand CompleteRequestCommand { get; }
-        public ICommand SetPriorityCommand { get; }
+        public ICommand UpdateSelectedStatusCommand { get; }
+
         public ICommand CloseRequestCommand { get; }
         public ICommand MarkInProgressCommand { get; }
 
-        public MaintenanceViewModel(MaintenanceService maintenanceService, DialogService dialogService, User? currentUser = null)
+        public MaintenanceViewModel(MaintenanceService maintenanceService, RoomService roomService, StudentService studentService, DialogService dialogService, User? currentUser = null)
         {
             Title = "Quản lý Báo Cáo & Sửa Chữa";
             _maintenanceService = maintenanceService;
+            _roomService = roomService;
+            _studentService = studentService;
             _dialogService = dialogService;
             _currentUser = currentUser;
 
@@ -131,18 +179,30 @@ namespace DormCare.WPF.ViewModels
             ClearFiltersCommand = new RelayCommand(_ => ExecuteClearFilters());
             CreateRequestCommand = new AsyncRelayCommand(ExecuteCreateRequestAsync);
             CompleteRequestCommand = new AsyncRelayCommand(ExecuteCompleteRequestAsync, () => SelectedRequest != null);
-            SetPriorityCommand = new AsyncRelayCommand(ExecuteSetPriorityAsync, (_) => SelectedRequest != null);
+            UpdateSelectedStatusCommand = new AsyncRelayCommand(ExecuteUpdateSelectedStatusAsync, () => SelectedRequest != null);
+
             CloseRequestCommand = new AsyncRelayCommand(ExecuteCloseRequestAsync, () => SelectedRequest != null);
             MarkInProgressCommand = new AsyncRelayCommand(ExecuteMarkInProgressAsync, () => SelectedRequest != null);
 
             _ = LoadRequestsAsync();
+            _ = LoadRoomsAsync();
+        }
+
+        public async Task LoadRoomsAsync()
+        {
+            var rooms = await _roomService.GetAllRoomsAsync();
+            Rooms = new ObservableCollection<DormCare.Business.DTOs.RoomDto>(rooms.OrderBy(r => r.RoomNumber));
+            if (Rooms.Any())
+            {
+                SelectedNewRoomId = Rooms.First().RoomId;
+            }
         }
 
         private void ExecuteClearFilters()
         {
             SearchText = string.Empty;
-            SelectedPriorityFilter = "All";
             SelectedStatusFilter = "All";
+            SelectedPriorityFilter = "All";
         }
 
         public async Task LoadRequestsAsync()
@@ -174,14 +234,15 @@ namespace DormCare.WPF.ViewModels
                                          (m.Room != null && m.Room.RoomNumber.Contains(SearchText, StringComparison.OrdinalIgnoreCase)));
             }
 
-            if (!string.IsNullOrWhiteSpace(SelectedPriorityFilter) && SelectedPriorityFilter != "All")
-            {
-                query = query.Where(m => m.Priority.Equals(SelectedPriorityFilter, StringComparison.OrdinalIgnoreCase));
-            }
 
             if (!string.IsNullOrWhiteSpace(SelectedStatusFilter) && SelectedStatusFilter != "All")
             {
                 query = query.Where(m => m.Status.Equals(SelectedStatusFilter, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (!string.IsNullOrWhiteSpace(SelectedPriorityFilter) && SelectedPriorityFilter != "All")
+            {
+                query = query.Where(m => m.Priority.Equals(SelectedPriorityFilter, StringComparison.OrdinalIgnoreCase));
             }
 
             Requests = new ObservableCollection<MaintenanceRequest>(query);
@@ -216,15 +277,46 @@ namespace DormCare.WPF.ViewModels
                 return;
             }
 
-            if (_currentUser == null || _currentUser.StudentProfile == null)
+            int studentId = 1; // Default fallback
+            int roomId = SelectedNewRoomId ?? 1;
+
+            if (_currentUser != null && _currentUser.StudentProfile != null)
             {
-                _dialogService.ShowError("Chỉ sinh viên đang ở trong ký túc xá mới có thể gửi yêu cầu sửa chữa.");
-                return;
+                studentId = _currentUser.StudentProfile.StudentId;
+            }
+            else
+            {
+                // Manager creating a request for a room
+                if (SelectedNewRoomId.HasValue)
+                {
+                    roomId = SelectedNewRoomId.Value;
+                    // Try to get a student in that room
+                    var roomDetail = await _roomService.GetRoomDetailAsync(roomId);
+                    var activeBed = roomDetail?.Beds?.FirstOrDefault(b => b.Status == "Occupied");
+                    if (activeBed != null)
+                    {
+                        var students = await _studentService.GetAllStudentsAsync();
+                        var student = students.FirstOrDefault(s => s.StudentCode == activeBed.StudentCode);
+                        if (student != null)
+                        {
+                            studentId = student.Id;
+                        }
+                        else
+                        {
+                            _dialogService.ShowError("Không thể xác định sinh viên trong phòng này.");
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        _dialogService.ShowError("Phòng này hiện không có sinh viên nào đang ở. Hệ thống yêu cầu phải có sinh viên để tạo yêu cầu.");
+                        return;
+                    }
+                }
             }
 
             IsBusy = true;
-            var roomId = 1;
-            var result = await _maintenanceService.CreateRequestAsync(_currentUser.StudentProfile.StudentId, roomId, NewTitle, NewDescription);
+            var result = await _maintenanceService.CreateRequestAsync(studentId, roomId, NewTitle, NewDescription, NewPriority);
             IsBusy = false;
 
             if (result.IsSuccess)
@@ -232,6 +324,7 @@ namespace DormCare.WPF.ViewModels
                 _dialogService.ShowInformation(result.Message);
                 NewTitle = string.Empty;
                 NewDescription = string.Empty;
+                NewPriority = "Medium";
                 HasValidationError = false;
                 await LoadRequestsAsync();
             }
@@ -260,24 +353,6 @@ namespace DormCare.WPF.ViewModels
             }
         }
 
-        private async Task ExecuteSetPriorityAsync(object? param)
-        {
-            if (SelectedRequest == null || param is not string newPriority) return;
-
-            IsBusy = true;
-            var result = await _maintenanceService.UpdatePriorityAsync(SelectedRequest.RequestId, newPriority);
-            IsBusy = false;
-
-            if (result.IsSuccess)
-            {
-                _dialogService.ShowInformation(result.Message);
-                await LoadRequestsAsync();
-            }
-            else
-            {
-                _dialogService.ShowError(result.Message);
-            }
-        }
 
         private async Task ExecuteCloseRequestAsync()
         {
@@ -309,6 +384,28 @@ namespace DormCare.WPF.ViewModels
             if (result.IsSuccess)
             {
                 _dialogService.ShowInformation(result.Message);
+                await LoadRequestsAsync();
+            }
+            else
+            {
+                _dialogService.ShowError(result.Message);
+            }
+        }
+
+        private async Task ExecuteUpdateSelectedStatusAsync()
+        {
+            if (SelectedRequest == null) return;
+
+            string note = string.IsNullOrWhiteSpace(UpdateMessage) ? $"Quản lý đã cập nhật trạng thái thành: {SelectedUpdateStatus}" : UpdateMessage;
+
+            IsBusy = true;
+            var result = await _maintenanceService.UpdateStatusAsync(SelectedRequest.RequestId, SelectedUpdateStatus, note);
+            IsBusy = false;
+
+            if (result.IsSuccess)
+            {
+                _dialogService.ShowInformation("Cập nhật trạng thái và gửi thông báo thành công!");
+                UpdateMessage = string.Empty;
                 await LoadRequestsAsync();
             }
             else

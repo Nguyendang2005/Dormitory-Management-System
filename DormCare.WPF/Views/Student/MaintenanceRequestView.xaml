@@ -20,8 +20,8 @@
         <!-- Body -->
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="1fr"/>
-                <ColumnDefinition Width="1.2fr"/>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="1.2*"/>
             </Grid.ColumnDefinitions>
 
             <!-- Form Create -->
@@ -37,21 +37,14 @@
                         <ComboBoxItem Content="Nội thất (Giường, Bàn, Tủ)"/>
                     </ComboBox>
 
-                    <TextBlock Text="Mức Độ Ưu Tiên:" FontSize="13" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,4"/>
-                    <ComboBox SelectedIndex="1" Style="{StaticResource ModernComboBox}" Margin="0,0,0,12">
-                        <ComboBoxItem Content="Thấp (Low)"/>
-                        <ComboBoxItem Content="Trung bình (Medium)"/>
-                        <ComboBoxItem Content="Cao (High)"/>
-                        <ComboBoxItem Content="Khẩn cấp (Critical)"/>
-                    </ComboBox>
 
                     <TextBlock Text="Tiêu Đề Sự Cố:" FontSize="13" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,4"/>
-                    <TextBox Text="Đèn phòng A101 bị chập chập chớp" Style="{StaticResource FormTextBox}" Margin="0,0,0,12"/>
+                    <TextBox Text="{Binding NewTitle, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormTextBox}" Margin="0,0,0,12"/>
 
                     <TextBlock Text="Mô Tả Chi Tiết:" FontSize="13" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,4"/>
-                    <TextBox Text="Bóng đèn chính trần nhà bị chớp liên tục từ tối qua, cần kĩ thuật kiểm tra thay mới bóng đèn." Style="{StaticResource FormTextBox}" Height="80" TextWrapping="Wrap" AcceptsReturn="True" Margin="0,0,0,16"/>
+                    <TextBox Text="{Binding NewDescription, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormTextBox}" Height="80" TextWrapping="Wrap" AcceptsReturn="True" Margin="0,0,0,16"/>
 
-                    <Button Content="🛠️ Gửi Yêu Cầu Sửa Chữa" Style="{StaticResource PrimaryButton}" Height="40" FontSize="14"/>
+                    <Button Content="🛠️ Gửi Yêu Cầu Sửa Chữa" Command="{Binding CreateRequestCommand}" Style="{StaticResource PrimaryButton}" Height="40" FontSize="14"/>
                 </StackPanel>
             </Border>
 
@@ -59,12 +52,12 @@
             <Border Grid.Column="1" Style="{StaticResource CardBorder}" Margin="12,0,0,0">
                 <DockPanel Margin="16">
                     <TextBlock DockPanel.Dock="Top" Text="Lịch Sử Yêu Cầu Đã Gửi" FontSize="15" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,12"/>
-                    <DataGrid ItemsSource="{Binding MaintenanceRequests}" AutoGenerateColumns="False" IsReadOnly="True" Style="{StaticResource ModernDataGrid}">
+                    <DataGrid ItemsSource="{Binding Requests}" AutoGenerateColumns="False" IsReadOnly="True" Style="{StaticResource ModernDataGrid}">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Mã Yêu Cầu" Binding="{Binding RequestCode}" Width="110"/>
                             <DataGridTextColumn Header="Danh Mục" Binding="{Binding Category}" Width="100"/>
                             <DataGridTextColumn Header="Tiêu Đề" Binding="{Binding Title}" Width="150"/>
-                            <DataGridTextColumn Header="Độ Ưu Tiên" Binding="{Binding Priority}" Width="90"/>
+
                             <DataGridTextColumn Header="Trạng Thái" Binding="{Binding Status}" Width="*"/>
                         </DataGrid.Columns>
                     </DataGrid>

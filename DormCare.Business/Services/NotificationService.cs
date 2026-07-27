@@ -39,5 +39,22 @@ namespace DormCare.Business.Services
             _context.Notifications.Add(notif);
             await _context.SaveChangesAsync();
         }
+
+        public async Task MarkAllAsReadAsync(int userId)
+        {
+            var unread = await _context.Notifications
+                .Where(n => n.UserId == userId && !n.IsRead)
+                .ToListAsync();
+
+            foreach(var n in unread)
+            {
+                n.IsRead = true;
+            }
+
+            if (unread.Any())
+            {
+                await _context.SaveChangesAsync();
+            }
+        }
     }
 }

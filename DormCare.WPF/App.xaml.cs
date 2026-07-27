@@ -225,6 +225,8 @@ namespace DormCare.WPF
                     ServiceProvider.GetRequiredService<InvoiceService>(),
                     ServiceProvider.GetRequiredService<PaymentService>(),
                     ServiceProvider.GetRequiredService<DialogService>(),
+                    ServiceProvider.GetRequiredService<MaintenanceService>(),
+                    ServiceProvider.GetRequiredService<NotificationService>(),
                     user
                 );
                 var studentWindow = new Window

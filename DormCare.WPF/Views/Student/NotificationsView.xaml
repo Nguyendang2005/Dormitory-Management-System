@@ -10,7 +10,7 @@
         <!-- Header -->
         <Border Grid.Row="0" Style="{StaticResource HeaderCard}" Margin="0,0,0,16">
             <DockPanel>
-                <Button DockPanel.Dock="Right" Content="✓ Đánh Dấu Tất Cả Đã Đọc" Style="{StaticResource SecondaryButton}" VerticalAlignment="Center"/>
+                <Button DockPanel.Dock="Right" Content="✓ Đánh Dấu Tất Cả Đã Đọc" Style="{StaticResource SecondaryButton}" VerticalAlignment="Center" Command="{Binding NotificationsViewModel.MarkAllAsReadCommand}"/>
                 <StackPanel VerticalAlignment="Center">
                     <TextBlock Text="🔔 THÔNG BÁO HỆ THỐNG" FontSize="20" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}"/>
                     <TextBlock Text="Xem tất cả các thông báo từ Ban Quản lý Ký túc xá" FontSize="13" Foreground="{StaticResource TextMutedBrush}" Margin="0,4,0,0"/>
@@ -21,33 +21,40 @@
         <!-- Notification Items Grid -->
         <Border Grid.Row="1" Style="{StaticResource CardBorder}">
             <ScrollViewer VerticalScrollBarVisibility="Auto">
-                <StackPanel Margin="16">
-                    <Border Background="#F8FAFC" BorderBrush="{StaticResource CardBorderBrush}" BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,0,12">
-                        <DockPanel>
-                            <Border DockPanel.Dock="Left" Background="#FEF3C7" CornerRadius="6" Width="36" Height="36" Margin="0,0,12,0">
-                                <TextBlock Text="📢" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                <ItemsControl ItemsSource="{Binding NotificationsViewModel.Notifications}" Margin="16">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border BorderBrush="{StaticResource CardBorderBrush}" BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,0,12">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Setter Property="Background" Value="#F8FAFC"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsRead}" Value="False">
+                                                <Setter Property="Background" Value="#E0F2FE"/>
+                                                <Setter Property="BorderBrush" Value="#BAE6FD"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <DockPanel>
+                                    <Border DockPanel.Dock="Left" Background="#D1FAE5" CornerRadius="6" Width="36" Height="36" Margin="0,0,12,0">
+                                        <TextBlock Text="📢" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding Title}" FontWeight="Bold" FontSize="14" Foreground="{StaticResource TextPrimaryBrush}"/>
+                                        <TextBlock Text="{Binding Message}" FontSize="13" Foreground="{StaticResource TextMutedBrush}" Margin="0,4,0,0" TextWrapping="Wrap"/>
+                                        <TextBlock Text="{Binding CreatedAt, StringFormat='{}{0:dd/MM/yyyy HH:mm}'}" FontSize="11" Foreground="{StaticResource TextMutedBrush}" Margin="0,6,0,0"/>
+                                    </StackPanel>
+                                </DockPanel>
                             </Border>
-                            <StackPanel>
-                                <TextBlock Text="Thông Báo Phí Ký Túc Xá Tháng 07/2026" FontWeight="Bold" FontSize="14" Foreground="{StaticResource TextPrimaryBrush}"/>
-                                <TextBlock Text="Hóa đơn lệ phí KTX tháng 07/2026 đã được cập nhật. Vui lòng thanh toán trước ngày 10/07/2026." FontSize="13" Foreground="{StaticResource TextMutedBrush}" Margin="0,4,0,0"/>
-                                <TextBlock Text="26/07/2026 14:00" FontSize="11" Foreground="{StaticResource TextMutedBrush}" Margin="0,6,0,0"/>
-                            </StackPanel>
-                        </DockPanel>
-                    </Border>
-
-                    <Border Background="#F8FAFC" BorderBrush="{StaticResource CardBorderBrush}" BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,0,12">
-                        <DockPanel>
-                            <Border DockPanel.Dock="Left" Background="#D1FAE5" CornerRadius="6" Width="36" Height="36" Margin="0,0,12,0">
-                                <TextBlock Text="🎉" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
-                            <StackPanel>
-                                <TextBlock Text="Chào Mừng Đến Với DormCare" FontWeight="Bold" FontSize="14" Foreground="{StaticResource TextPrimaryBrush}"/>
-                                <TextBlock Text="Tài khoản sinh viên của bạn đã được khởi tạo thành công trên hệ thống quản lý ký túc xá." FontSize="13" Foreground="{StaticResource TextMutedBrush}" Margin="0,4,0,0"/>
-                                <TextBlock Text="25/07/2026 09:00" FontSize="11" Foreground="{StaticResource TextMutedBrush}" Margin="0,6,0,0"/>
-                            </StackPanel>
-                        </DockPanel>
-                    </Border>
-                </StackPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                </ItemsControl>
             </ScrollViewer>
         </Border>
     </Grid>

@@ -139,7 +139,7 @@ namespace DormCare.WPF.ViewModels
             NavigateMaintenanceCommand = new RelayCommand(() =>
             {
                 ActiveTabName = "Maintenance";
-                CurrentView = new MaintenanceViewModel(_maintenanceService, _dialogService, CurrentUser);
+                CurrentView = new MaintenanceViewModel(_maintenanceService, _roomService, _studentService, _dialogService, CurrentUser);
             });
 
             LogoutCommand = new RelayCommand(() => RequestLogout?.Invoke());

@@ -23,7 +23,14 @@
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
                     <Button Content="👤 Thông tin cá nhân" Style="{StaticResource SecondaryButton}" Command="{Binding NavigateProfileCommand}" Margin="0,0,8,0"/>
                     <Button Content="📝 Đăng ký phòng" Style="{StaticResource SecondaryButton}" Command="{Binding NavigateRoomRegistrationCommand}" Margin="0,0,8,0"/>
-                    <Button Content="💳 Hóa Đơn &amp; Thanh Toán" Style="{StaticResource PrimaryButton}" Command="{Binding NavigateInvoiceCommand}" Margin="0,0,8,0"/>
+                    <Button Content="💳 Hóa Đơn &amp; Thanh Toán" Style="{StaticResource SecondaryButton}" Command="{Binding NavigateInvoiceCommand}" Margin="0,0,8,0"/>
+                    <Button Content="🛠️ Báo Cáo Sự Cố" Style="{StaticResource SecondaryButton}" Command="{Binding NavigateMaintenanceCommand}" Margin="0,0,8,0"/>
+                    <Grid Margin="0,0,8,0">
+                        <Button Content="🔔 Thông Báo" Style="{StaticResource PrimaryButton}" Command="{Binding NavigateNotificationsCommand}"/>
+                        <Border Background="Red" CornerRadius="10" MinWidth="20" Height="20" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-6,-6,0" Visibility="{Binding HasUnreadNotifications, Converter={StaticResource BoolToVisConverter}}">
+                            <TextBlock Text="{Binding UnreadNotificationsCount}" Foreground="White" FontSize="10" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="4,0"/>
+                        </Border>
+                    </Grid>
                     <Button Content="🚪 Đăng Xuất" Style="{StaticResource SmallDangerButton}" Height="36" Padding="12,0" Command="{Binding LogoutCommand}" ToolTip="Đăng xuất khỏi hệ thống"/>
                 </StackPanel>
             </DockPanel>
@@ -100,6 +107,16 @@
             <!-- Invoice Tab -->
             <Grid Visibility="{Binding IsInvoiceVisible, Converter={StaticResource BoolToVisConverter}}">
                 <studentViews:StudentInvoiceView DataContext="{Binding InvoiceViewModel}"/>
+            </Grid>
+
+            <!-- Maintenance Tab -->
+            <Grid Visibility="{Binding IsMaintenanceVisible, Converter={StaticResource BoolToVisConverter}}">
+                <studentViews:MaintenanceRequestView DataContext="{Binding MaintenanceViewModel}"/>
+            </Grid>
+
+            <!-- Notifications Tab -->
+            <Grid Visibility="{Binding IsNotificationsVisible, Converter={StaticResource BoolToVisConverter}}">
+                <studentViews:NotificationsView />
             </Grid>
         </Grid>
     </Grid>

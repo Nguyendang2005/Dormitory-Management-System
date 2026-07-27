@@ -29,5 +29,12 @@ namespace DormCare.DataAccess.Repositories
                 .Where(m => m.StudentId == studentId)
                 .ToListAsync();
         }
+
+        public async Task<MaintenanceRequest?> GetRequestByIdWithDetailsAsync(int requestId)
+        {
+            return await _dbSet
+                .Include(m => m.Student)
+                .FirstOrDefaultAsync(m => m.RequestId == requestId);
+        }
     }
 }
