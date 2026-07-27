@@ -64,14 +64,58 @@ namespace DormCare.WPF.ViewModels
         public int? Month
         {
             get => _month;
-            set => SetProperty(ref _month, value);
+            set
+            {
+                if (SetProperty(ref _month, value))
+                {
+                    OnPropertyChanged(nameof(MonthText));
+                }
+            }
+        }
+
+        public string MonthText
+        {
+            get => _month?.ToString() ?? string.Empty;
+            set
+            {
+                if (int.TryParse(value, out int m))
+                {
+                    Month = m;
+                }
+                else
+                {
+                    Month = null;
+                }
+            }
         }
 
         private int? _year = DateTime.Today.Year;
         public int? Year
         {
             get => _year;
-            set => SetProperty(ref _year, value);
+            set
+            {
+                if (SetProperty(ref _year, value))
+                {
+                    OnPropertyChanged(nameof(YearText));
+                }
+            }
+        }
+
+        public string YearText
+        {
+            get => _year?.ToString() ?? string.Empty;
+            set
+            {
+                if (int.TryParse(value, out int y))
+                {
+                    Year = y;
+                }
+                else
+                {
+                    Year = null;
+                }
+            }
         }
 
         private decimal _roomFee;

@@ -46,5 +46,6 @@ namespace DormCare.Business.DTOs
 
         public string OccupancyText => $"{OccupiedBeds} / {Capacity} đang sử dụng ({AvailableBeds} còn trống)";
         public double OccupancyPercentage => Capacity > 0 ? (double)OccupiedBeds / Capacity * 100 : 0;
+        public double OccupancyRate => OccupancyPercentage;
     }
 }
