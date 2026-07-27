@@ -25,6 +25,10 @@ namespace DormCare.Domain.Entities
         public DateTime? PaidAt { get; set; }
         public string Status { get; set; } = "Unpaid"; // Draft, Unpaid, PartiallyPaid, Paid, Overdue, Cancelled
         public string? Note { get; set; }
+        
+        public bool IsDueReminderSent { get; set; } = false;
+        public bool IsOverdueReminderSent { get; set; } = false;
+
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public ICollection<Payment> Payments { get; set; } = new List<Payment>();

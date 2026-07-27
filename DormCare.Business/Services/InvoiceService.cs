@@ -13,15 +13,18 @@ namespace DormCare.Business.Services
         private readonly InvoiceRepository _invoiceRepository;
         private readonly StudentRepository _studentRepository;
         private readonly RoomRepository _roomRepository;
+        private readonly NotificationService _notificationService;
 
         public InvoiceService(
             InvoiceRepository invoiceRepository,
             StudentRepository studentRepository,
-            RoomRepository roomRepository)
+            RoomRepository roomRepository,
+            NotificationService notificationService)
         {
             _invoiceRepository = invoiceRepository;
             _studentRepository = studentRepository;
             _roomRepository = roomRepository;
+            _notificationService = notificationService;
         }
 
         public decimal CalculateTotalFee(decimal roomFee, decimal serviceFee, decimal waterFee, decimal discountAmount)
@@ -118,11 +121,50 @@ namespace DormCare.Business.Services
                     await _invoiceRepository.UpdateAsync(i);
                     hasChanges = true;
                 }
-                else if (totalPaid < i.TotalAmount && i.DueDate.Date < DateTime.Today.Date && i.Status != "Overdue" && i.Status != "Paid")
+                else if (totalPaid < i.TotalAmount)
                 {
-                    i.Status = "Overdue";
-                    await _invoiceRepository.UpdateAsync(i);
-                    hasChanges = true;
+                    if (i.DueDate.Date < DateTime.Today.Date && i.Status != "Overdue")
+                    {
+                        i.Status = "Overdue";
+                        await _invoiceRepository.UpdateAsync(i);
+                        hasChanges = true;
+                    }
+
+                    // Notification Logic
+                    if (i.Student?.User != null || i.Student != null)
+                    {
+                        int userId = i.Student?.User?.UserId ?? i.Student?.UserId ?? 0;
+                        if (userId > 0)
+                        {
+                            double daysUntilDue = (i.DueDate.Date - DateTime.Today.Date).TotalDays;
+
+                            // 1. Nhắc nợ trước hạn 3 ngày (hoặc còn <= 3 ngày mà chưa gửi)
+                            if (daysUntilDue >= 0 && daysUntilDue <= 3 && !i.IsDueReminderSent)
+                            {
+                                await _notificationService.SendNotificationAsync(
+                                    userId,
+                                    "Hóa đơn KTX sắp đến hạn",
+                                    $"Hóa đơn {i.InvoiceCode} của bạn sẽ hết hạn thanh toán vào ngày {i.DueDate:dd/MM/yyyy}. Vui lòng thanh toán sớm để tránh bị tính phí phạt.");
+                                
+                                i.IsDueReminderSent = true;
+                                await _invoiceRepository.UpdateAsync(i);
+                                hasChanges = true;
+                            }
+
+                            // 2. Nhắc nợ quá hạn 3 ngày (trễ >= 3 ngày mà chưa gửi)
+                            if (daysUntilDue <= -3 && !i.IsOverdueReminderSent)
+                            {
+                                await _notificationService.SendNotificationAsync(
+                                    userId,
+                                    "⚠️ Hóa đơn KTX quá hạn thanh toán",
+                                    $"Hóa đơn {i.InvoiceCode} của bạn đã quá hạn thanh toán {Math.Abs(daysUntilDue)} ngày! Yêu cầu thanh toán ngay lập tức.");
+                                
+                                i.IsOverdueReminderSent = true;
+                                await _invoiceRepository.UpdateAsync(i);
+                                hasChanges = true;
+                            }
+                        }
+                    }
                 }
             }
 
