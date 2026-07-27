@@ -51,7 +51,11 @@ namespace DormCare.Business.Services
             return await _context.Beds
                 .Include(b => b.Room)
                     .ThenInclude(r => r.Building)
-                .Where(b => b.RoomId == roomId && b.Status == "Available")
+                .Where(b =>
+                    b.RoomId == roomId &&
+                    b.Status == "Available" &&
+                    b.Room.Status == "Available" &&
+                    b.Room.Building.Status == "Active")
                 .OrderBy(b => b.BedNumber)
                 .Select(b => new BedDto
                 {
@@ -106,11 +110,17 @@ namespace DormCare.Business.Services
             }
 
             var room = await _context.Rooms
+                .Include(r => r.Building)
                 .Include(r => r.Beds)
                 .FirstOrDefaultAsync(r => r.RoomId == roomId);
             if (room == null || room.Status != "Available")
             {
                 return ServiceResult<bool>.Failure("Phòng không tồn tại hoặc không sẵn sàng nhận đăng ký.");
+            }
+
+            if (!IsBuildingActive(room.Building))
+            {
+                return ServiceResult<bool>.Failure("Toa nha cua phong da chon hien khong hoat dong. Vui long chon phong khac.");
             }
 
             if (room.GenderType != "Mixed" && !room.GenderType.Equals(student.Gender, StringComparison.OrdinalIgnoreCase))
@@ -173,6 +183,8 @@ namespace DormCare.Business.Services
                     var app = await _context.RoomApplications
                         .Include(a => a.Student)
                         .Include(a => a.Room)
+                            .ThenInclude(r => r.Building)
+                        .Include(a => a.Room)
                             .ThenInclude(r => r.Beds)
                         .FirstOrDefaultAsync(a => a.ApplicationId == applicationId);
 
@@ -212,6 +224,11 @@ namespace DormCare.Business.Services
                     if (app.Room.Status != "Available")
                     {
                         return ServiceResult<bool>.Failure("Phòng không còn sẵn sàng để duyệt.");
+                    }
+
+                    if (!IsBuildingActive(app.Room.Building))
+                    {
+                        return ServiceResult<bool>.Failure("Khong the duyet don vi toa nha hien khong hoat dong.");
                     }
 
                     if (app.Room.GenderType != "Mixed" && !app.Room.GenderType.Equals(app.Student.Gender, StringComparison.OrdinalIgnoreCase))
@@ -360,6 +377,11 @@ namespace DormCare.Business.Services
             }
 
             return "Ban dang co phong trong ky tuc xa. Vui long hoan thanh thu tuc tra phong truoc khi dang ky phong moi.";
+        }
+
+        private static bool IsBuildingActive(Building? building)
+        {
+            return building != null && building.Status == "Active";
         }
     }
 }

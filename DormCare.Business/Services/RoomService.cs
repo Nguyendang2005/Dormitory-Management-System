@@ -42,7 +42,11 @@ namespace DormCare.Business.Services
         {
             var rooms = await _roomRepository.GetRoomsWithBuildingAndBedsAsync();
             return rooms
-                .Where(r => r.Status == "Available" && (r.Beds.Count == 0 || r.Beds.Any(b => b.Status == "Available")))
+                .Where(r =>
+                    r.Building != null &&
+                    r.Building.Status == "Active" &&
+                    r.Status == "Available" &&
+                    r.Beds.Any(b => b.Status == "Available"))
                 .Select(MapToDto);
         }
 
@@ -59,7 +63,10 @@ namespace DormCare.Business.Services
                 int maintenance = r.Beds.Count(b => b.Status == "Maintenance");
                 int total = r.Beds.Count > 0 ? r.Beds.Count : r.Capacity;
                 int available = total - occupied - maintenance;
-                return available > 0 && r.Status != "Inactive";
+                return available > 0 &&
+                    r.Building != null &&
+                    r.Building.Status == "Active" &&
+                    r.Status == "Available";
             });
 
             return new RoomOccupancyStats

@@ -54,7 +54,11 @@ namespace DormCare.DataAccess.Repositories
             var query = _dbSet
                 .Include(r => r.Building)
                 .Include(r => r.Beds)
-                .Where(r => r.Status == "Available" && r.Beds.Any(b => b.Status == "Available"));
+                .Where(r =>
+                    r.Building != null &&
+                    r.Building.Status == "Active" &&
+                    r.Status == "Available" &&
+                    r.Beds.Any(b => b.Status == "Available"));
 
             if (buildingId.HasValue)
             {
