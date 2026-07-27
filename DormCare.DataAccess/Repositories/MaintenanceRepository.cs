@@ -22,7 +22,7 @@ namespace DormCare.DataAccess.Repositories
                 .ThenBy(m => m.Priority == "Urgent" ? 1 :
                              m.Priority == "High" ? 2 :
                              m.Priority == "Medium" ? 3 : 4)
-                .ThenByDescending(m => m.CreatedAt)
+                .ThenBy(m => m.CreatedAt) // FIFO: Đơn gửi từ lâu chưa xử lý được ưu tiên nổi lên trước
                 .ToListAsync();
         }
 
@@ -36,7 +36,7 @@ namespace DormCare.DataAccess.Repositories
                 .ThenBy(m => m.Priority == "Urgent" ? 1 :
                              m.Priority == "High" ? 2 :
                              m.Priority == "Medium" ? 3 : 4)
-                .ThenByDescending(m => m.CreatedAt)
+                .ThenBy(m => m.CreatedAt) // FIFO: Đơn gửi từ lâu chưa xử lý được ưu tiên nổi lên trước
                 .ToListAsync();
         }
 
