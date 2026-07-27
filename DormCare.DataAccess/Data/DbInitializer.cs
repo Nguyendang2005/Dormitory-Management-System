@@ -83,6 +83,19 @@ namespace DormCare.DataAccess.Data
                     // Fix invalid RoomType values violating CK_Rooms_Type
                     await context.Database.ExecuteSqlRawAsync(
                         "UPDATE Rooms SET RoomType = 'Premium' WHERE RoomType NOT IN ('Standard', 'Premium', 'Accessible');");
+
+                    // Auto-sync approved applications that are missing active RoomAssignments
+                    await context.Database.ExecuteSqlRawAsync(@"
+                        INSERT INTO RoomAssignments (StudentId, RoomId, BedId, StartDate, AssignmentType, Status, AssignedBy, Note, CreatedAt)
+                        SELECT a.StudentId, a.RoomId, a.PreferredBedId, COALESCE(a.ReviewedAt, GETUTCDATE()), 'Application', 'Active', COALESCE(a.ReviewedBy, 1), N'Xếp phòng từ đơn đăng ký được duyệt', GETUTCDATE()
+                        FROM RoomApplications a
+                        WHERE a.Status = 'Approved' AND a.PreferredBedId IS NOT NULL
+                          AND NOT EXISTS (SELECT 1 FROM RoomAssignments ra WHERE ra.StudentId = a.StudentId AND ra.Status = 'Active');
+
+                        UPDATE Beds
+                        SET Status = 'Occupied', UpdatedAt = GETUTCDATE()
+                        WHERE BedId IN (SELECT BedId FROM RoomAssignments WHERE Status = 'Active') AND Status <> 'Occupied';
+                    ");
                 }
                 catch
                 {

@@ -122,7 +122,9 @@ namespace DormCare.Business.Services
                     BedCode = !string.IsNullOrWhiteSpace(b.BedCode) ? b.BedCode : $"{room.RoomNumber}-{b.BedNumber}",
                     Status = b.Status,
                     StudentName = activeAssign?.Student?.FullName ?? "-",
-                    StudentCode = activeAssign?.Student?.StudentCode ?? "-"
+                    StudentCode = activeAssign?.Student?.StudentCode ?? "-",
+                    StartDate = activeAssign?.StartDate,
+                    AssignedByName = activeAssign?.Manager?.Username ?? string.Empty
                 };
             }).ToList();
 
@@ -163,37 +165,43 @@ namespace DormCare.Business.Services
             room.Status = "Available";
 
             var dbContext = _roomRepository.DbContext;
-            using var transaction = await dbContext.Database.BeginTransactionAsync();
-            try
-            {
-                await _roomRepository.AddAsync(room);
-                await _roomRepository.SaveChangesAsync();
+            var strategy = dbContext.Database.CreateExecutionStrategy();
 
-                // Automatically generate Capacity number of Beds inside the transaction
-                for (int i = 1; i <= room.Capacity; i++)
+            return await strategy.ExecuteAsync(async () =>
+            {
+                using var transaction = await dbContext.Database.BeginTransactionAsync();
+                try
                 {
-                    var bed = new Bed
+                    await _roomRepository.AddAsync(room);
+                    await _roomRepository.SaveChangesAsync();
+
+                    // Automatically generate Capacity number of Beds inside the transaction
+                    for (int i = 1; i <= room.Capacity; i++)
                     {
-                        RoomId = room.RoomId,
-                        BedNumber = $"B{i}",
-                        BedCode = $"{room.RoomNumber}-B{i}",
-                        Status = "Available",
-                        Description = $"Giường số {i} thuộc phòng {room.RoomNumber}"
-                    };
-                    await dbContext.Set<Bed>().AddAsync(bed);
+                        var bed = new Bed
+                        {
+                            RoomId = room.RoomId,
+                            BedNumber = $"B{i}",
+                            BedCode = $"{room.RoomNumber}-B{i}",
+                            Status = "Available",
+                            Description = $"Giường số {i} thuộc phòng {room.RoomNumber}"
+                        };
+                        await dbContext.Set<Bed>().AddAsync(bed);
+                    }
+
+                    await dbContext.SaveChangesAsync();
+                    await transaction.CommitAsync();
+
+                    RoomUpdated?.Invoke(this, EventArgs.Empty);
+                    return ServiceResult<Room>.Success(room, $"Tạo phòng '{room.RoomNumber}' và {room.Capacity} giường thành công!");
                 }
-
-                await dbContext.SaveChangesAsync();
-                await transaction.CommitAsync();
-
-                RoomUpdated?.Invoke(this, EventArgs.Empty);
-                return ServiceResult<Room>.Success(room, $"Tạo phòng '{room.RoomNumber}' và {room.Capacity} giường thành công!");
-            }
-            catch (Exception ex)
-            {
-                await transaction.RollbackAsync();
-                return ServiceResult<Room>.Failure($"Lỗi khi tạo phòng và giường vào Database: {ex.Message}");
-            }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    string detail = ex.InnerException?.Message ?? ex.Message;
+                    return ServiceResult<Room>.Failure($"Lỗi khi tạo phòng và giường vào cơ sở dữ liệu: {detail}");
+                }
+            });
         }
 
         public async Task<ServiceResult<bool>> UpdateRoomAsync(Room room)
@@ -262,11 +270,23 @@ namespace DormCare.Business.Services
             }
 
             existingRoom.UpdatedAt = DateTime.UtcNow;
-            await _roomRepository.UpdateAsync(existingRoom);
-            await _roomRepository.SaveChangesAsync();
 
-            RoomUpdated?.Invoke(this, EventArgs.Empty);
-            return ServiceResult<bool>.Success(true, $"Cập nhật phòng '{existingRoom.RoomNumber}' thành công!");
+            try
+            {
+                await _roomRepository.UpdateAsync(existingRoom);
+                await _roomRepository.SaveChangesAsync();
+
+                RoomUpdated?.Invoke(this, EventArgs.Empty);
+                return ServiceResult<bool>.Success(true, $"Cập nhật phòng '{existingRoom.RoomNumber}' thành công!");
+            }
+            catch (DbUpdateException ex)
+            {
+                return ServiceResult<bool>.Failure($"Lỗi cơ sở dữ liệu khi cập nhật phòng: {ex.InnerException?.Message ?? ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                return ServiceResult<bool>.Failure($"Không thể cập nhật phòng: {ex.Message}");
+            }
         }
 
         public async Task<RoomDeleteResult> CheckRoomDeleteDependencyAsync(int roomId)
@@ -302,17 +322,30 @@ namespace DormCare.Business.Services
 
         public async Task<ServiceResult<bool>> DeactivateRoomAsync(int roomId)
         {
-            var room = await _roomRepository.GetByIdAsync(roomId);
+            var room = await _roomRepository.GetRoomWithDetailsAsync(roomId);
             if (room == null) return ServiceResult<bool>.Failure("Phòng không tồn tại.");
+
+            int occupiedCount = room.Beds.Count(b => b.Status == "Occupied");
+            if (occupiedCount > 0)
+            {
+                return ServiceResult<bool>.Failure($"❌ Không thể chuyển phòng '{room.RoomNumber}' sang Inactive vì đang có {occupiedCount} sinh viên đang cư trú.\nVui lòng check-out sinh viên trước.");
+            }
 
             room.Status = "Inactive";
             room.UpdatedAt = DateTime.UtcNow;
 
-            await _roomRepository.UpdateAsync(room);
-            await _roomRepository.SaveChangesAsync();
+            try
+            {
+                await _roomRepository.UpdateAsync(room);
+                await _roomRepository.SaveChangesAsync();
 
-            RoomUpdated?.Invoke(this, EventArgs.Empty);
-            return ServiceResult<bool>.Success(true, $"Đã chuyển trạng thái phòng '{room.RoomNumber}' sang Inactive.");
+                RoomUpdated?.Invoke(this, EventArgs.Empty);
+                return ServiceResult<bool>.Success(true, $"Đã chuyển trạng thái phòng '{room.RoomNumber}' sang Inactive.");
+            }
+            catch (Exception ex)
+            {
+                return ServiceResult<bool>.Failure($"Không thể vô hiệu hóa phòng: {ex.Message}");
+            }
         }
 
         public async Task<ServiceResult<bool>> DeleteRoomAsync(int roomId)
@@ -326,11 +359,18 @@ namespace DormCare.Business.Services
             var room = await _roomRepository.GetByIdAsync(roomId);
             if (room == null) return ServiceResult<bool>.Failure("Phòng không tồn tại.");
 
-            await _roomRepository.DeleteAsync(room);
-            await _roomRepository.SaveChangesAsync();
+            try
+            {
+                await _roomRepository.DeleteAsync(room);
+                await _roomRepository.SaveChangesAsync();
 
-            RoomUpdated?.Invoke(this, EventArgs.Empty);
-            return ServiceResult<bool>.Success(true, $"Xóa phòng '{room.RoomNumber}' thành công!");
+                RoomUpdated?.Invoke(this, EventArgs.Empty);
+                return ServiceResult<bool>.Success(true, $"Xóa phòng '{room.RoomNumber}' thành công!");
+            }
+            catch (DbUpdateException)
+            {
+                return ServiceResult<bool>.Failure($"Không thể xóa phòng '{room.RoomNumber}' do ràng buộc dữ liệu liên quan trong CSDL SQL Server.");
+            }
         }
 
         private static RoomDto MapToDto(Room r)
@@ -362,6 +402,49 @@ namespace DormCare.Business.Services
                 MaintenanceBeds = maintenance,
                 TotalBedsCreated = r.Beds.Count
             };
+        }
+
+        /// <summary>Lấy danh sách sinh viên đang cư trú trong phòng (active assignments).</summary>
+        public async Task<List<RoomResidentDto>> GetRoomResidentsAsync(int roomId)
+        {
+            var assignments = await _roomRepository.GetRoomAllAssignmentsAsync(roomId);
+            return assignments
+                .Where(ra => ra.Status == "Active")
+                .Select(ra => new RoomResidentDto
+                {
+                    AssignmentId = ra.AssignmentId,
+                    StudentId = ra.StudentId,
+                    StudentCode = ra.Student?.StudentCode ?? string.Empty,
+                    FullName = ra.Student?.FullName ?? string.Empty,
+                    BedCode = ra.Bed?.BedCode ?? string.Empty,
+                    BedNumber = ra.Bed?.BedNumber ?? string.Empty,
+                    StartDate = ra.StartDate,
+                    AssignmentType = ra.AssignmentType,
+                    AssignedByName = ra.Manager?.Username ?? string.Empty,
+                    Status = ra.Status
+                })
+                .OrderBy(r => r.BedCode)
+                .ToList();
+        }
+
+        /// <summary>Lấy lịch sử cư trú đầy đủ của phòng (cả Active lẫn Ended).</summary>
+        public async Task<List<RoomHistoryEntryDto>> GetRoomHistoryAsync(int roomId)
+        {
+            var assignments = await _roomRepository.GetRoomAllAssignmentsAsync(roomId);
+            return assignments
+                .Select(ra => new RoomHistoryEntryDto
+                {
+                    AssignmentId = ra.AssignmentId,
+                    StudentCode = ra.Student?.StudentCode ?? string.Empty,
+                    FullName = ra.Student?.FullName ?? string.Empty,
+                    BedCode = ra.Bed?.BedCode ?? string.Empty,
+                    StartDate = ra.StartDate,
+                    EndDate = ra.EndDate,
+                    Status = ra.Status,
+                    Note = ra.Note ?? string.Empty,
+                    AssignedByName = ra.Manager?.Username ?? string.Empty
+                })
+                .ToList();
         }
     }
 }

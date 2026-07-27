@@ -231,12 +231,14 @@
                 <DataGrid ItemsSource="{Binding Buildings}" SelectedItem="{Binding SelectedBuilding}" AutoGenerateColumns="False" IsReadOnly="True" Style="{StaticResource ModernDataGrid}">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Mã Tòa" Binding="{Binding BuildingCode}" Width="85" FontWeight="Bold"/>
-                        <DataGridTextColumn Header="Tên Tòa Nhà" Binding="{Binding BuildingName}" Width="160" FontWeight="Bold"/>
-                        <DataGridTextColumn Header="Địa Chỉ" Binding="{Binding Address}" Width="240"/>
-                        <DataGridTextColumn Header="Số Tầng" Binding="{Binding NumberOfFloors}" Width="80"/>
-                        <DataGridTextColumn Header="Tổng Phòng" Binding="{Binding TotalRooms}" Width="100"/>
-                        <DataGridTextColumn Header="Tổng Giường" Binding="{Binding TotalBeds}" Width="105"/>
-                        <DataGridTextColumn Header="Giường Trống" Binding="{Binding AvailableBeds}" Width="105" FontWeight="Bold" Foreground="#059669"/>
+                        <DataGridTextColumn Header="Tên Tòa Nhà" Binding="{Binding BuildingName}" Width="150" FontWeight="Bold"/>
+                        <DataGridTextColumn Header="Địa Chỉ" Binding="{Binding Address}" Width="200"/>
+                        <DataGridTextColumn Header="Số Tầng" Binding="{Binding NumberOfFloors}" Width="70"/>
+                        <DataGridTextColumn Header="Tổng Phòng" Binding="{Binding TotalRooms}" Width="90"/>
+                        <DataGridTextColumn Header="Tổng Giường" Binding="{Binding TotalBeds}" Width="95"/>
+                        <DataGridTextColumn Header="Đang Ở" Binding="{Binding OccupiedBeds}" Width="75" FontWeight="Bold"/>
+                        <DataGridTextColumn Header="Còn Trống" Binding="{Binding AvailableBeds}" Width="80"/>
+                        <DataGridTextColumn Header="Bảo Trì" Binding="{Binding MaintenanceBeds}" Width="75"/>
 
                         <!-- Occupancy Rate Progress Column -->
                         <DataGridTemplateColumn Header="Tỷ Lệ Lấp Đầy" Width="210">

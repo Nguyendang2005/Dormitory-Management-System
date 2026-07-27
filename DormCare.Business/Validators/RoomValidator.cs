@@ -72,12 +72,17 @@ namespace DormCare.Business.Validators
                 return RoomValidationResult.Failure($"Số tầng phải nằm trong khoảng từ 1 đến {building.NumberOfFloors} (theo quy mô tòa nhà '{building.BuildingName}').");
             }
 
-            // 4. RoomType validation
+            // 4. RoomType validation (CK_Rooms_Type: Standard, Premium, Accessible)
             string roomType = room.RoomType?.Trim() ?? string.Empty;
             if (string.IsNullOrWhiteSpace(roomType))
                 return RoomValidationResult.Failure("Vui lòng chọn loại phòng.");
 
-            // 5. Capacity validation
+            if (roomType != "Standard" && roomType != "Premium" && roomType != "Accessible")
+            {
+                return RoomValidationResult.Failure("Loại phòng không hợp lệ. Chỉ chấp nhận: Standard, Premium, Accessible.");
+            }
+
+            // 5. Capacity validation (CK_Rooms_Capacity: 1 - 20)
             if (room.Capacity < 1 || room.Capacity > 20)
                 return RoomValidationResult.Failure("Sức chứa phòng phải nằm trong khoảng từ 1 đến 20 giường.");
 
@@ -86,25 +91,47 @@ namespace DormCare.Business.Validators
                 return RoomValidationResult.Failure($"Không thể giảm sức chứa xuống {room.Capacity}. Phòng hiện đang có {currentOccupiedBeds} sinh viên đang cư trú.");
             }
 
-            // 6. MonthlyRent validation
+            // 6. MonthlyRent validation (CK_Rooms_Rent: >= 0)
             if (room.MonthlyRent <= 0)
                 return RoomValidationResult.Failure("Giá thuê phòng phải lớn hơn 0 VNĐ.");
 
             if (room.MonthlyRent > 999999999m)
                 return RoomValidationResult.Failure("Giá thuê phòng vượt quá hạn mức cho phép (Tối đa 999,999,999 VNĐ).");
 
-            // 7. GenderType validation
+            // 7. GenderType validation (CK_Rooms_Gender: Male, Female, Mixed)
             string genderType = room.GenderType?.Trim() ?? string.Empty;
             if (string.IsNullOrWhiteSpace(genderType))
                 return RoomValidationResult.Failure("Vui lòng chọn đối tượng cư trú.");
+
+            if (genderType != "Male" && genderType != "Female" && genderType != "Mixed")
+            {
+                return RoomValidationResult.Failure("Đối tượng cư trú không hợp lệ. Chỉ chấp nhận: Male, Female, Mixed.");
+            }
 
             if (isEdit && currentOccupiedBeds > 0 && !currentGenderType.Equals(genderType, StringComparison.OrdinalIgnoreCase))
             {
                 return RoomValidationResult.Failure($"Không thể thay đổi đối tượng cư trú ({currentGenderType} → {genderType}) khi phòng đang có {currentOccupiedBeds} sinh viên đang ở. Vui lòng check-out sinh viên trước.");
             }
 
-            // 8. Description length check
-            if (room.Description != null && room.Description.Length > 500)
+            // 8. Status validation (CK_Rooms_Status: Available, Full, Maintenance, Inactive)
+            string status = room.Status?.Trim() ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(status))
+            {
+                return RoomValidationResult.Failure("Trạng thái phòng không được để trống.");
+            }
+
+            if (status != "Available" && status != "Full" && status != "Maintenance" && status != "Inactive")
+            {
+                return RoomValidationResult.Failure("Trạng thái phòng không hợp lệ. Chỉ chấp nhận: Available, Full, Maintenance, Inactive.");
+            }
+
+            if (isEdit && currentOccupiedBeds > 0 && (status == "Maintenance" || status == "Inactive"))
+            {
+                return RoomValidationResult.Failure($"Không thể chuyển phòng sang trạng thái '{status}' khi phòng đang có {currentOccupiedBeds} sinh viên đang ở.");
+            }
+
+            // 9. Description length check
+            if (room.Description != null && room.Description.Trim().Length > 500)
                 return RoomValidationResult.Failure("Mô tả phòng không được vượt quá 500 ký tự.");
 
             return RoomValidationResult.Success();

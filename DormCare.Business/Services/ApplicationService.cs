@@ -76,27 +76,27 @@ namespace DormCare.Business.Services
         {
             if (string.IsNullOrWhiteSpace(reason))
             {
-                return ServiceResult<bool>.Failure("Vui long nhap ly do dang ky phong.");
+                return ServiceResult<bool>.Failure("Vui lòng nhập lý do đăng ký phòng.");
             }
 
             var student = await _context.Students.FirstOrDefaultAsync(s => s.StudentId == studentId && s.Status == "Active");
             if (student == null)
             {
-                return ServiceResult<bool>.Failure("Khong tim thay sinh vien dang hoat dong.");
+                return ServiceResult<bool>.Failure("Không tìm thấy sinh viên đang hoạt động.");
             }
 
             var activeAssignment = await _context.RoomAssignments
                 .AnyAsync(a => a.StudentId == studentId && a.Status == "Active");
             if (activeAssignment)
             {
-                return ServiceResult<bool>.Failure("Sinh vien da co cho o dang hoat dong.");
+                return ServiceResult<bool>.Failure("Sinh viên đã có chỗ ở đang hoạt động.");
             }
 
             var existingOpenApplication = await _context.RoomApplications
                 .AnyAsync(a => a.StudentId == studentId && (a.Status == "Pending" || a.Status == "Approved"));
             if (existingOpenApplication)
             {
-                return ServiceResult<bool>.Failure("Sinh vien da co don dang ky dang cho duyet hoac da duoc duyet.");
+                return ServiceResult<bool>.Failure("Sinh viên đã có đơn đăng ký đang chờ duyệt hoặc đã được duyệt.");
             }
 
             var room = await _context.Rooms
@@ -104,23 +104,23 @@ namespace DormCare.Business.Services
                 .FirstOrDefaultAsync(r => r.RoomId == roomId);
             if (room == null || room.Status != "Available")
             {
-                return ServiceResult<bool>.Failure("Phong khong ton tai hoac khong san sang nhan dang ky.");
+                return ServiceResult<bool>.Failure("Phòng không tồn tại hoặc không sẵn sàng nhận đăng ký.");
             }
 
             if (room.GenderType != "Mixed" && !room.GenderType.Equals(student.Gender, StringComparison.OrdinalIgnoreCase))
             {
-                return ServiceResult<bool>.Failure("Phong khong phu hop gioi tinh cua sinh vien.");
+                return ServiceResult<bool>.Failure("Phòng không phù hợp với giới tính của sinh viên.");
             }
 
             var availableBeds = room.Beds.Where(b => b.Status == "Available").ToList();
             if (availableBeds.Count == 0)
             {
-                return ServiceResult<bool>.Failure("Phong da het giuong trong.");
+                return ServiceResult<bool>.Failure("Phòng đã hết giường trống.");
             }
 
             if (preferredBedId.HasValue && !availableBeds.Any(b => b.BedId == preferredBedId.Value))
             {
-                return ServiceResult<bool>.Failure("Giuong mong muon khong thuoc phong nay hoac khong con trong.");
+                return ServiceResult<bool>.Failure("Giường mong muốn không thuộc phòng này hoặc không còn trống.");
             }
 
             var now = DateTime.UtcNow;
@@ -140,7 +140,7 @@ namespace DormCare.Business.Services
             await _context.SaveChangesAsync();
 
             ApplicationUpdated?.Invoke(this, EventArgs.Empty);
-            return ServiceResult<bool>.Success(true, "Gui yeu cau dang ky phong thanh cong.");
+            return ServiceResult<bool>.Success(true, "Gửi yêu cầu đăng ký phòng thành công.");
         }
 
         public async Task<ServiceResult<bool>> ApproveApplicationAsync(int applicationId, int reviewerId, string reviewNote)
@@ -150,151 +150,191 @@ namespace DormCare.Business.Services
 
         public async Task<ServiceResult<bool>> ApproveApplicationAsync(int applicationId, int reviewerId, string reviewNote, int? selectedBedId)
         {
-            await using var transaction = await _context.Database.BeginTransactionAsync(IsolationLevel.Serializable);
+            var strategy = _context.Database.CreateExecutionStrategy();
 
-            try
+            return await strategy.ExecuteAsync(async () =>
             {
-                var reviewerIsManager = await _context.Users.AnyAsync(u => u.UserId == reviewerId && u.Role == "Manager" && u.IsActive);
-                if (!reviewerIsManager)
+                await using var transaction = await _context.Database.BeginTransactionAsync(IsolationLevel.Serializable);
+
+                try
                 {
-                    return ServiceResult<bool>.Failure("Tai khoan khong co quyen duyet don.");
+                    var reviewerIsManager = await _context.Users.AnyAsync(u => u.UserId == reviewerId && u.Role == "Manager" && u.IsActive);
+                    if (!reviewerIsManager)
+                    {
+                        return ServiceResult<bool>.Failure("Tài khoản không có quyền duyệt đơn.");
+                    }
+
+                    var app = await _context.RoomApplications
+                        .Include(a => a.Student)
+                        .Include(a => a.Room)
+                            .ThenInclude(r => r.Beds)
+                        .FirstOrDefaultAsync(a => a.ApplicationId == applicationId);
+
+                    if (app == null)
+                    {
+                        return ServiceResult<bool>.Failure("Đơn đăng ký không tồn tại.");
+                    }
+
+                    if (app.Status != "Pending")
+                    {
+                        return ServiceResult<bool>.Failure("Đơn đăng ký đã được xử lý trước đó.");
+                    }
+
+                    var hasActiveAssignment = await _context.RoomAssignments
+                        .AnyAsync(a => a.StudentId == app.StudentId && a.Status == "Active");
+                    if (hasActiveAssignment)
+                    {
+                        return ServiceResult<bool>.Failure("Sinh viên đã có chỗ ở đang hoạt động.");
+                    }
+
+                    var hasApprovedApplication = await _context.RoomApplications
+                        .AnyAsync(a => a.ApplicationId != applicationId && a.StudentId == app.StudentId && a.Status == "Approved");
+                    if (hasApprovedApplication)
+                    {
+                        return ServiceResult<bool>.Failure("Sinh viên đã có đơn khác được duyệt.");
+                    }
+
+                    if (app.Room.Status != "Available")
+                    {
+                        return ServiceResult<bool>.Failure("Phòng không còn sẵn sàng để duyệt.");
+                    }
+
+                    if (app.Room.GenderType != "Mixed" && !app.Room.GenderType.Equals(app.Student.Gender, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return ServiceResult<bool>.Failure("Phòng không phù hợp với giới tính của sinh viên.");
+                    }
+
+                    var bedId = selectedBedId ?? app.PreferredBedId;
+                    if (!bedId.HasValue)
+                    {
+                        return ServiceResult<bool>.Failure("Vui lòng chọn giường để duyệt đơn.");
+                    }
+
+                    var bed = await _context.Beds.FirstOrDefaultAsync(b => b.BedId == bedId.Value);
+                    if (bed == null || bed.RoomId != app.RoomId)
+                    {
+                        return ServiceResult<bool>.Failure("Giường không thuộc phòng đăng ký.");
+                    }
+
+                    if (bed.Status != "Available")
+                    {
+                        return ServiceResult<bool>.Failure("Giường đã được sử dụng, giữ chỗ hoặc bảo trì.");
+                    }
+
+                    var now = DateTime.UtcNow;
+                    bed.Status = "Occupied";
+                    bed.UpdatedAt = now;
+                    app.PreferredBedId = bed.BedId;
+                    app.Status = "Approved";
+                    app.ReviewedBy = reviewerId;
+                    app.ReviewedAt = now;
+                    app.ReviewNote = string.IsNullOrWhiteSpace(reviewNote) ? "Đã duyệt yêu cầu đăng ký phòng." : reviewNote.Trim();
+
+                    // 1. Tạo RoomAssignment hoạt động (Active) cho sinh viên
+                    var assignment = new RoomAssignment
+                    {
+                        StudentId = app.StudentId,
+                        RoomId = app.RoomId,
+                        BedId = bed.BedId,
+                        StartDate = now.Date,
+                        AssignmentType = "InitialAssignment",
+                        Status = "Active",
+                        AssignedBy = reviewerId,
+                        Note = $"Check-in xếp phòng theo đơn đăng ký #{app.ApplicationCode}",
+                        CreatedAt = now
+                    };
+                    _context.RoomAssignments.Add(assignment);
+
+                    // 2. Cập nhật trạng thái phòng nếu không còn giường trống
+                    if (!app.Room.Beds.Any(b => b.BedId != bed.BedId && b.Status == "Available"))
+                    {
+                        app.Room.Status = "Full";
+                        app.Room.UpdatedAt = now;
+                    }
+
+                    // 3. Gửi thông báo cho sinh viên
+                    if (app.Student != null)
+                    {
+                        _context.Notifications.Add(new Notification
+                        {
+                            UserId = app.Student.UserId,
+                            Title = "Đơn đăng ký phòng đã được duyệt",
+                            Message = $"Chúc mừng! Yêu cầu đăng ký phòng của bạn đã được duyệt. Bạn đã được xếp vào giường {bed.BedCode} (Phòng {app.Room.RoomNumber}).",
+                            NotificationType = "ApplicationApproved",
+                            CreatedAt = now
+                        });
+                    }
+
+                    await _context.SaveChangesAsync();
+                    await transaction.CommitAsync();
+                    ApplicationUpdated?.Invoke(this, EventArgs.Empty);
+
+                    return ServiceResult<bool>.Success(true, $"Đã duyệt đơn đăng ký, gán giường {bed.BedCode} và xếp chỗ ở cho sinh viên thành công.");
                 }
-
-                var app = await _context.RoomApplications
-                    .Include(a => a.Student)
-                    .Include(a => a.Room)
-                        .ThenInclude(r => r.Beds)
-                    .FirstOrDefaultAsync(a => a.ApplicationId == applicationId);
-
-                if (app == null)
+                catch (Exception ex)
                 {
-                    return ServiceResult<bool>.Failure("Don dang ky khong ton tai.");
+                    await transaction.RollbackAsync();
+                    string detail = ex.InnerException?.Message ?? ex.Message;
+                    return ServiceResult<bool>.Failure($"Không thể duyệt đơn: {detail}");
                 }
-
-                if (app.Status != "Pending")
-                {
-                    return ServiceResult<bool>.Failure("Don dang ky da duoc xu ly truoc do.");
-                }
-
-                var hasActiveAssignment = await _context.RoomAssignments
-                    .AnyAsync(a => a.StudentId == app.StudentId && a.Status == "Active");
-                if (hasActiveAssignment)
-                {
-                    return ServiceResult<bool>.Failure("Sinh vien da co cho o dang hoat dong.");
-                }
-
-                var hasApprovedApplication = await _context.RoomApplications
-                    .AnyAsync(a => a.ApplicationId != applicationId && a.StudentId == app.StudentId && a.Status == "Approved");
-                if (hasApprovedApplication)
-                {
-                    return ServiceResult<bool>.Failure("Sinh vien da co don khac duoc duyet.");
-                }
-
-                if (app.Room.Status != "Available")
-                {
-                    return ServiceResult<bool>.Failure("Phong khong con san sang de duyet.");
-                }
-
-                if (app.Room.GenderType != "Mixed" && !app.Room.GenderType.Equals(app.Student.Gender, StringComparison.OrdinalIgnoreCase))
-                {
-                    return ServiceResult<bool>.Failure("Phong khong phu hop gioi tinh cua sinh vien.");
-                }
-
-                var bedId = selectedBedId ?? app.PreferredBedId;
-                if (!bedId.HasValue)
-                {
-                    return ServiceResult<bool>.Failure("Vui long chon giuong de duyet don.");
-                }
-
-                var bed = await _context.Beds.FirstOrDefaultAsync(b => b.BedId == bedId.Value);
-                if (bed == null || bed.RoomId != app.RoomId)
-                {
-                    return ServiceResult<bool>.Failure("Giuong khong thuoc phong dang ky.");
-                }
-
-                if (bed.Status != "Available")
-                {
-                    return ServiceResult<bool>.Failure("Giuong da duoc su dung, giu cho hoac bao tri.");
-                }
-
-                var now = DateTime.UtcNow;
-                bed.Status = "Reserved";
-                bed.UpdatedAt = now;
-                app.PreferredBedId = bed.BedId;
-                app.Status = "Approved";
-                app.ReviewedBy = reviewerId;
-                app.ReviewedAt = now;
-                app.ReviewNote = string.IsNullOrWhiteSpace(reviewNote) ? "Da duyet yeu cau dang ky phong." : reviewNote.Trim();
-
-                if (!app.Room.Beds.Any(b => b.BedId != bed.BedId && b.Status == "Available"))
-                {
-                    app.Room.Status = "Full";
-                    app.Room.UpdatedAt = now;
-                }
-
-                await _context.SaveChangesAsync();
-                await transaction.CommitAsync();
-                ApplicationUpdated?.Invoke(this, EventArgs.Empty);
-
-                return ServiceResult<bool>.Success(true, "Da duyet yeu cau va giu cho giuong thanh cong.");
-            }
-            catch (Exception)
-            {
-                await transaction.RollbackAsync();
-                return ServiceResult<bool>.Failure("Khong the duyet don. Du lieu chua duoc thay doi, vui long thu lai.");
-            }
+            });
         }
 
         public async Task<ServiceResult<bool>> RejectApplicationAsync(int applicationId, int reviewerId, string reviewNote)
         {
             if (string.IsNullOrWhiteSpace(reviewNote))
             {
-                return ServiceResult<bool>.Failure("Vui long nhap ly do tu choi.");
+                return ServiceResult<bool>.Failure("Vui lòng nhập lý do từ chối.");
             }
 
-            await using var transaction = await _context.Database.BeginTransactionAsync(IsolationLevel.Serializable);
+            var strategy = _context.Database.CreateExecutionStrategy();
 
-            try
+            return await strategy.ExecuteAsync(async () =>
             {
-                var reviewerIsManager = await _context.Users.AnyAsync(u => u.UserId == reviewerId && u.Role == "Manager" && u.IsActive);
-                if (!reviewerIsManager)
+                await using var transaction = await _context.Database.BeginTransactionAsync(IsolationLevel.Serializable);
+
+                try
                 {
-                    return ServiceResult<bool>.Failure("Tai khoan khong co quyen tu choi don.");
-                }
+                    var reviewerIsManager = await _context.Users.AnyAsync(u => u.UserId == reviewerId && u.Role == "Manager" && u.IsActive);
+                    if (!reviewerIsManager)
+                    {
+                        return ServiceResult<bool>.Failure("Tài khoản không có quyền từ chối đơn.");
+                    }
 
-                var app = await _context.RoomApplications.FindAsync(applicationId);
-                if (app == null)
+                    var app = await _context.RoomApplications.FindAsync(applicationId);
+                    if (app == null)
+                    {
+                        return ServiceResult<bool>.Failure("Đơn đăng ký không tồn tại.");
+                    }
+
+                    if (app.Status != "Pending")
+                    {
+                        return ServiceResult<bool>.Failure("Chỉ có thể từ chối đơn đang chờ duyệt.");
+                    }
+
+                    app.Status = "Rejected";
+                    app.ReviewedBy = reviewerId;
+                    app.ReviewedAt = DateTime.UtcNow;
+                    app.ReviewNote = reviewNote.Trim();
+
+                    await _context.SaveChangesAsync();
+                    await transaction.CommitAsync();
+                    ApplicationUpdated?.Invoke(this, EventArgs.Empty);
+
+                    return ServiceResult<bool>.Success(true, "Đã từ chối đơn đăng ký thành công.");
+                }
+                catch (Exception ex)
                 {
-                    return ServiceResult<bool>.Failure("Don dang ky khong ton tai.");
+                    await transaction.RollbackAsync();
+                    string detail = ex.InnerException?.Message ?? ex.Message;
+                    return ServiceResult<bool>.Failure($"Không thể từ chối đơn: {detail}");
                 }
-
-                if (app.Status != "Pending")
-                {
-                    return ServiceResult<bool>.Failure("Chi co the tu choi don dang cho duyet.");
-                }
-
-                app.Status = "Rejected";
-                app.ReviewedBy = reviewerId;
-                app.ReviewedAt = DateTime.UtcNow;
-                app.ReviewNote = reviewNote.Trim();
-
-                await _context.SaveChangesAsync();
-                await transaction.CommitAsync();
-                ApplicationUpdated?.Invoke(this, EventArgs.Empty);
-
-                return ServiceResult<bool>.Success(true, "Da tu choi yeu cau dang ky.");
-            }
-            catch (Exception)
-            {
-                await transaction.RollbackAsync();
-                return ServiceResult<bool>.Failure("Khong the tu choi don. Du lieu chua duoc thay doi, vui long thu lai.");
-            }
+            });
         }
 
-        private static string BuildApplicationCode(int studentId, DateTime now)
+        private static string BuildApplicationCode(int studentId, DateTime dt)
         {
-            var rawCode = $"APP{now:yyyyMMddHHmmss}{studentId:D4}";
-            return rawCode.Length <= 30 ? rawCode : rawCode[^30..];
+            return $"APP-{studentId}-{dt:yyyyMMdd-HHmmss}";
         }
     }
 }

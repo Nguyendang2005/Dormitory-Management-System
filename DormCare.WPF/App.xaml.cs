@@ -221,6 +221,7 @@ namespace DormCare.WPF
                 var studentVm = new StudentDashboardViewModel(
                     ServiceProvider.GetRequiredService<StudentService>(),
                     ServiceProvider.GetRequiredService<RoomService>(),
+                    ServiceProvider.GetRequiredService<BuildingService>(),
                     ServiceProvider.GetRequiredService<ApplicationService>(),
                     ServiceProvider.GetRequiredService<InvoiceService>(),
                     ServiceProvider.GetRequiredService<PaymentService>(),

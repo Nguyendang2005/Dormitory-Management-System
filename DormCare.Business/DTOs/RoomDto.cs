@@ -20,10 +20,23 @@ namespace DormCare.Business.DTOs
         public int ReservedBeds { get; set; }
         public int MaintenanceBeds { get; set; }
         public int TotalBedsCreated { get; set; }
-        public int TotalBeds => Capacity;
+        public int TotalBeds
+        {
+            get => Capacity;
+            set { }
+        }
 
-        public string OccupancySummary => $"{OccupiedBeds}/{Capacity} đang ở";
-        public double OccupancyRate => Capacity > 0 ? (double)OccupiedBeds / Capacity * 100 : 0;
+        public string OccupancySummary
+        {
+            get => $"{OccupiedBeds}/{Capacity} đang ở";
+            set { }
+        }
+
+        public double OccupancyRate
+        {
+            get => Capacity > 0 ? (double)OccupiedBeds / Capacity * 100 : 0;
+            set { }
+        }
 
         public string StatusDisplay
         {

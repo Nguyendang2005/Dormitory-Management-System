@@ -97,7 +97,8 @@ namespace DormCare.Business.Services
         private static BedDto MapToDto(Bed b)
         {
             var activeAssign = b.RoomAssignments?.FirstOrDefault(ra => ra.Status == "Active");
-            string studentName = activeAssign?.Student?.FullName ?? (b.Status == "Occupied" ? "Sinh viên" : "Chưa xếp");
+            string studentName = activeAssign?.Student?.FullName ?? (b.Status == "Occupied" ? "Sinh viên" : string.Empty);
+            string studentCode = activeAssign?.Student?.StudentCode ?? string.Empty;
 
             return new BedDto
             {
@@ -109,6 +110,8 @@ namespace DormCare.Business.Services
                 BedCode = b.BedCode,
                 Status = b.Status,
                 StudentName = studentName,
+                StudentCode = studentCode,
+                StartDate = activeAssign?.StartDate,
                 Description = b.Description ?? string.Empty
             };
         }

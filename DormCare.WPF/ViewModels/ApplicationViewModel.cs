@@ -32,6 +32,7 @@ namespace DormCare.WPF.ViewModels
                 {
                     ReviewNote = value?.ReviewNote ?? string.Empty;
                     SelectedBed = null;
+                    ClearStatus();
                     _ = LoadAvailableBedsAsync();
                     System.Windows.Input.CommandManager.InvalidateRequerySuggested();
                 }
@@ -60,6 +61,7 @@ namespace DormCare.WPF.ViewModels
             {
                 if (SetProperty(ref _searchText, value))
                 {
+                    ClearStatus();
                     ApplyFilters();
                 }
             }
@@ -82,6 +84,7 @@ namespace DormCare.WPF.ViewModels
         public ICommand RejectCommand { get; }
         public ICommand RefreshCommand { get; }
         public ICommand ResetFiltersCommand { get; }
+        public ICommand ClearStatusCommand { get; }
 
         public ApplicationViewModel(ApplicationService applicationService, DialogService dialogService, User? currentUser = null)
         {
@@ -94,6 +97,7 @@ namespace DormCare.WPF.ViewModels
             ResetFiltersCommand = new RelayCommand(ResetFilters);
             ApproveCommand = new AsyncRelayCommand(ExecuteApproveAsync, CanReviewSelectedApplication);
             RejectCommand = new AsyncRelayCommand(ExecuteRejectAsync, CanReviewSelectedApplication);
+            ClearStatusCommand = new RelayCommand(ClearStatus);
 
             _ = LoadApplicationsAsync();
         }
@@ -164,21 +168,23 @@ namespace DormCare.WPF.ViewModels
         {
             if (SelectedApplication == null)
             {
+                SetError("Vui lòng chọn một đơn đăng ký để duyệt.");
                 return;
             }
 
             if (SelectedBed == null)
             {
-                _dialogService.ShowError("Vui long chon giuong con trong de duyet don.");
+                SetError("Vui lòng chọn giường còn trống trước khi duyệt đơn.");
                 return;
             }
 
-            if (!_dialogService.ShowConfirmation($"Duyet don cua sinh vien {SelectedApplication.Student?.FullName} va giu giuong {SelectedBed.BedCode}?"))
+            if (!_dialogService.ShowConfirmation($"Duyệt đơn của sinh viên {SelectedApplication.Student?.FullName} và giữ giường {SelectedBed.BedCode}?"))
             {
                 return;
             }
 
             IsBusy = true;
+            ClearStatus();
             try
             {
                 var reviewerId = _currentUser?.UserId ?? 0;
@@ -190,12 +196,12 @@ namespace DormCare.WPF.ViewModels
 
                 if (result.IsSuccess)
                 {
-                    _dialogService.ShowInformation(result.Message);
+                    SetSuccess($"✅ Đã duyệt đơn thành công! Giường {SelectedBed?.BedCode} đã được gán.");
                     await LoadApplicationsAsync();
                 }
                 else
                 {
-                    _dialogService.ShowError(result.Message);
+                    SetError($"❌ {result.Message}");
                     await LoadAvailableBedsAsync();
                 }
             }
@@ -209,21 +215,23 @@ namespace DormCare.WPF.ViewModels
         {
             if (SelectedApplication == null)
             {
+                SetError("Vui lòng chọn một đơn đăng ký để từ chối.");
                 return;
             }
 
             if (string.IsNullOrWhiteSpace(ReviewNote))
             {
-                _dialogService.ShowError("Vui long nhap ly do tu choi.");
+                SetError("Bắt buộc nhập lý do từ chối trước khi thực hiện thao tác này.");
                 return;
             }
 
-            if (!_dialogService.ShowConfirmation($"Tu choi don dang ky cua sinh vien {SelectedApplication.Student?.FullName}?"))
+            if (!_dialogService.ShowConfirmation($"Từ chối đơn đăng ký của sinh viên {SelectedApplication.Student?.FullName}?"))
             {
                 return;
             }
 
             IsBusy = true;
+            ClearStatus();
             try
             {
                 var reviewerId = _currentUser?.UserId ?? 0;
@@ -231,12 +239,12 @@ namespace DormCare.WPF.ViewModels
 
                 if (result.IsSuccess)
                 {
-                    _dialogService.ShowInformation(result.Message);
+                    SetSuccess($"✅ Đã từ chối đơn đăng ký của {SelectedApplication?.Student?.FullName}.");
                     await LoadApplicationsAsync();
                 }
                 else
                 {
-                    _dialogService.ShowError(result.Message);
+                    SetError($"❌ {result.Message}");
                 }
             }
             finally

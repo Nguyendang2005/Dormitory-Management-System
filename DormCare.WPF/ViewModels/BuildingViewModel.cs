@@ -17,6 +17,7 @@ namespace DormCare.WPF.ViewModels
     public class BuildingViewModel : BaseViewModel
     {
         private readonly BuildingService _buildingService;
+        private readonly RoomService _roomService;
         private readonly DialogService _dialogService;
 
         private List<BuildingDto> _allBuildings = new();
@@ -159,10 +160,11 @@ namespace DormCare.WPF.ViewModels
         public ICommand DeleteBuildingCommand { get; }
         public ICommand ToggleViewModeCommand { get; }
 
-        public BuildingViewModel(BuildingService buildingService, DialogService dialogService)
+        public BuildingViewModel(BuildingService buildingService, RoomService roomService, DialogService dialogService)
         {
             Title = "Quản lý tòa nhà";
             _buildingService = buildingService;
+            _roomService = roomService;
             _dialogService = dialogService;
 
             RefreshCommand = new AsyncRelayCommand(LoadBuildingsAsync);
@@ -347,22 +349,20 @@ namespace DormCare.WPF.ViewModels
                 return;
             }
 
-            IsBusy = true;
-            var detailDto = await _buildingService.GetBuildingDetailAsync(target.BuildingId);
-            IsBusy = false;
-
-            if (detailDto == null)
-            {
-                _dialogService.ShowError("Không thể tải thông tin chi tiết tòa nhà.", "Lỗi");
-                return;
-            }
-
+            var detailVm = new BuildingDetailViewModel(_buildingService, _roomService);
             var detailWindow = new BuildingDetailWindow
             {
-                DataContext = new { Building = detailDto },
                 Owner = Application.Current.MainWindow
             };
 
+            detailVm.CloseAction = () =>
+            {
+                detailWindow.DialogResult = true;
+                detailWindow.Close();
+            };
+
+            detailWindow.DataContext = detailVm;
+            await detailVm.LoadAsync(target.BuildingId);
             detailWindow.ShowDialog();
         }
 

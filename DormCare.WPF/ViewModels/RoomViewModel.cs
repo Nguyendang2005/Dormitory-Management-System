@@ -143,7 +143,10 @@ namespace DormCare.WPF.ViewModels
             ViewDetailCommand = new AsyncRelayCommand(ExecuteViewDetailAsync);
             ApplyRoomCommand = new AsyncRelayCommand(ExecuteApplyRoomAsync, () => SelectedRoom != null);
 
-            _roomService.RoomUpdated += async (s, e) => await LoadRoomsAsync();
+            _roomService.RoomUpdated += (s, e) =>
+            {
+                System.Windows.Application.Current?.Dispatcher.InvokeAsync(async () => await LoadRoomsAsync());
+            };
 
             _ = InitializeDataAsync();
         }
@@ -189,7 +192,7 @@ namespace DormCare.WPF.ViewModels
 
         public async Task LoadRoomsAsync()
         {
-            if (!await _semaphore.WaitAsync(0)) return;
+            await _semaphore.WaitAsync();
             try
             {
                 IsBusy = true;
@@ -232,7 +235,7 @@ namespace DormCare.WPF.ViewModels
 
         private async Task LoadFilteredRoomsAsync()
         {
-            if (!await _semaphore.WaitAsync(0)) return;
+            await _semaphore.WaitAsync();
             try
             {
                 int? buildingId = null;
@@ -279,7 +282,7 @@ namespace DormCare.WPF.ViewModels
                 return;
             }
 
-            var vm = new RoomDetailViewModel(roomDetail);
+            var vm = new RoomDetailViewModel(_roomService, roomDetail);
             var win = new RoomDetailWindow
             {
                 DataContext = vm,

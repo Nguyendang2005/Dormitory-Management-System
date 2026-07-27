@@ -37,6 +37,18 @@ namespace DormCare.DataAccess.Repositories
                 .FirstOrDefaultAsync(r => r.RoomId == roomId);
         }
 
+        public async Task<IEnumerable<RoomAssignment>> GetRoomAllAssignmentsAsync(int roomId)
+        {
+            return await _context.RoomAssignments
+                .AsNoTracking()
+                .Include(ra => ra.Student)
+                .Include(ra => ra.Bed)
+                .Include(ra => ra.Manager)
+                .Where(ra => ra.RoomId == roomId)
+                .OrderByDescending(ra => ra.StartDate)
+                .ToListAsync();
+        }
+
         public async Task<IEnumerable<Room>> GetAvailableRoomsAsync(int? buildingId = null, string? genderType = null, string? roomType = null)
         {
             var query = _dbSet

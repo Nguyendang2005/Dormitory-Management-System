@@ -1,11 +1,66 @@
 <Window x:Class="DormCare.WPF.Views.Manager.BuildingDetailWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Chi Tiết Tòa Nhà" Height="640" Width="660"
-        WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
-        Background="#FFFFFF" Foreground="#0F172A">
+        xmlns:conv="clr-namespace:DormCare.WPF.Converters"
+        Title="{Binding Title}" Height="760" Width="980"
+        WindowStartupLocation="CenterOwner" ResizeMode="CanResize"
+        Background="#F8FAFC" Foreground="#0F172A"
+        MinHeight="600" MinWidth="800">
 
-    <Grid Margin="24">
+    <Window.Resources>
+        <conv:StatusToColorConverter x:Key="StatusColorConverter"/>
+        <conv:EqualityToBoolConverter x:Key="EqualityToBoolConverter"/>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+
+        <!-- Tab Button Base Style -->
+        <Style x:Key="TabBtn" TargetType="Button">
+            <Setter Property="Height" Value="38"/>
+            <Setter Property="Padding" Value="18,0"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#64748B"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="8" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="TabBtnActive" TargetType="Button" BasedOn="{StaticResource TabBtn}">
+            <Setter Property="Background" Value="#0EA5E9"/>
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+
+        <!-- Floor Pill Button -->
+        <Style x:Key="FloorBtn" TargetType="Button">
+            <Setter Property="Height" Value="34"/>
+            <Setter Property="Padding" Value="16,0"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="#CBD5E1"/>
+            <Setter Property="Background" Value="#FFFFFF"/>
+            <Setter Property="Foreground" Value="#475569"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="17" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -13,149 +68,400 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- Header -->
-        <Border Grid.Row="0" Margin="0,0,0,16" Padding="0,0,0,12" BorderBrush="#E2E8F0" BorderThickness="0,0,0,1">
+        <!-- ═══════════════════════════════════ HEADER ═══════════════════════════════════ -->
+        <Border Grid.Row="0" Background="#FFFFFF" BorderBrush="#E2E8F0" BorderThickness="0,0,0,1" Padding="28,20">
             <DockPanel>
-                <Border Width="48" Height="48" CornerRadius="10" Background="#E0F2FE" BorderBrush="#BAE6FD" BorderThickness="1" Margin="0,0,14,0" DockPanel.Dock="Left">
-                    <TextBlock Text="🏢" FontSize="24" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                </Border>
-                <StackPanel VerticalAlignment="Center">
-                    <StackPanel Orientation="Horizontal">
-                        <Border Background="#E0F2FE" BorderBrush="#BAE6FD" BorderThickness="1" CornerRadius="6" Padding="8,2" Margin="0,0,8,0">
-                            <TextBlock Text="{Binding Building.BuildingCode}" FontSize="16" FontWeight="Bold" Foreground="#0284C7"/>
-                        </Border>
-                        <TextBlock Text="—" FontSize="18" Foreground="#94A3B8" Margin="0,0,8,0"/>
-                        <TextBlock Text="{Binding Building.BuildingName}" FontSize="18" FontWeight="Bold" Foreground="#0F172A" VerticalAlignment="Center"/>
+                <!-- Close button -->
+                <Button DockPanel.Dock="Right" Content="✕ Đóng" Command="{Binding CloseCommand}"
+                        Style="{StaticResource TabBtn}" Background="#F1F5F9" Foreground="#475569" Height="38" Padding="14,0"/>
+
+                <!-- Building icon + title -->
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <Border Width="52" Height="52" CornerRadius="12" Background="#E0F2FE" BorderBrush="#BAE6FD" BorderThickness="1" Margin="0,0,16,0">
+                        <TextBlock Text="🏢" FontSize="26" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <StackPanel VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal">
+                            <Border Background="#E0F2FE" BorderBrush="#BAE6FD" BorderThickness="1" CornerRadius="6" Padding="10,3" Margin="0,0,10,0">
+                                <TextBlock Text="{Binding Building.BuildingCode}" FontSize="16" FontWeight="Bold" Foreground="#0284C7"/>
+                            </Border>
+                            <TextBlock Text="{Binding Building.BuildingName}" FontSize="20" FontWeight="Bold" Foreground="#0F172A" VerticalAlignment="Center"/>
+                        </StackPanel>
+                        <TextBlock Text="{Binding Building.Address, StringFormat='📍 {0}'}" FontSize="13" Foreground="#64748B" Margin="0,4,0,0"/>
                     </StackPanel>
-                    <TextBlock Text="{Binding Building.Address, StringFormat='📍 {0}'}" FontSize="13" Foreground="#64748B" Margin="0,4,0,0"/>
                 </StackPanel>
             </DockPanel>
         </Border>
 
-        <!-- Metrics Grid & Occupancy Bar Card -->
-        <Border Grid.Row="1" Background="#F8FAFC" CornerRadius="12" Padding="16" Margin="0,0,0,16" BorderBrush="#CBD5E1" BorderThickness="1">
-            <StackPanel>
-                <UniformGrid Columns="3" Margin="0,0,0,14">
-                    <Border Background="#FFFFFF" BorderBrush="#CBD5E1" BorderThickness="1" CornerRadius="8" Padding="12" Margin="0,0,6,0">
-                        <StackPanel HorizontalAlignment="Center">
-                            <TextBlock Text="SỐ TẦNG" FontSize="11" FontWeight="Bold" Foreground="#64748B" HorizontalAlignment="Center"/>
-                            <TextBlock Text="{Binding Building.NumberOfFloors}" FontSize="20" FontWeight="Bold" Foreground="#0F172A" HorizontalAlignment="Center" Margin="0,2,0,0"/>
+        <!-- ═══════════════════════════════════ TAB BAR ═══════════════════════════════════ -->
+        <Border Grid.Row="1" Background="#FFFFFF" BorderBrush="#E2E8F0" BorderThickness="0,0,0,1" Padding="20,0">
+            <StackPanel Orientation="Horizontal" Height="52">
+                <Button Content="📊 Tổng quan" Command="{Binding SelectTabCommand}" CommandParameter="0" Margin="0,0,4,0">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource TabBtn}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ActiveTab}" Value="0">
+                                    <Setter Property="Background" Value="#0EA5E9"/>
+                                    <Setter Property="Foreground" Value="White"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+                <Button Content="🏗 Theo tầng" Command="{Binding SelectTabCommand}" CommandParameter="1" Margin="0,0,4,0">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource TabBtn}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ActiveTab}" Value="1">
+                                    <Setter Property="Background" Value="#0EA5E9"/>
+                                    <Setter Property="Foreground" Value="White"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+                <Button Content="👥 Danh sách cư trú" Command="{Binding SelectTabCommand}" CommandParameter="2" Margin="0,0,4,0">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource TabBtn}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ActiveTab}" Value="2">
+                                    <Setter Property="Background" Value="#0EA5E9"/>
+                                    <Setter Property="Foreground" Value="White"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+            </StackPanel>
+        </Border>
+
+        <!-- ═══════════════════════════════════ TAB CONTENT ═══════════════════════════════════ -->
+        <Grid Grid.Row="2" Margin="20,16">
+
+            <!-- ─── TAB 0: TỔNG QUAN ─── -->
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <ScrollViewer.Visibility>
+                    <Binding Path="ActiveTab">
+                        <Binding.Converter>
+                            <conv:IntToVisibilityConverter TargetValue="0"/>
+                        </Binding.Converter>
+                    </Binding>
+                </ScrollViewer.Visibility>
+                <StackPanel>
+                    <!-- 6 Metric Cards -->
+                    <UniformGrid Columns="3" Margin="0,0,0,16">
+                        <Border Background="#FFFFFF" BorderBrush="#CBD5E1" BorderThickness="1" CornerRadius="12" Padding="20,14" Margin="0,0,8,0">
+                            <StackPanel HorizontalAlignment="Center">
+                                <TextBlock Text="SỐ TẦNG" FontSize="11" FontWeight="Bold" Foreground="#64748B" HorizontalAlignment="Center"/>
+                                <TextBlock Text="{Binding Building.NumberOfFloors}" FontSize="28" FontWeight="Bold" Foreground="#0F172A" HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                            </StackPanel>
+                        </Border>
+                        <Border Background="#FFFFFF" BorderBrush="#CBD5E1" BorderThickness="1" CornerRadius="12" Padding="20,14" Margin="4,0,4,0">
+                            <StackPanel HorizontalAlignment="Center">
+                                <TextBlock Text="TỔNG PHÒNG" FontSize="11" FontWeight="Bold" Foreground="#64748B" HorizontalAlignment="Center"/>
+                                <TextBlock Text="{Binding Building.TotalRooms}" FontSize="28" FontWeight="Bold" Foreground="#0F172A" HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                            </StackPanel>
+                        </Border>
+                        <Border Background="#FFFFFF" BorderBrush="#CBD5E1" BorderThickness="1" CornerRadius="12" Padding="20,14" Margin="8,0,0,0">
+                            <StackPanel HorizontalAlignment="Center">
+                                <TextBlock Text="TỔNG GIƯỜNG" FontSize="11" FontWeight="Bold" Foreground="#64748B" HorizontalAlignment="Center"/>
+                                <TextBlock Text="{Binding Building.TotalBeds}" FontSize="28" FontWeight="Bold" Foreground="#0F172A" HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                            </StackPanel>
+                        </Border>
+                    </UniformGrid>
+                    <UniformGrid Columns="3" Margin="0,0,0,16">
+                        <Border Background="#EFF6FF" BorderBrush="#BFDBFE" BorderThickness="1" CornerRadius="12" Padding="20,14" Margin="0,0,8,0">
+                            <StackPanel HorizontalAlignment="Center">
+                                <TextBlock Text="GIƯỜNG ĐANG Ở" FontSize="11" FontWeight="Bold" Foreground="#1D4ED8" HorizontalAlignment="Center"/>
+                                <TextBlock Text="{Binding Building.OccupiedBeds}" FontSize="28" FontWeight="Bold" Foreground="#2563EB" HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                            </StackPanel>
+                        </Border>
+                        <Border Background="#ECFDF5" BorderBrush="#A7F3D0" BorderThickness="1" CornerRadius="12" Padding="20,14" Margin="4,0,4,0">
+                            <StackPanel HorizontalAlignment="Center">
+                                <TextBlock Text="GIƯỜNG TRỐNG" FontSize="11" FontWeight="Bold" Foreground="#15803D" HorizontalAlignment="Center"/>
+                                <TextBlock Text="{Binding Building.AvailableBeds}" FontSize="28" FontWeight="Bold" Foreground="#16A34A" HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                            </StackPanel>
+                        </Border>
+                        <Border Background="#FEF3C7" BorderBrush="#FDE68A" BorderThickness="1" CornerRadius="12" Padding="20,14" Margin="8,0,0,0">
+                            <StackPanel HorizontalAlignment="Center">
+                                <TextBlock Text="BẢO TRÌ" FontSize="11" FontWeight="Bold" Foreground="#B45309" HorizontalAlignment="Center"/>
+                                <TextBlock Text="{Binding Building.MaintenanceBeds}" FontSize="28" FontWeight="Bold" Foreground="#D97706" HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                            </StackPanel>
+                        </Border>
+                    </UniformGrid>
+
+                    <!-- Nổi bật: Tổng sinh viên đang cư trú -->
+                    <Border CornerRadius="14" Padding="24,18" Margin="0,0,0,16">
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                <GradientStop Color="#1D4ED8" Offset="0"/>
+                                <GradientStop Color="#0EA5E9" Offset="1"/>
+                            </LinearGradientBrush>
+                        </Border.Background>
+                        <DockPanel>
+                            <StackPanel DockPanel.Dock="Right" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                <TextBlock Text="👥" FontSize="40"/>
+                            </StackPanel>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="TỔNG SINH VIÊN ĐANG CƯ TRÚ" FontSize="12" FontWeight="Bold" Foreground="#BFDBFE"/>
+                                <TextBlock Text="{Binding Building.TotalResidents}" FontSize="48" FontWeight="Bold" Foreground="White" Margin="0,4,0,0"/>
+                                <TextBlock Text="sinh viên đang ở trong tòa nhà này" FontSize="13" Foreground="#BAE6FD" Margin="0,2,0,0"/>
+                            </StackPanel>
+                        </DockPanel>
+                    </Border>
+
+                    <!-- Tỷ lệ lấp đầy -->
+                    <Border Background="#FFFFFF" BorderBrush="#CBD5E1" BorderThickness="1" CornerRadius="12" Padding="20">
+                        <StackPanel>
+                            <DockPanel Margin="0,0,0,10">
+                                <TextBlock Text="TỶ LỆ LẤP ĐẦY" FontSize="13" FontWeight="Bold" Foreground="#334155"/>
+                                <TextBlock Text="{Binding Building.OccupancyRateDisplay, Mode=OneWay}" FontSize="16" FontWeight="Bold" Foreground="#0284C7" HorizontalAlignment="Right"/>
+                            </DockPanel>
+                            <Grid Height="14">
+                                <Border Background="#E0F2FE" CornerRadius="7"/>
+                                <ProgressBar Value="{Binding Building.OccupancyRate, Mode=OneWay}" Minimum="0" Maximum="100" Height="14" BorderThickness="0" Background="Transparent" Foreground="#0284C7"/>
+                            </Grid>
+                            <TextBlock Text="{Binding Building.OccupancyText, StringFormat='{}Chiếm dụng: {0} giường'}" FontSize="11" Foreground="#94A3B8" Margin="0,6,0,0"/>
                         </StackPanel>
                     </Border>
-                    <Border Background="#FFFFFF" BorderBrush="#CBD5E1" BorderThickness="1" CornerRadius="8" Padding="12" Margin="3,0,3,0">
-                        <StackPanel HorizontalAlignment="Center">
-                            <TextBlock Text="TỔNG PHÒNG" FontSize="11" FontWeight="Bold" Foreground="#64748B" HorizontalAlignment="Center"/>
-                            <TextBlock Text="{Binding Building.TotalRooms}" FontSize="20" FontWeight="Bold" Foreground="#0F172A" HorizontalAlignment="Center" Margin="0,2,0,0"/>
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- ─── TAB 1: THEO TẦNG ─── -->
+            <Grid>
+                <Grid.Visibility>
+                    <Binding Path="ActiveTab">
+                        <Binding.Converter>
+                            <conv:IntToVisibilityConverter TargetValue="1"/>
+                        </Binding.Converter>
+                    </Binding>
+                </Grid.Visibility>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- Floor pill buttons -->
+                <Border Grid.Row="0" Background="#FFFFFF" BorderBrush="#CBD5E1" BorderThickness="1" CornerRadius="10" Padding="12,10" Margin="0,0,0,14">
+                    <DockPanel>
+                        <TextBlock DockPanel.Dock="Left" Text="Chọn tầng:" FontSize="13" FontWeight="SemiBold" Foreground="#475569" VerticalAlignment="Center" Margin="0,0,12,0"/>
+                        <Button DockPanel.Dock="Right" Content="Tất cả" Command="{Binding ClearFloorCommand}" Height="32" Padding="12,0" Margin="8,0,0,0"
+                                Background="#F1F5F9" Foreground="#475569" BorderThickness="0" FontSize="11">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border Background="{TemplateBinding Background}" CornerRadius="16" Padding="{TemplateBinding Padding}">
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+                        <ItemsControl ItemsSource="{Binding Floors}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Button Content="{Binding StringFormat='Tầng {0}'}"
+                                            Command="{Binding DataContext.SelectFloorCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                            CommandParameter="{Binding}"
+                                            Margin="4,0,0,0" Height="32" Padding="14,0">
+                                        <Button.Style>
+                                            <Style TargetType="Button" BasedOn="{StaticResource FloorBtn}">
+                                                <Style.Triggers>
+                                                    <DataTrigger Value="True">
+                                                        <DataTrigger.Binding>
+                                                            <MultiBinding Converter="{StaticResource EqualityToBoolConverter}">
+                                                                <Binding Path="DataContext.SelectedFloor" RelativeSource="{RelativeSource AncestorType=ItemsControl}"/>
+                                                                <Binding Path="."/>
+                                                            </MultiBinding>
+                                                        </DataTrigger.Binding>
+                                                        <Setter Property="Background" Value="#0EA5E9"/>
+                                                        <Setter Property="Foreground" Value="White"/>
+                                                        <Setter Property="BorderBrush" Value="#0284C7"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Button.Style>
+                                    </Button>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </DockPanel>
+                </Border>
+
+                <!-- Floor stats -->
+                <UniformGrid Grid.Row="1" Columns="2" Margin="0,0,0,12">
+                    <Border Background="#EFF6FF" BorderBrush="#BFDBFE" BorderThickness="1" CornerRadius="8" Padding="14,10" Margin="0,0,6,0">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="👥 Sinh viên đang ở: " FontSize="13" Foreground="#1D4ED8" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding FloorResidentCount}" FontSize="16" FontWeight="Bold" Foreground="#2563EB" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Border>
-                    <Border Background="#FFFFFF" BorderBrush="#CBD5E1" BorderThickness="1" CornerRadius="8" Padding="12" Margin="6,0,0,0">
-                        <StackPanel HorizontalAlignment="Center">
-                            <TextBlock Text="TỔNG GIƯỜNG" FontSize="11" FontWeight="Bold" Foreground="#64748B" HorizontalAlignment="Center"/>
-                            <TextBlock Text="{Binding Building.TotalBeds}" FontSize="20" FontWeight="Bold" Foreground="#0F172A" HorizontalAlignment="Center" Margin="0,2,0,0"/>
+                    <Border Background="#ECFDF5" BorderBrush="#A7F3D0" BorderThickness="1" CornerRadius="8" Padding="14,10" Margin="6,0,0,0">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="🛏 Chỗ còn trống: " FontSize="13" Foreground="#15803D" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding FloorAvailableCount}" FontSize="16" FontWeight="Bold" Foreground="#16A34A" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Border>
                 </UniformGrid>
 
-                <!-- Detailed Bed Breakdown -->
-                <Grid Margin="0,0,0,12">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="1*"/>
-                        <ColumnDefinition Width="1*"/>
-                        <ColumnDefinition Width="1*"/>
-                    </Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Center">
-                        <TextBlock Text="👤 Đang ở: " FontSize="13" Foreground="#475569"/>
-                        <TextBlock Text="{Binding Building.OccupiedBeds}" FontSize="14" FontWeight="Bold" Foreground="#0284C7"/>
-                    </StackPanel>
-                    <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center">
-                        <TextBlock Text="🛏️ Còn trống: " FontSize="13" Foreground="#475569"/>
-                        <TextBlock Text="{Binding Building.AvailableBeds}" FontSize="14" FontWeight="Bold" Foreground="#059669"/>
-                    </StackPanel>
-                    <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Center">
-                        <TextBlock Text="🛠️ Bảo trì: " FontSize="13" Foreground="#475569"/>
-                        <TextBlock Text="{Binding Building.MaintenanceBeds}" FontSize="14" FontWeight="Bold" Foreground="#D97706"/>
-                    </StackPanel>
-                </Grid>
+                <!-- Room cards on selected floor -->
+                <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
+                    <ItemsControl ItemsSource="{Binding RoomsOnFloor}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <UniformGrid Columns="2"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Background="#FFFFFF" BorderBrush="#CBD5E1" BorderThickness="1" CornerRadius="12" Padding="16" Margin="0,0,10,10">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
 
-                <!-- Occupancy Rate Bar -->
-                <StackPanel>
-                    <DockPanel Margin="0,0,0,6">
-                        <TextBlock Text="TỶ LỆ LẤP ĐẦY" FontSize="11" FontWeight="Bold" Foreground="#334155"/>
-                        <TextBlock Text="{Binding Building.OccupancyRate, StringFormat='{}{0:F1}%'}" FontSize="13" FontWeight="Bold" Foreground="#0284C7" HorizontalAlignment="Right"/>
-                    </DockPanel>
-                    <Grid Height="10">
-                        <Border Background="#E0F2FE" CornerRadius="5"/>
-                        <ProgressBar Value="{Binding Building.OccupancyRate, Mode=OneWay}" Minimum="0" Maximum="100" Height="10" BorderThickness="0" Background="Transparent" Foreground="#0284C7"/>
-                    </Grid>
-                </StackPanel>
-            </StackPanel>
-        </Border>
+                                        <!-- Room header -->
+                                        <DockPanel Grid.Row="0" Margin="0,0,0,10">
+                                            <Border DockPanel.Dock="Right" CornerRadius="8" Padding="8,4">
+                                                <Border.Style>
+                                                    <Style TargetType="Border">
+                                                        <Setter Property="Background" Value="#DCFCE7"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding StatusDisplay}" Value="Đã đầy">
+                                                                <Setter Property="Background" Value="#FEE2E2"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding StatusDisplay}" Value="Bảo trì">
+                                                                <Setter Property="Background" Value="#FEF3C7"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Border.Style>
+                                                <TextBlock Text="{Binding StatusDisplay}" FontSize="11" FontWeight="Bold">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Foreground" Value="#15803D"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding StatusDisplay}" Value="Đã đầy">
+                                                                    <Setter Property="Foreground" Value="#B91C1C"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding StatusDisplay}" Value="Bảo trì">
+                                                                    <Setter Property="Foreground" Value="#B45309"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                            </Border>
+                                            <StackPanel VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding RoomNumber}" FontSize="18" FontWeight="Bold" Foreground="#0F172A"/>
+                                                <TextBlock Text="{Binding FloorNumber, StringFormat='Tầng {0}'}" FontSize="12" Foreground="#64748B"/>
+                                            </StackPanel>
+                                        </DockPanel>
 
-        <!-- Room List Section -->
-        <Border Grid.Row="2" Background="#FFFFFF" CornerRadius="12" Padding="16" BorderBrush="#CBD5E1" BorderThickness="1">
+                                        <!-- Occupancy bar -->
+                                        <Grid Grid.Row="1" Margin="0,0,0,10">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <ProgressBar Grid.Column="0" Value="{Binding OccupiedBeds}" Maximum="{Binding Capacity}" Height="8" Background="#E0F2FE" BorderThickness="0" Foreground="#0284C7" VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Column="1" Text="{Binding OccupancyText}" FontSize="12" FontWeight="Bold" Foreground="#0284C7" Margin="10,0,0,0" VerticalAlignment="Center"/>
+                                        </Grid>
+
+                                        <!-- Resident mini list -->
+                                        <ItemsControl Grid.Row="2" ItemsSource="{Binding CurrentResidents}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Border Background="#F8FAFC" CornerRadius="6" Padding="8,4" Margin="0,0,0,2">
+                                                        <DockPanel>
+                                                            <TextBlock DockPanel.Dock="Right" Text="{Binding BedCode}" FontSize="10" Foreground="#94A3B8" VerticalAlignment="Center"/>
+                                                            <TextBlock Text="👤 " FontSize="11"/>
+                                                            <TextBlock Text="{Binding FullName}" FontSize="11" FontWeight="SemiBold" Foreground="#1E3A5F"/>
+                                                        </DockPanel>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </Grid>
+
+            <!-- ─── TAB 2: DANH SÁCH CƯ TRÚ ─── -->
             <Grid>
+                <Grid.Visibility>
+                    <Binding Path="ActiveTab">
+                        <Binding.Converter>
+                            <conv:IntToVisibilityConverter TargetValue="2"/>
+                        </Binding.Converter>
+                    </Binding>
+                </Grid.Visibility>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
-                <TextBlock Grid.Row="0" Text="📋 DANH SÁCH PHÒNG TRONG TÒA NHÀ" FontSize="13" FontWeight="Bold" Foreground="#0F172A" Margin="0,0,0,12"/>
 
-                <DataGrid Grid.Row="1" ItemsSource="{Binding Building.Rooms}" AutoGenerateColumns="False" IsReadOnly="True" Background="Transparent" RowHeaderWidth="0" GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="#E2E8F0">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="Phòng" Binding="{Binding RoomNumber}" Width="100" FontWeight="Bold"/>
-                        <DataGridTextColumn Header="Tầng" Binding="{Binding FloorNumber, StringFormat='{}Tầng {0}'}" Width="90"/>
-                        <DataGridTextColumn Header="Sức Chứa" Binding="{Binding Capacity, StringFormat='{}{0} giường'}" Width="100"/>
-                        <DataGridTextColumn Header="Hiện Có" Binding="{Binding OccupancyText}" Width="100" FontWeight="Bold"/>
-                        <DataGridTemplateColumn Header="Trạng Thái" Width="*">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <Border CornerRadius="8" Padding="10,4" HorizontalAlignment="Left">
-                                        <Border.Style>
-                                            <Style TargetType="Border">
-                                                <Setter Property="Background" Value="#F1F5F9"/>
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding StatusDisplay}" Value="Còn chỗ">
-                                                        <Setter Property="Background" Value="#DCFCE7"/>
-                                                    </DataTrigger>
-                                                    <DataTrigger Binding="{Binding StatusDisplay}" Value="Đã đầy">
-                                                        <Setter Property="Background" Value="#FEE2E2"/>
-                                                    </DataTrigger>
-                                                    <DataTrigger Binding="{Binding StatusDisplay}" Value="Bảo trì">
-                                                        <Setter Property="Background" Value="#FEF3C7"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Border.Style>
-                                        <TextBlock Text="{Binding StatusDisplay}" FontSize="11" FontWeight="Bold">
-                                            <TextBlock.Style>
-                                                <Style TargetType="TextBlock">
-                                                    <Setter Property="Foreground" Value="#475569"/>
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding StatusDisplay}" Value="Còn chỗ">
-                                                            <Setter Property="Foreground" Value="#15803D"/>
-                                                        </DataTrigger>
-                                                        <DataTrigger Binding="{Binding StatusDisplay}" Value="Đã đầy">
-                                                            <Setter Property="Foreground" Value="#B91C1C"/>
-                                                        </DataTrigger>
-                                                        <DataTrigger Binding="{Binding StatusDisplay}" Value="Bảo trì">
-                                                            <Setter Property="Foreground" Value="#B45309"/>
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </TextBlock.Style>
-                                        </TextBlock>
-                                    </Border>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                    </DataGrid.Columns>
-                </DataGrid>
+                <!-- Search + filter bar -->
+                <Border Grid.Row="0" Background="#FFFFFF" BorderBrush="#CBD5E1" BorderThickness="1" CornerRadius="10" Padding="12,8" Margin="0,0,0,12">
+                    <DockPanel>
+                        <ComboBox DockPanel.Dock="Right" ItemsSource="{Binding ResidentFloorOptions}" SelectedItem="{Binding SelectedResidentFloor}"
+                                  Width="140" Height="36" Margin="8,0,0,0" Style="{StaticResource ModernComboBox}"/>
+                        <Border Background="#F8FAFC" BorderBrush="#CBD5E1" BorderThickness="1" CornerRadius="8" Padding="10,0" Height="36">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="🔍" Foreground="#64748B" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                <TextBox Grid.Column="1" Text="{Binding ResidentSearch, UpdateSourceTrigger=PropertyChanged}"
+                                         BorderThickness="0" Background="Transparent" VerticalAlignment="Center" FontSize="13"
+                                         Width="300"/>
+                            </Grid>
+                        </Border>
+                    </DockPanel>
+                </Border>
+
+                <!-- Resident DataGrid -->
+                <Border Grid.Row="1" Background="#FFFFFF" BorderBrush="#CBD5E1" BorderThickness="1" CornerRadius="12">
+                    <DataGrid ItemsSource="{Binding FilteredResidents}" AutoGenerateColumns="False" IsReadOnly="True"
+                              Style="{StaticResource ModernDataGrid}" CanUserSortColumns="True">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Mã SV" Binding="{Binding StudentCode}" Width="110" FontWeight="Bold"/>
+                            <DataGridTextColumn Header="Họ và tên" Binding="{Binding FullName}" Width="*" FontWeight="SemiBold"/>
+                            <DataGridTextColumn Header="Phòng" Binding="{Binding RoomNumber}" Width="90" FontWeight="Bold"/>
+                            <DataGridTextColumn Header="Giường" Binding="{Binding BedCode}" Width="110"/>
+                            <DataGridTextColumn Header="Tầng" Binding="{Binding FloorDisplay}" Width="80"/>
+                            <DataGridTextColumn Header="Ngày vào ở" Binding="{Binding StartDateDisplay}" Width="110"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Border>
             </Grid>
+
+        </Grid>
+
+        <!-- ═══════════════════════════════════ FOOTER ═══════════════════════════════════ -->
+        <Border Grid.Row="3" Background="#FFFFFF" BorderBrush="#E2E8F0" BorderThickness="0,1,0,0" Padding="24,14">
+            <DockPanel>
+                <TextBlock DockPanel.Dock="Left" FontSize="12" Foreground="#94A3B8" VerticalAlignment="Center">
+                    <Run Text="Tổng sinh viên: "/>
+                    <Run Text="{Binding Building.TotalResidents, Mode=OneWay}" FontWeight="Bold" Foreground="#0284C7"/>
+                    <Run Text=" người  •  "/>
+                    <Run Text="Tỷ lệ lấp đầy: "/>
+                    <Run Text="{Binding Building.OccupancyRateDisplay, Mode=OneWay}" FontWeight="Bold" Foreground="#0284C7"/>
+                </TextBlock>
+                <Button DockPanel.Dock="Right" Content="Đóng" Command="{Binding CloseCommand}"
+                        Width="120" Height="38" Style="{StaticResource PrimaryButton}"/>
+            </DockPanel>
         </Border>
 
-        <!-- Actions -->
-        <Border Grid.Row="3" Margin="0,16,0,0" Padding="0,12,0,0" BorderBrush="#E2E8F0" BorderThickness="0,1,0,0">
-            <Button Content="Đóng" Click="Close_Click" Style="{StaticResource PrimaryButton}" Width="120" Height="38" HorizontalAlignment="Right"/>
-        </Border>
     </Grid>
 </Window>

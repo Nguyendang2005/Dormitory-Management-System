@@ -133,7 +133,10 @@ namespace DormCare.WPF.ViewModels
             SetOccupiedCommand = new AsyncRelayCommand(param => ExecuteChangeStatusAsync(param, "Occupied"));
             SetMaintenanceCommand = new AsyncRelayCommand(param => ExecuteChangeStatusAsync(param, "Maintenance"));
 
-            _bedService.BedUpdated += async (s, e) => await LoadBedsAsync();
+            _bedService.BedUpdated += (s, e) =>
+            {
+                System.Windows.Application.Current?.Dispatcher.InvokeAsync(async () => await LoadBedsAsync());
+            };
 
             _ = InitializeDataAsync();
         }
@@ -153,7 +156,7 @@ namespace DormCare.WPF.ViewModels
 
         public async Task LoadBedsAsync()
         {
-            if (!await _semaphore.WaitAsync(0)) return;
+            await _semaphore.WaitAsync();
             try
             {
                 IsBusy = true;
@@ -180,7 +183,7 @@ namespace DormCare.WPF.ViewModels
 
         private async Task LoadFilteredBedsAsync()
         {
-            if (!await _semaphore.WaitAsync(0)) return;
+            await _semaphore.WaitAsync();
             try
             {
                 var filtered = await _bedService.SearchAndFilterBedsAsync(SelectedStatusFilter, SearchText);
@@ -208,7 +211,6 @@ namespace DormCare.WPF.ViewModels
             if (result.IsSuccess)
             {
                 _dialogService.ShowInformation(result.Message, "Thành Công");
-                await LoadBedsAsync();
             }
             else
             {

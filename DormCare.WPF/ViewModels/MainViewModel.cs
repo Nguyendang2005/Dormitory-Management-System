@@ -91,7 +91,7 @@ namespace DormCare.WPF.ViewModels
             NavigateBuildingsCommand = new RelayCommand(() =>
             {
                 ActiveTabName = "Buildings";
-                CurrentView = new BuildingViewModel(_buildingService, _dialogService);
+                CurrentView = new BuildingViewModel(_buildingService, _roomService, _dialogService);
             });
 
             NavigateRoomsCommand = new RelayCommand(() =>
@@ -145,7 +145,7 @@ namespace DormCare.WPF.ViewModels
             LogoutCommand = new RelayCommand(() => RequestLogout?.Invoke());
 
             // Default startup view: Buildings & Rooms (as specified)
-            _currentView = new BuildingViewModel(_buildingService, _dialogService);
+            _currentView = new BuildingViewModel(_buildingService, _roomService, _dialogService);
         }
     }
 }

@@ -11,6 +11,7 @@ namespace DormCare.WPF.ViewModels
     {
         private readonly StudentService _studentService;
         private readonly RoomService _roomService;
+        private readonly BuildingService _buildingService;
         private readonly ApplicationService _applicationService;
         private readonly InvoiceService _invoiceService;
         private readonly PaymentService _paymentService;
@@ -32,6 +33,13 @@ namespace DormCare.WPF.ViewModels
             set => SetProperty(ref _roomRegistrationViewModel, value);
         }
 
+        private AvailableRoomViewModel? _availableRoomsViewModel;
+        public AvailableRoomViewModel? AvailableRoomsViewModel
+        {
+            get => _availableRoomsViewModel;
+            set => SetProperty(ref _availableRoomsViewModel, value);
+        }
+
         private InvoiceViewModel? _invoiceViewModel;
         public InvoiceViewModel? InvoiceViewModel
         {
@@ -44,6 +52,13 @@ namespace DormCare.WPF.ViewModels
         {
             get => _isProfileVisible;
             set => SetProperty(ref _isProfileVisible, value);
+        }
+
+        private bool _isAvailableRoomsVisible;
+        public bool IsAvailableRoomsVisible
+        {
+            get => _isAvailableRoomsVisible;
+            set => SetProperty(ref _isAvailableRoomsVisible, value);
         }
 
         private bool _isRoomRegistrationVisible;
@@ -126,6 +141,7 @@ namespace DormCare.WPF.ViewModels
         }
 
         public ICommand NavigateProfileCommand { get; }
+        public ICommand NavigateAvailableRoomsCommand { get; }
         public ICommand NavigateRoomRegistrationCommand { get; }
         public ICommand NavigateInvoiceCommand { get; }
         public ICommand NavigateMaintenanceCommand { get; }
@@ -138,6 +154,7 @@ namespace DormCare.WPF.ViewModels
         public StudentDashboardViewModel(
             StudentService studentService,
             RoomService roomService,
+            BuildingService buildingService,
             ApplicationService applicationService,
             InvoiceService invoiceService,
             PaymentService paymentService,
@@ -149,6 +166,7 @@ namespace DormCare.WPF.ViewModels
             Title = "Trang chủ Sinh viên";
             _studentService = studentService;
             _roomService = roomService;
+            _buildingService = buildingService;
             _applicationService = applicationService;
             _invoiceService = invoiceService;
             _paymentService = paymentService;
@@ -162,6 +180,20 @@ namespace DormCare.WPF.ViewModels
             {
                 ActiveTabName = "Profile";
                 IsProfileVisible = true;
+                IsAvailableRoomsVisible = false;
+                IsRoomRegistrationVisible = false;
+                IsInvoiceVisible = false;
+            });
+
+            NavigateAvailableRoomsCommand = new RelayCommand(() =>
+            {
+                ActiveTabName = "AvailableRooms";
+                if (AvailableRoomsViewModel == null)
+                {
+                    AvailableRoomsViewModel = new AvailableRoomViewModel(_roomService, _buildingService);
+                }
+                IsProfileVisible = false;
+                IsAvailableRoomsVisible = true;
                 IsRoomRegistrationVisible = false;
                 IsInvoiceVisible = false;
                 IsMaintenanceVisible = false;
@@ -173,6 +205,7 @@ namespace DormCare.WPF.ViewModels
                 ActiveTabName = "RoomRegistration";
                 RoomRegistrationViewModel = new StudentRoomRegistrationViewModel(_roomService, _applicationService, _dialogService, Student);
                 IsProfileVisible = false;
+                IsAvailableRoomsVisible = false;
                 IsRoomRegistrationVisible = true;
                 IsInvoiceVisible = false;
                 IsMaintenanceVisible = false;
@@ -191,6 +224,7 @@ namespace DormCare.WPF.ViewModels
                     InvoiceViewModel = new InvoiceViewModel(_invoiceService, _paymentService, _studentService, _roomService, _dialogService, Student.StudentId);
                 }
                 IsProfileVisible = false;
+                IsAvailableRoomsVisible = false;
                 IsRoomRegistrationVisible = false;
                 IsInvoiceVisible = true;
                 IsMaintenanceVisible = false;

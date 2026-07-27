@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System;
 
 namespace DormCare.Business.DTOs
 {
@@ -10,6 +11,19 @@ namespace DormCare.Business.DTOs
         public string Status { get; set; } = "Available"; // Available, Occupied, Maintenance
         public string StudentName { get; set; } = "-";
         public string StudentCode { get; set; } = "-";
+        public DateTime? StartDate { get; set; }
+        public string AssignedByName { get; set; } = string.Empty;
+
+        public string StatusVietnamese => Status switch
+        {
+            "Available"   => "Còn trống",
+            "Occupied"    => "Đang sử dụng",
+            "Reserved"    => "Đã đặt trước",
+            "Maintenance" => "Bảo trì",
+            _             => Status
+        };
+
+        public string StartDateDisplay => StartDate.HasValue ? StartDate.Value.ToString("dd/MM/yyyy") : "—";
     }
 
     public class RoomDetailDto
@@ -31,8 +45,16 @@ namespace DormCare.Business.DTOs
         public int AvailableBeds { get; set; }
         public int MaintenanceBeds { get; set; }
 
-        public double OccupancyRate => Capacity > 0 ? (double)OccupiedBeds / Capacity * 100 : 0;
-        public string OccupancyText => $"{OccupiedBeds}/{Capacity}";
+        public double OccupancyRate
+        {
+            get => Capacity > 0 ? (double)OccupiedBeds / Capacity * 100 : 0;
+            set { }
+        }
+        public string OccupancyText
+        {
+            get => $"{OccupiedBeds}/{Capacity}";
+            set { }
+        }
 
         public List<BedDetailDto> Beds { get; set; } = new();
     }

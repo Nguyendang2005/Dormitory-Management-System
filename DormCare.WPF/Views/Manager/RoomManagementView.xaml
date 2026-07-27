@@ -263,14 +263,15 @@
             <Border Background="#FFFFFF" BorderBrush="#CBD5E1" BorderThickness="1" CornerRadius="12" Visibility="{Binding IsTableView, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <DataGrid ItemsSource="{Binding Rooms}" SelectedItem="{Binding SelectedRoom}" AutoGenerateColumns="False" IsReadOnly="True" Style="{StaticResource ModernDataGrid}">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Số Phòng" Binding="{Binding RoomNumber}" Width="100" FontWeight="Bold"/>
-                        <DataGridTextColumn Header="Tòa Nhà" Binding="{Binding BuildingName}" Width="140"/>
-                        <DataGridTextColumn Header="Tầng" Binding="{Binding FloorNumber, StringFormat='{}Tầng {0}'}" Width="85"/>
-                        <DataGridTextColumn Header="Loại Phòng" Binding="{Binding RoomType}" Width="110"/>
-                        <DataGridTextColumn Header="Sức Chứa" Binding="{Binding Capacity, StringFormat='{}{0} giường'}" Width="100"/>
-                        <DataGridTextColumn Header="Tình Trạng Chỗ Ở" Binding="{Binding OccupancySummary}" Width="160" FontWeight="Bold"/>
-                        <DataGridTextColumn Header="Giá Thuê / Tháng" Binding="{Binding MonthlyRent, StringFormat={}{0:N0} VNĐ}" Width="150" FontWeight="Bold" Foreground="#0284C7"/>
-                        <DataGridTextColumn Header="Đối Tượng" Binding="{Binding GenderType}" Width="100"/>
+                        <DataGridTextColumn Header="Số Phòng" Binding="{Binding RoomNumber}" Width="90" FontWeight="Bold"/>
+                        <DataGridTextColumn Header="Tòa Nhà" Binding="{Binding BuildingName}" Width="120"/>
+                        <DataGridTextColumn Header="Tầng" Binding="{Binding FloorNumber, StringFormat='{}Tầng {0}'}" Width="75"/>
+                        <DataGridTextColumn Header="Loại" Binding="{Binding RoomType}" Width="85"/>
+                        <DataGridTextColumn Header="Sức chứa" Binding="{Binding Capacity, StringFormat='{}{0} giường'}" Width="90"/>
+                        <DataGridTextColumn Header="Đang ở" Binding="{Binding OccupiedBeds}" Width="70" FontWeight="Bold"/>
+                        <DataGridTextColumn Header="Còn trống" Binding="{Binding AvailableBeds}" Width="80"/>
+                        <DataGridTextColumn Header="Bảo trì" Binding="{Binding MaintenanceBeds}" Width="70"/>
+                        <DataGridTextColumn Header="Giá / Tháng" Binding="{Binding MonthlyRent, StringFormat={}{0:N0} đ}" Width="120" FontWeight="Bold"/>
 
                         <!-- Status Column -->
                         <DataGridTemplateColumn Header="Trạng Thái" Width="110">

@@ -201,12 +201,13 @@
             <Border Background="#FFFFFF" BorderBrush="#CBD5E1" BorderThickness="1" CornerRadius="12" Visibility="{Binding IsTableView, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <DataGrid ItemsSource="{Binding Beds}" SelectedItem="{Binding SelectedBed}" AutoGenerateColumns="False" IsReadOnly="True" Style="{StaticResource ModernDataGrid}">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Mã Giường" Binding="{Binding BedCode}" Width="130" FontWeight="Bold"/>
-                        <DataGridTextColumn Header="Số Giường" Binding="{Binding BedNumber}" Width="100"/>
-                        <DataGridTextColumn Header="Số Phòng" Binding="{Binding RoomNumber, StringFormat='{}P.{0}'}" Width="110" FontWeight="Bold"/>
-                        <DataGridTextColumn Header="Tòa Nhà" Binding="{Binding BuildingName}" Width="140"/>
-                        <DataGridTextColumn Header="Sinh Viên Đang Ở" Binding="{Binding StudentName}" Width="180" FontWeight="Bold" Foreground="#0F172A"/>
-                        <DataGridTextColumn Header="Ghi Chú" Binding="{Binding Description}" Width="180"/>
+                        <DataGridTextColumn Header="Mã Giường" Binding="{Binding BedCode}" Width="120" FontWeight="Bold"/>
+                        <DataGridTextColumn Header="Số Giường" Binding="{Binding BedNumber}" Width="85"/>
+                        <DataGridTextColumn Header="Phòng" Binding="{Binding RoomNumber, StringFormat='{}P.{0}'}" Width="90" FontWeight="Bold"/>
+                        <DataGridTextColumn Header="Tòa Nhà" Binding="{Binding BuildingName}" Width="110"/>
+                        <DataGridTextColumn Header="Sinh Viên Đang Ở" Binding="{Binding StudentName}" Width="160" FontWeight="Bold"/>
+                        <DataGridTextColumn Header="Mã SV" Binding="{Binding StudentCode}" Width="100"/>
+                        <DataGridTextColumn Header="Ngày Bắt Đầu" Binding="{Binding StartDateDisplay}" Width="110"/>
 
                         <!-- Status Column -->
                         <DataGridTemplateColumn Header="Trạng Thái" Width="140">
