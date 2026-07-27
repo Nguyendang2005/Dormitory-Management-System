@@ -185,32 +185,9 @@ namespace DormCare.WPF.ViewModels
                 IsInvoiceVisible = false;
             });
 
-            NavigateAvailableRoomsCommand = new RelayCommand(() =>
-            {
-                ActiveTabName = "AvailableRooms";
-                if (AvailableRoomsViewModel == null)
-                {
-                    AvailableRoomsViewModel = new AvailableRoomViewModel(_roomService, _buildingService);
-                }
-                IsProfileVisible = false;
-                IsAvailableRoomsVisible = true;
-                IsRoomRegistrationVisible = false;
-                IsInvoiceVisible = false;
-                IsMaintenanceVisible = false;
-                IsNotificationsVisible = false;
-            });
+            NavigateAvailableRoomsCommand = new AsyncRelayCommand(ShowAvailableRoomsAsync);
 
-            NavigateRoomRegistrationCommand = new RelayCommand(() =>
-            {
-                ActiveTabName = "RoomRegistration";
-                RoomRegistrationViewModel = new StudentRoomRegistrationViewModel(_roomService, _applicationService, _dialogService, Student);
-                IsProfileVisible = false;
-                IsAvailableRoomsVisible = false;
-                IsRoomRegistrationVisible = true;
-                IsInvoiceVisible = false;
-                IsMaintenanceVisible = false;
-                IsNotificationsVisible = false;
-            });
+            NavigateRoomRegistrationCommand = new AsyncRelayCommand(() => ShowRoomRegistrationAsync(null));
 
             NavigateInvoiceCommand = new AsyncRelayCommand(async () =>
             {
@@ -267,6 +244,43 @@ namespace DormCare.WPF.ViewModels
 
             _ = LoadStudentDataAsync();
             _ = LoadNotificationsCountAsync();
+        }
+
+        private async Task ShowAvailableRoomsAsync()
+        {
+            ActiveTabName = "AvailableRooms";
+            AvailableRoomsViewModel ??= new AvailableRoomViewModel(_roomService, _buildingService, roomId => ShowRoomRegistrationAsync(roomId));
+            IsProfileVisible = false;
+            IsAvailableRoomsVisible = true;
+            IsRoomRegistrationVisible = false;
+            IsInvoiceVisible = false;
+            IsMaintenanceVisible = false;
+            IsNotificationsVisible = false;
+
+            await Task.CompletedTask;
+        }
+
+        private async Task ShowRoomRegistrationAsync(int? selectedRoomId)
+        {
+            if (Student == null)
+            {
+                await LoadStudentDataAsync();
+            }
+
+            ActiveTabName = "RoomRegistration";
+            RoomRegistrationViewModel = new StudentRoomRegistrationViewModel(
+                _roomService,
+                _applicationService,
+                _dialogService,
+                Student,
+                selectedRoomId,
+                ShowAvailableRoomsAsync);
+            IsProfileVisible = false;
+            IsAvailableRoomsVisible = false;
+            IsRoomRegistrationVisible = true;
+            IsInvoiceVisible = false;
+            IsMaintenanceVisible = false;
+            IsNotificationsVisible = false;
         }
 
         private async Task LoadNotificationsCountAsync()

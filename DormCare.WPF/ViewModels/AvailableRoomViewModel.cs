@@ -14,6 +14,7 @@ namespace DormCare.WPF.ViewModels
     {
         private readonly RoomService _roomService;
         private readonly BuildingService _buildingService;
+        private readonly Func<int, Task>? _registerRoomAsync;
 
         private bool _isInitializing = false;
 
@@ -158,23 +159,59 @@ namespace DormCare.WPF.ViewModels
             set => SetProperty(ref _isEmptyState, value);
         }
 
+        public bool CanRegisterRooms => _registerRoomAsync != null;
+
         public ICommand ResetFiltersCommand { get; }
         public ICommand RefreshCommand { get; }
         public ICommand ToggleViewModeCommand { get; }
+        public ICommand RegisterRoomCommand { get; }
 
         private List<RoomAvailabilityDto> _allRoomsCache = new();
 
-        public AvailableRoomViewModel(RoomService roomService, BuildingService buildingService)
+        public AvailableRoomViewModel(RoomService roomService, BuildingService buildingService, Func<int, Task>? registerRoomAsync = null)
         {
             Title = "Tìm Phòng Còn Giường Trống";
             _roomService = roomService;
             _buildingService = buildingService;
+            _registerRoomAsync = registerRoomAsync;
 
             ResetFiltersCommand = new RelayCommand(_ => ResetFilters());
             RefreshCommand = new AsyncRelayCommand(LoadAvailableRoomsAsync);
             ToggleViewModeCommand = new RelayCommand(_ => IsCardView = !IsCardView);
+            RegisterRoomCommand = new AsyncRelayCommand(RegisterRoomAsync, CanRegisterRoom);
 
             _ = InitializeAsync();
+        }
+
+        private bool CanRegisterRoom(object? parameter)
+        {
+            return !IsBusy && _registerRoomAsync != null && TryGetRoomId(parameter, out _);
+        }
+
+        private async Task RegisterRoomAsync(object? parameter)
+        {
+            if (_registerRoomAsync == null || !TryGetRoomId(parameter, out var roomId))
+            {
+                return;
+            }
+
+            await _registerRoomAsync(roomId);
+        }
+
+        private static bool TryGetRoomId(object? parameter, out int roomId)
+        {
+            switch (parameter)
+            {
+                case int id:
+                    roomId = id;
+                    return id > 0;
+                case RoomAvailabilityDto room:
+                    roomId = room.RoomId;
+                    return room.RoomId > 0;
+                default:
+                    roomId = 0;
+                    return false;
+            }
         }
 
         private async Task InitializeAsync()

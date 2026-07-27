@@ -180,6 +180,7 @@
                                         <RowDefinition Height="Auto"/>
                                         <RowDefinition Height="Auto"/>
                                         <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
                                     </Grid.RowDefinitions>
 
                                     <!-- Card Header: Room Badge, Building Name, Available Beds Count -->
@@ -244,6 +245,14 @@
                                             <ProgressBar Value="{Binding OccupancyRate, Mode=OneWay}" Minimum="0" Maximum="100" Height="8" BorderThickness="0" Background="Transparent" Foreground="#0284C7"/>
                                         </Grid>
                                     </StackPanel>
+                                    <Button Grid.Row="4"
+                                            Content="Đăng ký phòng này"
+                                            Command="{Binding DataContext.RegisterRoomCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                            CommandParameter="{Binding RoomId}"
+                                            Visibility="{Binding DataContext.CanRegisterRooms, RelativeSource={RelativeSource AncestorType=ItemsControl}, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                            Style="{StaticResource PrimaryButton}"
+                                            Height="36"
+                                            Margin="0,14,0,0"/>
                                 </Grid>
                             </Border>
                         </DataTemplate>
@@ -265,6 +274,19 @@
                         <DataGridTextColumn Header="Tình Trạng Chỗ Ở" Binding="{Binding OccupancyText}" Width="160" FontWeight="Bold"/>
                         <DataGridTextColumn Header="Giá Thuê / Tháng" Binding="{Binding MonthlyRent, StringFormat={}{0:N0} VNĐ}" Width="150" FontWeight="Bold" Foreground="#0284C7"/>
                         <DataGridTextColumn Header="Đối Tượng" Binding="{Binding GenderType}" Width="100"/>
+                        <DataGridTemplateColumn Header="Đăng ký" Width="150">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Button Content="Đăng ký phòng này"
+                                            Command="{Binding DataContext.RegisterRoomCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                            CommandParameter="{Binding RoomId}"
+                                            Visibility="{Binding DataContext.CanRegisterRooms, RelativeSource={RelativeSource AncestorType=DataGrid}, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                            Style="{StaticResource PrimaryButton}"
+                                            Height="32"
+                                            Padding="10,0"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
                         <DataGridTemplateColumn Header="Trạng Thái" Width="*">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>

@@ -17,10 +17,9 @@ namespace DormCare.WPF.ViewModels
         private readonly ApplicationService _applicationService;
         private readonly DialogService _dialogService;
         private readonly Student? _student;
+        private readonly Func<Task>? _navigateBackToRoomSearchAsync;
+        private readonly int? _initialRoomId;
 
-        private ObservableCollection<RoomAvailabilityDto> _allRooms = new();
-
-        public ObservableCollection<RoomAvailabilityDto> AvailableRooms { get; private set; } = new();
         public ObservableCollection<BedDto> AvailableBeds { get; private set; } = new();
         public ObservableCollection<RoomApplication> MyApplications { get; private set; } = new();
 
@@ -28,60 +27,24 @@ namespace DormCare.WPF.ViewModels
         public RoomAvailabilityDto? SelectedRoom
         {
             get => _selectedRoom;
-            set
+            private set
             {
                 if (SetProperty(ref _selectedRoom, value))
                 {
-                    SelectedBed = null;
-                    _ = LoadAvailableBedsAsync();
+                    OnPropertyChanged(nameof(HasSelectedRoom));
+                    OnPropertyChanged(nameof(NoSelectedRoom));
                 }
             }
         }
+
+        public bool HasSelectedRoom => SelectedRoom != null;
+        public bool NoSelectedRoom => SelectedRoom == null;
 
         private BedDto? _selectedBed;
         public BedDto? SelectedBed
         {
             get => _selectedBed;
             set => SetProperty(ref _selectedBed, value);
-        }
-
-        private string _searchText = string.Empty;
-        public string SearchText
-        {
-            get => _searchText;
-            set
-            {
-                if (SetProperty(ref _searchText, value))
-                {
-                    ApplyFilters();
-                }
-            }
-        }
-
-        private string _selectedRoomType = "All";
-        public string SelectedRoomType
-        {
-            get => _selectedRoomType;
-            set
-            {
-                if (SetProperty(ref _selectedRoomType, value))
-                {
-                    ApplyFilters();
-                }
-            }
-        }
-
-        private string _selectedGenderType = "All";
-        public string SelectedGenderType
-        {
-            get => _selectedGenderType;
-            set
-            {
-                if (SetProperty(ref _selectedGenderType, value))
-                {
-                    ApplyFilters();
-                }
-            }
         }
 
         private string _reason = string.Empty;
@@ -99,24 +62,28 @@ namespace DormCare.WPF.ViewModels
         }
 
         public ICommand RefreshCommand { get; }
-        public ICommand ResetFiltersCommand { get; }
         public ICommand SubmitCommand { get; }
+        public ICommand BackToRoomSearchCommand { get; }
 
         public StudentRoomRegistrationViewModel(
             RoomService roomService,
             ApplicationService applicationService,
             DialogService dialogService,
-            Student? student)
+            Student? student,
+            int? selectedRoomId = null,
+            Func<Task>? navigateBackToRoomSearchAsync = null)
         {
             Title = "Dang ky phong";
             _roomService = roomService;
             _applicationService = applicationService;
             _dialogService = dialogService;
             _student = student;
+            _initialRoomId = selectedRoomId;
+            _navigateBackToRoomSearchAsync = navigateBackToRoomSearchAsync;
 
             RefreshCommand = new AsyncRelayCommand(LoadAsync);
-            ResetFiltersCommand = new RelayCommand(ResetFilters);
             SubmitCommand = new AsyncRelayCommand(SubmitAsync, CanSubmit);
+            BackToRoomSearchCommand = new AsyncRelayCommand(BackToRoomSearchAsync);
 
             _ = LoadAsync();
         }
@@ -124,29 +91,10 @@ namespace DormCare.WPF.ViewModels
         public async Task LoadAsync()
         {
             IsBusy = true;
+            ClearStatus();
             try
             {
-                var rooms = await _roomService.GetAvailableRoomsAsync();
-                _allRooms = new ObservableCollection<RoomAvailabilityDto>(rooms.Select(r => new RoomAvailabilityDto
-                {
-                    RoomId = r.RoomId,
-                    BuildingId = r.BuildingId,
-                    BuildingName = r.BuildingName,
-                    RoomNumber = r.RoomNumber,
-                    FloorNumber = r.FloorNumber,
-                    RoomType = r.RoomType,
-                    Capacity = r.Capacity,
-                    MonthlyRent = r.MonthlyRent,
-                    GenderType = r.GenderType,
-                    Status = r.Status,
-                    OccupiedBeds = r.OccupiedBeds,
-                    AvailableBeds = r.AvailableBeds,
-                    ReservedBeds = r.ReservedBeds,
-                    MaintenanceBeds = r.MaintenanceBeds,
-                    TotalBedsCreated = r.TotalBedsCreated
-                }));
-
-                ApplyFilters();
+                await LoadSelectedRoomAsync();
                 await LoadMyApplicationsAsync();
             }
             finally
@@ -155,12 +103,36 @@ namespace DormCare.WPF.ViewModels
             }
         }
 
-        private async Task LoadAvailableBedsAsync()
+        private async Task LoadSelectedRoomAsync()
         {
-            AvailableBeds = SelectedRoom == null
-                ? new ObservableCollection<BedDto>()
-                : new ObservableCollection<BedDto>(await _applicationService.GetAvailableBedsByRoomAsync(SelectedRoom.RoomId));
+            SelectedBed = null;
+            AvailableBeds = new ObservableCollection<BedDto>();
 
+            if (!_initialRoomId.HasValue)
+            {
+                SelectedRoom = null;
+                Message = "Ban chua chon phong. Vui long tim va chon mot phong con cho truoc khi dang ky.";
+                SetWarning(Message);
+                OnPropertyChanged(nameof(AvailableBeds));
+                return;
+            }
+
+            var rooms = await _roomService.GetAvailableRoomsAsync();
+            var room = rooms.FirstOrDefault(r => r.RoomId == _initialRoomId.Value);
+            SelectedRoom = room == null ? null : MapToAvailabilityDto(room);
+
+            if (SelectedRoom == null)
+            {
+                Message = "Phong da chon khong con san sang dang ky. Vui long chon phong khac.";
+                SetWarning(Message);
+                OnPropertyChanged(nameof(AvailableBeds));
+                return;
+            }
+
+            AvailableBeds = new ObservableCollection<BedDto>(
+                await _applicationService.GetAvailableBedsByRoomAsync(SelectedRoom.RoomId));
+            SelectedBed = AvailableBeds.FirstOrDefault();
+            Message = string.Empty;
             OnPropertyChanged(nameof(AvailableBeds));
         }
 
@@ -173,37 +145,26 @@ namespace DormCare.WPF.ViewModels
             OnPropertyChanged(nameof(MyApplications));
         }
 
-        private void ApplyFilters()
+        private static RoomAvailabilityDto MapToAvailabilityDto(RoomDto room)
         {
-            var query = _allRooms.Where(r => r.Status == "Available" && r.AvailableBeds > 0);
-
-            if (!string.IsNullOrWhiteSpace(SearchText))
+            return new RoomAvailabilityDto
             {
-                query = query.Where(r =>
-                    r.RoomNumber.Contains(SearchText, StringComparison.OrdinalIgnoreCase) ||
-                    r.BuildingName.Contains(SearchText, StringComparison.OrdinalIgnoreCase));
-            }
-
-            if (SelectedRoomType != "All")
-            {
-                query = query.Where(r => r.RoomType.Equals(SelectedRoomType, StringComparison.OrdinalIgnoreCase));
-            }
-
-            if (SelectedGenderType != "All")
-            {
-                query = query.Where(r => r.GenderType.Equals(SelectedGenderType, StringComparison.OrdinalIgnoreCase));
-            }
-
-            AvailableRooms = new ObservableCollection<RoomAvailabilityDto>(query);
-            OnPropertyChanged(nameof(AvailableRooms));
-        }
-
-        private void ResetFilters()
-        {
-            SearchText = string.Empty;
-            SelectedRoomType = "All";
-            SelectedGenderType = "All";
-            ApplyFilters();
+                RoomId = room.RoomId,
+                BuildingId = room.BuildingId,
+                BuildingName = room.BuildingName,
+                RoomNumber = room.RoomNumber,
+                FloorNumber = room.FloorNumber,
+                RoomType = room.RoomType,
+                Capacity = room.Capacity,
+                MonthlyRent = room.MonthlyRent,
+                GenderType = room.GenderType,
+                Status = room.Status,
+                OccupiedBeds = room.OccupiedBeds,
+                AvailableBeds = room.AvailableBeds,
+                ReservedBeds = room.ReservedBeds,
+                MaintenanceBeds = room.MaintenanceBeds,
+                TotalBedsCreated = room.TotalBedsCreated
+            };
         }
 
         private bool CanSubmit()
@@ -215,7 +176,8 @@ namespace DormCare.WPF.ViewModels
         {
             if (!CanSubmit())
             {
-                _dialogService.ShowError("Vui long chon phong, chon giuong va nhap ly do dang ky.");
+                SetError("Vui long chon giuong con trong va nhap ly do dang ky.");
+                _dialogService.ShowError("Vui long chon giuong con trong va nhap ly do dang ky.");
                 return;
             }
 
@@ -226,6 +188,7 @@ namespace DormCare.WPF.ViewModels
             }
 
             IsBusy = true;
+            ClearStatus();
             try
             {
                 var result = await _applicationService.SubmitApplicationAsync(_student!.StudentId, SelectedRoom.RoomId, SelectedBed.BedId, Reason);
@@ -233,19 +196,29 @@ namespace DormCare.WPF.ViewModels
 
                 if (result.IsSuccess)
                 {
+                    SetSuccess(result.Message);
                     _dialogService.ShowInformation(result.Message);
                     Reason = string.Empty;
                     await LoadAsync();
                 }
                 else
                 {
+                    SetError(result.Message);
                     _dialogService.ShowError(result.Message);
-                    await LoadAvailableBedsAsync();
+                    await LoadSelectedRoomAsync();
                 }
             }
             finally
             {
                 IsBusy = false;
+            }
+        }
+
+        private async Task BackToRoomSearchAsync()
+        {
+            if (_navigateBackToRoomSearchAsync != null)
+            {
+                await _navigateBackToRoomSearchAsync();
             }
         }
     }
