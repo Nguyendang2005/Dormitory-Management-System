@@ -56,12 +56,12 @@
 
                     <StackPanel Grid.Column="0">
                         <TextBlock Text="📅 Tháng Thu" FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,6"/>
-                        <TextBox Style="{StaticResource ModernTextBox}" Text="{Binding Month, UpdateSourceTrigger=PropertyChanged}"/>
+                        <TextBox Style="{StaticResource ModernTextBox}" Text="{Binding Month, UpdateSourceTrigger=LostFocus, TargetNullValue=1}"/>
                     </StackPanel>
 
                     <StackPanel Grid.Column="2">
                         <TextBlock Text="📅 Năm Thu" FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,6"/>
-                        <TextBox Style="{StaticResource ModernTextBox}" Text="{Binding Year, UpdateSourceTrigger=PropertyChanged}"/>
+                        <TextBox Style="{StaticResource ModernTextBox}" Text="{Binding Year, UpdateSourceTrigger=LostFocus, TargetNullValue=2026}"/>
                     </StackPanel>
 
                     <StackPanel Grid.Column="4">
@@ -84,12 +84,12 @@
 
                             <StackPanel Grid.Column="0">
                                 <TextBlock Text="Tiền Phòng:" FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,4"/>
-                                <TextBox Style="{StaticResource ModernTextBox}" Text="{Binding RoomFee, StringFormat='{}{0:0.#}', UpdateSourceTrigger=PropertyChanged}"/>
+                                <TextBox Style="{StaticResource ModernTextBox}" Text="{Binding RoomFee, StringFormat='{}{0:0.#}', UpdateSourceTrigger=PropertyChanged, TargetNullValue=0}"/>
                             </StackPanel>
 
                             <StackPanel Grid.Column="2">
                                 <TextBlock Text="Tiền Điện (Service Fee):" FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,4"/>
-                                <TextBox Style="{StaticResource ModernTextBox}" Text="{Binding ElectricityFee, StringFormat='{}{0:0.#}', UpdateSourceTrigger=PropertyChanged}"/>
+                                <TextBox Style="{StaticResource ModernTextBox}" Text="{Binding ElectricityFee, StringFormat='{}{0:0.#}', UpdateSourceTrigger=PropertyChanged, TargetNullValue=0}"/>
                             </StackPanel>
                         </Grid>
 
@@ -102,12 +102,12 @@
 
                             <StackPanel Grid.Column="0">
                                 <TextBlock Text="Tiền Nước (Water Fee):" FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,4"/>
-                                <TextBox Style="{StaticResource ModernTextBox}" Text="{Binding WaterFee, StringFormat='{}{0:0.#}', UpdateSourceTrigger=PropertyChanged}"/>
+                                <TextBox Style="{StaticResource ModernTextBox}" Text="{Binding WaterFee, StringFormat='{}{0:0.#}', UpdateSourceTrigger=PropertyChanged, TargetNullValue=0}"/>
                             </StackPanel>
 
                             <StackPanel Grid.Column="2">
                                 <TextBlock Text="Phí Khác / Phí Khống:" FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,4"/>
-                                <TextBox Style="{StaticResource ModernTextBox}" Text="{Binding OtherFee, StringFormat='{}{0:0.#}', UpdateSourceTrigger=PropertyChanged}"/>
+                                <TextBox Style="{StaticResource ModernTextBox}" Text="{Binding OtherFee, StringFormat='{}{0:0.#}', UpdateSourceTrigger=PropertyChanged, TargetNullValue=0}"/>
                             </StackPanel>
                         </Grid>
 
@@ -120,7 +120,7 @@
 
                             <StackPanel Grid.Column="0">
                                 <TextBlock Text="Giảm Giá / Miễn Giam:" FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,4"/>
-                                <TextBox Style="{StaticResource ModernTextBox}" Text="{Binding DiscountAmount, StringFormat='{}{0:0.#}', UpdateSourceTrigger=PropertyChanged}"/>
+                                <TextBox Style="{StaticResource ModernTextBox}" Text="{Binding DiscountAmount, StringFormat='{}{0:0.#}', UpdateSourceTrigger=PropertyChanged, TargetNullValue=0}"/>
                             </StackPanel>
                         </Grid>
                     </StackPanel>
