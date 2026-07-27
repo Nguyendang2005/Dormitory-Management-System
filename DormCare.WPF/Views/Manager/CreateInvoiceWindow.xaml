@@ -56,12 +56,12 @@
 
                     <StackPanel Grid.Column="0">
                         <TextBlock Text="📅 Tháng Thu" FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,6"/>
-                        <TextBox Style="{StaticResource ModernTextBox}" Text="{Binding Month, UpdateSourceTrigger=LostFocus, TargetNullValue=1}"/>
+                        <TextBox Style="{StaticResource ModernTextBox}" Text="{Binding Month, UpdateSourceTrigger=PropertyChanged, TargetNullValue=1, FallbackValue=1}"/>
                     </StackPanel>
 
                     <StackPanel Grid.Column="2">
                         <TextBlock Text="📅 Năm Thu" FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,6"/>
-                        <TextBox Style="{StaticResource ModernTextBox}" Text="{Binding Year, UpdateSourceTrigger=LostFocus, TargetNullValue=2026}"/>
+                        <TextBox Style="{StaticResource ModernTextBox}" Text="{Binding Year, UpdateSourceTrigger=PropertyChanged, TargetNullValue=2026, FallbackValue=2026}"/>
                     </StackPanel>
 
                     <StackPanel Grid.Column="4">

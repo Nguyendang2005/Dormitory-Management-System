@@ -78,9 +78,10 @@ namespace DormCare.Business.Services
                 await _invoiceRepository.AddAsync(invoice);
                 await _invoiceRepository.SaveChangesAsync();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return ServiceResult<InvoiceDto>.Failure($"Lỗi lưu hóa đơn: Hóa đơn tháng {billingMonth:MM/yyyy} của sinh viên này đã tồn tại.");
+                var realError = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
+                return ServiceResult<InvoiceDto>.Failure($"Lỗi lưu hóa đơn: {realError}");
             }
 
             var createdInvoice = await _invoiceRepository.GetByIdWithDetailsAsync(invoice.InvoiceId);
