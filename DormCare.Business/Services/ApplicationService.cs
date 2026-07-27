@@ -97,11 +97,6 @@ namespace DormCare.Business.Services
             {
                 return ServiceResult<bool>.Failure(BuildActiveAssignmentMessage(activeAssignment));
             }
-            if (activeAssignment != null)
-            {
-                return ServiceResult<bool>.Failure("Sinh viên đã có chỗ ở đang hoạt động.");
-            }
-
             var existingOpenApplication = await _context.RoomApplications
                 .AnyAsync(a => a.StudentId == studentId && (a.Status == "Pending" || a.Status == "Approved"));
             if (existingOpenApplication)
@@ -205,13 +200,6 @@ namespace DormCare.Business.Services
                     if (activeAssignmentForApproval != null)
                     {
                         return ServiceResult<bool>.Failure(BuildActiveAssignmentMessage(activeAssignmentForApproval));
-                    }
-
-                    var hasActiveAssignment = await _context.RoomAssignments
-                        .AnyAsync(a => a.StudentId == app.StudentId && a.Status == "Active");
-                    if (hasActiveAssignment)
-                    {
-                        return ServiceResult<bool>.Failure("Sinh viên đã có chỗ ở đang hoạt động.");
                     }
 
                     var hasApprovedApplication = await _context.RoomApplications
