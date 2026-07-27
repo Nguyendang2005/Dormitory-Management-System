@@ -35,7 +35,7 @@ namespace DormCare.WPF
         {
             services.AddDbContext<DormCareDbContext>(options =>
             {
-                options.UseSqlServer("Server=localhost;Database=DormCareDB;User Id=hau;Password=123456;TrustServerCertificate=True;Encrypt=False;");
+                options.UseSqlServer("Server=.;Database=DormCareDB;Trusted_Connection=True;TrustServerCertificate=True;Encrypt=False;");
             });
 
             services.AddScoped<UserRepository>();
@@ -67,7 +67,12 @@ namespace DormCare.WPF
             services.AddTransient<BedViewModel>();
             services.AddTransient<AvailableRoomViewModel>();
             services.AddTransient<OccupancyStatisticsViewModel>();
-            services.AddTransient<StudentViewModel>();
+            services.AddTransient<StudentViewModel>(provider => new StudentViewModel(
+                provider.GetRequiredService<StudentService>(),
+                provider.GetRequiredService<DormCareDbContext>(),
+                provider.GetRequiredService<DialogService>(),
+                new User() // Dummy user for DI registration
+            ));
             services.AddTransient<ApplicationViewModel>();
             services.AddTransient<InvoiceViewModel>();
             services.AddTransient<MaintenanceViewModel>();

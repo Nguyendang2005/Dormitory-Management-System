@@ -9,21 +9,48 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Header -->
+        <!-- Header & Toolbar -->
         <DockPanel Grid.Row="0" Margin="0,0,0,16">
             <StackPanel DockPanel.Dock="Left">
                 <TextBlock Text="Quản Lý Sinh Viên" FontSize="26" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}"/>
-                <TextBlock Text="Danh sách sinh viên ký túc xá và thông tin phòng ở" FontSize="14" Foreground="{StaticResource TextMutedBrush}" Margin="0,4,0,0"/>
+                <TextBlock Text="Quản lý hồ sơ học viên, thông tin lưu trú, nhận/trả phòng ký túc xá" FontSize="14" Foreground="{StaticResource TextMutedBrush}" Margin="0,4,0,0"/>
             </StackPanel>
-            <Button DockPanel.Dock="Right" Content="🔄 Tải lại" Style="{StaticResource PrimaryButton}" Command="{Binding RefreshCommand}" VerticalAlignment="Center"/>
+            
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                <Button Content="➕ Thêm mới" Style="{StaticResource PrimaryButton}" Command="{Binding AddStudentCommand}" Margin="0,0,8,0"/>
+                <Button Content="✏️ Sửa đổi" Style="{StaticResource SecondaryButton}" Command="{Binding EditStudentCommand}" Margin="0,0,8,0"/>
+                <Button Content="❌ Xóa" Style="{StaticResource SecondaryButton}" Command="{Binding DeleteStudentCommand}" Margin="0,0,12,0"/>
+                <Button Content="🔑 Nhận phòng (Check-in)" Style="{StaticResource PrimaryButton}" Command="{Binding CheckInCommand}" Margin="0,0,8,0"/>
+                <Button Content="🚪 Trả phòng (Check-out)" Style="{StaticResource SecondaryButton}" Command="{Binding CheckOutCommand}" Margin="0,0,16,0"/>
+                <Button Content="🔄 Tải lại" Style="{StaticResource SecondaryButton}" Command="{Binding RefreshCommand}"/>
+            </StackPanel>
         </DockPanel>
 
-        <!-- Search Bar -->
+        <!-- Search & Filter Bar -->
         <Border Grid.Row="1" Style="{StaticResource CardFrame}" Margin="0,0,0,16" Padding="16,12">
-            <StackPanel>
-                <TextBlock Text="🔍 Tìm kiếm sinh viên (Họ tên / Mã SV / Ngành học / Lớp)" FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,4"/>
-                <TextBox Style="{StaticResource ModernTextBox}" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"/>
-            </StackPanel>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="2*"/>
+                    <ColumnDefinition Width="16"/>
+                    <ColumnDefinition Width="1*"/>
+                </Grid.ColumnDefinitions>
+                
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="🔍 Tìm kiếm sinh viên (Họ tên / Mã SV / Ngành học / Lớp)" FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,4"/>
+                    <TextBox Style="{StaticResource ModernTextBox}" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"/>
+                </StackPanel>
+                
+                <StackPanel Grid.Column="2">
+                    <TextBlock Text="🚪 Xem Theo Phòng" FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,4"/>
+                    <ComboBox ItemsSource="{Binding Rooms}" SelectedItem="{Binding SelectedRoomFilter}" Height="38" Style="{StaticResource ModernComboBox}">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding RoomNumber}" Foreground="White" FontSize="13"/>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </StackPanel>
+            </Grid>
         </Border>
 
         <!-- Student DataGrid -->
