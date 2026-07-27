@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DormCare.Domain.Entities
 {
@@ -19,6 +20,8 @@ namespace DormCare.Domain.Entities
         public decimal ServiceFee { get; set; }
         public decimal OtherFee { get; set; }
         public decimal DiscountAmount { get; set; }
+
+        [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public decimal TotalAmount { get; set; } // Computed column
 
         public DateTime DueDate { get; set; }

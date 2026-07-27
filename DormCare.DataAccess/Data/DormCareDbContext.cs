@@ -131,6 +131,7 @@ namespace DormCare.DataAccess.Data
             {
                 entity.HasKey(e => e.InvoiceId);
                 entity.HasIndex(e => e.InvoiceCode).IsUnique();
+                entity.Property(e => e.TotalAmount).ValueGeneratedOnAddOrUpdate();
                 entity.HasOne(i => i.Student)
                       .WithMany(s => s.Invoices)
                       .HasForeignKey(i => i.StudentId)

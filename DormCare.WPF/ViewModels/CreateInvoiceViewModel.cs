@@ -60,15 +60,15 @@ namespace DormCare.WPF.ViewModels
             }
         }
 
-        private int _month = DateTime.Today.Month;
-        public int Month
+        private int? _month = DateTime.Today.Month;
+        public int? Month
         {
             get => _month;
             set => SetProperty(ref _month, value);
         }
 
-        private int _year = DateTime.Today.Year;
-        public int Year
+        private int? _year = DateTime.Today.Year;
+        public int? Year
         {
             get => _year;
             set => SetProperty(ref _year, value);
@@ -231,7 +231,10 @@ namespace DormCare.WPF.ViewModels
                 return;
             }
 
-            if (Month < 1 || Month > 12)
+            int monthVal = Month ?? DateTime.Today.Month;
+            int yearVal = Year ?? DateTime.Today.Year;
+
+            if (monthVal < 1 || monthVal > 12)
             {
                 ErrorMessage = "Tháng không hợp lệ (1 - 12).";
                 return;
@@ -250,7 +253,7 @@ namespace DormCare.WPF.ViewModels
             {
                 StudentId = SelectedStudent.Id,
                 RoomId = SelectedRoom.RoomId,
-                BillingMonth = new DateTime(Year, Month, 1),
+                BillingMonth = new DateTime(yearVal, monthVal, 1),
                 RoomFee = RoomFee,
                 ElectricityFee = ElectricityFee,
                 WaterFee = WaterFee,
