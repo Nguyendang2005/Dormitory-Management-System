@@ -142,7 +142,7 @@ namespace DormCare.WPF
             {
                 "Server=DANG;Database=DormCareDB;User Id=sa;Password=123456;TrustServerCertificate=True;Encrypt=False;Connect Timeout=3;",
                 "Server=.;Database=DormCareDB;User Id=sa;Password=123456;TrustServerCertificate=True;Encrypt=False;Connect Timeout=3;",
-                "Server=localhost;Database=DormCareDB;User Id=sa;Password=123456;TrustServerCertificate=True;Encrypt=False;Connect Timeout=3;",
+                "Server=localhost;Database=DormCareDB;User Id=hau;Password=123456;TrustServerCertificate=True;Encrypt=False;Connect Timeout=3;",
                 "Server=.\\SQLEXPRESS;Database=DormCareDB;User Id=sa;Password=123456;TrustServerCertificate=True;Encrypt=False;Connect Timeout=3;",
                 "Server=.\\SQLEXPRESS;Database=DormCareDB;Trusted_Connection=True;TrustServerCertificate=True;Connect Timeout=3;",
                 "Server=.;Database=DormCareDB;Trusted_Connection=True;TrustServerCertificate=True;Connect Timeout=3;",

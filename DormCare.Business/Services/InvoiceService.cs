@@ -44,10 +44,13 @@ namespace DormCare.Business.Services
 
             DateTime billingMonth = new DateTime(dto.BillingMonth.Year, dto.BillingMonth.Month, 1);
 
-            var existingInvoices = await _invoiceRepository.FindAsync(i => i.StudentId == dto.StudentId && i.BillingMonth == billingMonth);
+            var existingInvoices = await _invoiceRepository.FindAsync(
+                i => i.StudentId == dto.StudentId &&
+                     i.BillingMonth.Month == dto.BillingMonth.Month &&
+                     i.BillingMonth.Year == dto.BillingMonth.Year);
             if (existingInvoices.Any())
             {
-                return ServiceResult<InvoiceDto>.Failure($"Sinh viên {student.FullName} đã có hóa đơn cho tháng {billingMonth:MM/yyyy} rồi!");
+                return ServiceResult<InvoiceDto>.Failure($"Sinh viên {student.FullName} đã có hóa đơn cho tháng {dto.BillingMonth:MM/yyyy} rồi!");
             }
 
             string invoiceCode = await _invoiceRepository.GenerateNextInvoiceCodeAsync();
