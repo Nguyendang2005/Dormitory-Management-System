@@ -62,39 +62,49 @@
                             <TextBlock Text="Hệ Thống Quản Lý Ký Túc Xá" FontSize="11" Foreground="#94A3B8"/>
                         </StackPanel>
                     </StackPanel>
+                </StackPanel>
 
-                    <!-- Manager Profile Header Badge -->
-                    <Border Background="#1C2B36" CornerRadius="8" Padding="10,8" Margin="0,16,0,0">
-                        <DockPanel>
-                            <TextBlock DockPanel.Dock="Right" Text="⚙️" Foreground="#64748B" VerticalAlignment="Center" Cursor="Hand"/>
-                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <Border Width="30" Height="30" CornerRadius="15" Background="#334155" Margin="0,0,10,0">
-                                    <TextBlock Text="👤" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                <!-- Bottom User Profile & Prominent Logout Button Dock -->
+                <StackPanel DockPanel.Dock="Bottom" Margin="0,16,0,0">
+                    <Border Background="#1C2B36" BorderBrush="#2D4354" BorderThickness="1" CornerRadius="12" Padding="12">
+                        <StackPanel>
+                            <DockPanel Margin="0,0,0,10">
+                                <Border Width="34" Height="34" CornerRadius="17" Background="#0D9488" Margin="0,0,10,0">
+                                    <TextBlock Text="👤" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </Border>
                                 <StackPanel VerticalAlignment="Center">
                                     <TextBlock Text="{Binding CurrentUser.Username}" Foreground="#FFFFFF" FontWeight="Bold" FontSize="13"/>
-                                    <TextBlock Text="{Binding CurrentUser.Role}" Foreground="#94A3B8" FontSize="11"/>
+                                    <TextBlock Text="{Binding CurrentUser.Role}" Foreground="#38BDF8" FontWeight="SemiBold" FontSize="11"/>
                                 </StackPanel>
-                            </StackPanel>
-                        </DockPanel>
-                    </Border>
-                </StackPanel>
+                            </DockPanel>
 
-                <!-- Bottom Logout Button Dock -->
-                <StackPanel DockPanel.Dock="Bottom" Margin="0,12,0,0">
-                    <Border Background="#1C2B36" CornerRadius="8" Padding="10,8">
-                        <DockPanel>
-                            <Button DockPanel.Dock="Right" Content="🚪" Command="{Binding LogoutCommand}" Style="{StaticResource SidebarNavButton}" Foreground="#EF4444" Padding="6,2" VerticalAlignment="Center"/>
-                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <Border Width="28" Height="28" CornerRadius="14" Background="#334155" Margin="0,0,8,0">
-                                    <TextBlock Text="👤" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                </Border>
-                                <StackPanel VerticalAlignment="Center">
-                                    <TextBlock Text="{Binding CurrentUser.Username}" Foreground="#FFFFFF" FontWeight="Bold" FontSize="12"/>
-                                    <TextBlock Text="{Binding CurrentUser.Role}" Foreground="#94A3B8" FontSize="10"/>
-                                </StackPanel>
-                            </StackPanel>
-                        </DockPanel>
+                            <Button Command="{Binding LogoutCommand}" Cursor="Hand" Height="36">
+                                <Button.Style>
+                                    <Style TargetType="Button">
+                                        <Setter Property="Background" Value="#991B1B"/>
+                                        <Setter Property="Foreground" Value="#FFFFFF"/>
+                                        <Setter Property="BorderThickness" Value="0"/>
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="Button">
+                                                    <Border Background="{TemplateBinding Background}" CornerRadius="8" Padding="10,6">
+                                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                            <TextBlock Text="🚪 " FontSize="14"/>
+                                                            <TextBlock Text="Đăng Xuất" FontWeight="Bold" FontSize="12" Foreground="#FFFFFF"/>
+                                                        </StackPanel>
+                                                    </Border>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="#DC2626"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
+                        </StackPanel>
                     </Border>
                 </StackPanel>
 
