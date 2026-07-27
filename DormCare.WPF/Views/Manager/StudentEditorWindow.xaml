@@ -1,0 +1,120 @@
+<Window x:Class="DormCare.WPF.Views.Manager.StudentEditorWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:conv="clr-namespace:DormCare.WPF.Converters"
+        Title="{Binding Title}"
+        Width="720" SizeToContent="Height"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize"
+        Style="{StaticResource ModernWindow}">
+
+    <Window.Resources>
+        <conv:BoolToVisibilityConverter x:Key="BoolToVisConverter"/>
+        <Style x:Key="FieldLabel" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Foreground" Value="{StaticResource TextMutedBrush}"/>
+            <Setter Property="Margin" Value="0,0,0,4"/>
+        </Style>
+        <Style x:Key="FieldGroup" TargetType="StackPanel">
+            <Setter Property="Margin" Value="0,0,0,14"/>
+        </Style>
+    </Window.Resources>
+
+    <Border Padding="28">
+        <StackPanel>
+            <!-- Header -->
+            <TextBlock Text="{Binding HeaderText}" FontSize="22" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}"/>
+            <TextBlock Text="{Binding SubHeaderText}" FontSize="13" Foreground="{StaticResource TextMutedBrush}" Margin="0,4,0,18" TextWrapping="Wrap"/>
+
+            <!-- Error banner -->
+            <Border Style="{StaticResource ValidationBanner}" Visibility="{Binding HasError, Converter={StaticResource BoolToVisConverter}}">
+                <TextBlock Text="{Binding ErrorMessage}" Foreground="#FCA5A5" FontSize="13" TextWrapping="Wrap"/>
+            </Border>
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="20"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Left column -->
+                <StackPanel Grid.Column="0">
+                    <StackPanel Style="{StaticResource FieldGroup}">
+                        <TextBlock Text="Mã sinh viên *" Style="{StaticResource FieldLabel}"/>
+                        <TextBox Style="{StaticResource ModernTextBox}" Text="{Binding Draft.StudentCode, UpdateSourceTrigger=PropertyChanged}"/>
+                    </StackPanel>
+
+                    <StackPanel Style="{StaticResource FieldGroup}">
+                        <TextBlock Text="Họ và tên *" Style="{StaticResource FieldLabel}"/>
+                        <TextBox Style="{StaticResource ModernTextBox}" Text="{Binding Draft.FullName, UpdateSourceTrigger=PropertyChanged}"/>
+                    </StackPanel>
+
+                    <StackPanel Style="{StaticResource FieldGroup}">
+                        <TextBlock Text="Ngày sinh *" Style="{StaticResource FieldLabel}"/>
+                        <DatePicker SelectedDate="{Binding Draft.DateOfBirth}" FontSize="14"/>
+                    </StackPanel>
+
+                    <StackPanel Style="{StaticResource FieldGroup}">
+                        <TextBlock Text="Giới tính *" Style="{StaticResource FieldLabel}"/>
+                        <ComboBox ItemsSource="{Binding GenderOptions}" SelectedItem="{Binding Draft.Gender}" FontSize="14" Padding="10,8"/>
+                    </StackPanel>
+
+                    <StackPanel Style="{StaticResource FieldGroup}">
+                        <TextBlock Text="Email *" Style="{StaticResource FieldLabel}"/>
+                        <TextBox Style="{StaticResource ModernTextBox}" Text="{Binding Draft.Email, UpdateSourceTrigger=PropertyChanged}"/>
+                    </StackPanel>
+
+                    <StackPanel Style="{StaticResource FieldGroup}">
+                        <TextBlock Text="Số điện thoại *" Style="{StaticResource FieldLabel}"/>
+                        <TextBox Style="{StaticResource ModernTextBox}" Text="{Binding Draft.PhoneNumber, UpdateSourceTrigger=PropertyChanged}"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Right column -->
+                <StackPanel Grid.Column="2">
+                    <StackPanel Style="{StaticResource FieldGroup}">
+                        <TextBlock Text="Ngành học *" Style="{StaticResource FieldLabel}"/>
+                        <TextBox Style="{StaticResource ModernTextBox}" Text="{Binding Draft.Major, UpdateSourceTrigger=PropertyChanged}"/>
+                    </StackPanel>
+
+                    <StackPanel Style="{StaticResource FieldGroup}">
+                        <TextBlock Text="Lớp *" Style="{StaticResource FieldLabel}"/>
+                        <TextBox Style="{StaticResource ModernTextBox}" Text="{Binding Draft.ClassName, UpdateSourceTrigger=PropertyChanged}"/>
+                    </StackPanel>
+
+                    <StackPanel Style="{StaticResource FieldGroup}">
+                        <TextBlock Text="Cơ sở (Campus) *" Style="{StaticResource FieldLabel}"/>
+                        <TextBox Style="{StaticResource ModernTextBox}" Text="{Binding Draft.Campus, UpdateSourceTrigger=PropertyChanged}"/>
+                    </StackPanel>
+
+                    <StackPanel Style="{StaticResource FieldGroup}">
+                        <TextBlock Text="Địa chỉ" Style="{StaticResource FieldLabel}"/>
+                        <TextBox Style="{StaticResource ModernTextBox}" Text="{Binding Draft.Address, UpdateSourceTrigger=PropertyChanged}"/>
+                    </StackPanel>
+
+                    <StackPanel Style="{StaticResource FieldGroup}">
+                        <TextBlock Text="Người liên hệ khẩn cấp" Style="{StaticResource FieldLabel}"/>
+                        <TextBox Style="{StaticResource ModernTextBox}" Text="{Binding Draft.EmergencyContactName, UpdateSourceTrigger=PropertyChanged}"/>
+                    </StackPanel>
+
+                    <StackPanel Style="{StaticResource FieldGroup}">
+                        <TextBlock Text="SĐT liên hệ khẩn cấp" Style="{StaticResource FieldLabel}"/>
+                        <TextBox Style="{StaticResource ModernTextBox}" Text="{Binding Draft.EmergencyContactPhone, UpdateSourceTrigger=PropertyChanged}"/>
+                    </StackPanel>
+
+                    <StackPanel Style="{StaticResource FieldGroup}" Visibility="{Binding IsEditMode, Converter={StaticResource BoolToVisConverter}}">
+                        <TextBlock Text="Trạng thái" Style="{StaticResource FieldLabel}"/>
+                        <ComboBox ItemsSource="{Binding StatusOptions}" SelectedItem="{Binding Draft.Status}" FontSize="14" Padding="10,8"/>
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+
+            <!-- Buttons -->
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+                <Button Content="Hủy" Style="{StaticResource DangerButton}" Command="{Binding CancelCommand}" MinWidth="110" Margin="0,0,12,0"/>
+                <Button Content="{Binding SaveButtonText}" Style="{StaticResource PrimaryButton}" Command="{Binding SaveCommand}" MinWidth="170"/>
+            </StackPanel>
+        </StackPanel>
+    </Border>
+</Window>

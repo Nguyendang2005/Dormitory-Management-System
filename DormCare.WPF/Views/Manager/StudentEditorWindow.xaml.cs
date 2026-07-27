@@ -3,15 +3,11 @@ using DormCare.WPF.ViewModels;
 
 namespace DormCare.WPF.Views.Manager
 {
-    public partial class CheckInWindow : Window
+    public partial class StudentEditorWindow : Window
     {
-        public CheckInWindow()
+        public StudentEditorWindow(StudentEditorViewModel viewModel)
         {
             InitializeComponent();
-        }
-
-        public CheckInWindow(CheckInViewModel viewModel) : this()
-        {
             DataContext = viewModel;
             viewModel.RequestClose += saved =>
             {

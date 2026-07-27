@@ -1,13 +1,10 @@
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using Microsoft.EntityFrameworkCore;
 using DormCare.Business.DTOs;
 using DormCare.Business.Services;
-using DormCare.DataAccess.Data;
 using DormCare.Domain.Entities;
 using DormCare.WPF.Commands;
 using DormCare.WPF.Services;
@@ -17,10 +14,12 @@ namespace DormCare.WPF.ViewModels
 {
     public class StudentViewModel : BaseViewModel
     {
+        private const string FilterAll = "Tất cả phòng";
+        private const string FilterNoRoom = "Chưa nhận phòng";
+
         private readonly StudentService _studentService;
-        private readonly DormCareDbContext _context;
         private readonly DialogService _dialogService;
-        private readonly User _currentUser;
+        private readonly User? _currentUser;
 
         private ObservableCollection<StudentDto> _allStudents = new();
 
@@ -51,15 +50,15 @@ namespace DormCare.WPF.ViewModels
             }
         }
 
-        private ObservableCollection<RoomDto> _rooms = new();
-        public ObservableCollection<RoomDto> Rooms
+        private ObservableCollection<string> _roomFilterOptions = new();
+        public ObservableCollection<string> RoomFilterOptions
         {
-            get => _rooms;
-            set => SetProperty(ref _rooms, value);
+            get => _roomFilterOptions;
+            set => SetProperty(ref _roomFilterOptions, value);
         }
 
-        private RoomDto? _selectedRoomFilter;
-        public RoomDto? SelectedRoomFilter
+        private string _selectedRoomFilter = FilterAll;
+        public string SelectedRoomFilter
         {
             get => _selectedRoomFilter;
             set
@@ -71,31 +70,33 @@ namespace DormCare.WPF.ViewModels
             }
         }
 
+        private string _summaryText = string.Empty;
+        public string SummaryText
+        {
+            get => _summaryText;
+            set => SetProperty(ref _summaryText, value);
+        }
+
         public ICommand RefreshCommand { get; }
-        public ICommand AddStudentCommand { get; }
-        public ICommand EditStudentCommand { get; }
-        public ICommand DeleteStudentCommand { get; }
+        public ICommand AddCommand { get; }
+        public ICommand EditCommand { get; }
+        public ICommand DeleteCommand { get; }
         public ICommand CheckInCommand { get; }
         public ICommand CheckOutCommand { get; }
 
-        public StudentViewModel(
-            StudentService studentService,
-            DormCareDbContext context,
-            DialogService dialogService,
-            User currentUser)
+        public StudentViewModel(StudentService studentService, DialogService dialogService, User? currentUser = null)
         {
             Title = "Quản lý Sinh viên";
             _studentService = studentService;
-            _context = context;
             _dialogService = dialogService;
             _currentUser = currentUser;
 
             RefreshCommand = new AsyncRelayCommand(LoadStudentsAsync);
-            AddStudentCommand = new RelayCommand(ExecuteAddStudent);
-            EditStudentCommand = new RelayCommand(ExecuteEditStudent);
-            DeleteStudentCommand = new AsyncRelayCommand(ExecuteDeleteStudentAsync);
-            CheckInCommand = new RelayCommand(ExecuteCheckIn);
-            CheckOutCommand = new AsyncRelayCommand(ExecuteCheckOutAsync);
+            AddCommand = new RelayCommand(ExecuteAdd);
+            EditCommand = new RelayCommand(ExecuteEdit, () => SelectedStudent != null);
+            DeleteCommand = new AsyncRelayCommand(ExecuteDeleteAsync, () => SelectedStudent != null);
+            CheckInCommand = new RelayCommand(ExecuteCheckIn, () => SelectedStudent is { HasRoom: false });
+            CheckOutCommand = new AsyncRelayCommand(ExecuteCheckOutAsync, () => SelectedStudent is { HasRoom: true });
 
             _ = LoadStudentsAsync();
         }
@@ -107,28 +108,38 @@ namespace DormCare.WPF.ViewModels
             {
                 var dtos = await _studentService.GetAllStudentsAsync();
                 _allStudents = new ObservableCollection<StudentDto>(dtos);
-
-                // Load rooms for filter combobox
-                var roomService = App.ServiceProvider.GetService(typeof(RoomService)) as RoomService;
-                if (roomService != null)
-                {
-                    var roomList = await roomService.GetAllRoomsAsync();
-                    var list = new List<RoomDto> { new RoomDto { RoomNumber = "Tất cả" } };
-                    list.AddRange(roomList.OrderBy(r => r.RoomNumber));
-                    Rooms = new ObservableCollection<RoomDto>(list);
-                    SelectedRoomFilter = Rooms.FirstOrDefault();
-                }
-
+                RebuildRoomFilterOptions();
                 ApplyFilters();
             }
             catch (Exception ex)
             {
-                _dialogService.ShowError($"Lỗi khi tải danh sách sinh viên: {ex.Message}");
+                _dialogService.ShowError($"Không thể tải danh sách sinh viên:\n{ex.Message}", "Lỗi tải dữ liệu");
             }
             finally
             {
                 IsBusy = false;
             }
+        }
+
+        private void RebuildRoomFilterOptions()
+        {
+            var rooms = _allStudents
+                .Where(s => s.HasRoom)
+                .Select(s => s.RoomDisplay)
+                .Distinct()
+                .OrderBy(r => r)
+                .ToList();
+
+            var options = new ObservableCollection<string> { FilterAll, FilterNoRoom };
+            foreach (var room in rooms)
+            {
+                options.Add(room);
+            }
+
+            var current = SelectedRoomFilter;
+            RoomFilterOptions = options;
+            _selectedRoomFilter = options.Contains(current) ? current : FilterAll;
+            OnPropertyChanged(nameof(SelectedRoomFilter));
         }
 
         private void ApplyFilters()
@@ -139,173 +150,123 @@ namespace DormCare.WPF.ViewModels
             {
                 query = query.Where(s => s.FullName.Contains(SearchText, StringComparison.OrdinalIgnoreCase) ||
                                          s.StudentCode.Contains(SearchText, StringComparison.OrdinalIgnoreCase) ||
+                                         s.Email.Contains(SearchText, StringComparison.OrdinalIgnoreCase) ||
+                                         s.PhoneNumber.Contains(SearchText, StringComparison.OrdinalIgnoreCase) ||
                                          s.Major.Contains(SearchText, StringComparison.OrdinalIgnoreCase) ||
                                          s.ClassName.Contains(SearchText, StringComparison.OrdinalIgnoreCase));
             }
 
-            if (SelectedRoomFilter != null && SelectedRoomFilter.RoomNumber != "Tất cả")
+            if (SelectedRoomFilter == FilterNoRoom)
             {
-                query = query.Where(s => s.RoomNumber == SelectedRoomFilter.RoomNumber);
+                query = query.Where(s => !s.HasRoom);
+            }
+            else if (SelectedRoomFilter != FilterAll)
+            {
+                query = query.Where(s => s.RoomDisplay == SelectedRoomFilter);
             }
 
             Students = new ObservableCollection<StudentDto>(query);
+            SummaryText = $"Hiển thị {Students.Count}/{_allStudents.Count} sinh viên · " +
+                          $"Đang ở KTX: {_allStudents.Count(s => s.HasRoom)} · " +
+                          $"Chưa nhận phòng: {_allStudents.Count(s => !s.HasRoom)}";
         }
 
-        private void ExecuteAddStudent()
+        /* =====================================================
+           ADD / EDIT / DELETE
+           ===================================================== */
+
+        private void ExecuteAdd()
         {
-            var detailVm = new StudentDetailViewModel(_studentService);
-            var dialog = new StudentDetailWindow
-            {
-                DataContext = detailVm,
-                Owner = System.Windows.Application.Current?.MainWindow
-            };
+            var editorVm = new StudentEditorViewModel(_studentService);
+            var window = new StudentEditorWindow(editorVm);
 
-            detailVm.RequestClose += async (success) =>
+            if (window.ShowDialog() == true)
             {
-                dialog.Close();
-                if (success)
-                {
-                    _dialogService.ShowInformation("Thêm sinh viên mới thành công!");
-                    await LoadStudentsAsync();
-                }
-            };
-
-            dialog.ShowDialog();
-        }
-
-        private void ExecuteEditStudent()
-        {
-            if (SelectedStudent == null)
-            {
-                _dialogService.ShowInformation("Vui lòng chọn sinh viên cần chỉnh sửa.", "Thông báo");
-                return;
+                _dialogService.ShowInformation(editorVm.ResultMessage, "Thành công");
+                _ = LoadStudentsAsync();
             }
-
-            var detailVm = new StudentDetailViewModel(_studentService, SelectedStudent);
-            var dialog = new StudentDetailWindow
-            {
-                DataContext = detailVm,
-                Owner = System.Windows.Application.Current?.MainWindow
-            };
-
-            detailVm.RequestClose += async (success) =>
-            {
-                dialog.Close();
-                if (success)
-                {
-                    _dialogService.ShowInformation("Cập nhật thông tin sinh viên thành công!");
-                    await LoadStudentsAsync();
-                }
-            };
-
-            dialog.ShowDialog();
         }
 
-        private async Task ExecuteDeleteStudentAsync()
+        private void ExecuteEdit()
         {
-            if (SelectedStudent == null)
-            {
-                _dialogService.ShowInformation("Vui lòng chọn sinh viên cần xóa.", "Thông báo");
-                return;
-            }
+            if (SelectedStudent == null) return;
 
-            var confirmed = _dialogService.ShowConfirmation($"Bạn có chắc chắn muốn xóa sinh viên {SelectedStudent.FullName} (Mã số: {SelectedStudent.StudentCode})?", "Xác nhận xóa");
+            var editorVm = new StudentEditorViewModel(_studentService, SelectedStudent);
+            var window = new StudentEditorWindow(editorVm);
+
+            if (window.ShowDialog() == true)
+            {
+                _dialogService.ShowInformation(editorVm.ResultMessage, "Thành công");
+                _ = LoadStudentsAsync();
+            }
+        }
+
+        private async Task ExecuteDeleteAsync()
+        {
+            if (SelectedStudent == null) return;
+
+            var confirmed = _dialogService.ShowConfirmation(
+                $"Bạn có chắc muốn xóa sinh viên '{SelectedStudent.FullName}' ({SelectedStudent.StudentCode})?\n" +
+                "Tài khoản đăng nhập của sinh viên cũng sẽ bị xóa.",
+                "Xác nhận xóa");
+
             if (!confirmed) return;
 
             IsBusy = true;
-            try
-            {
-                var result = await _studentService.DeleteStudentAsync(SelectedStudent.Id);
-                IsBusy = false;
+            var result = await _studentService.DeleteStudentAsync(SelectedStudent.Id);
+            IsBusy = false;
 
-                if (result.IsSuccess)
-                {
-                    _dialogService.ShowInformation("Xóa sinh viên thành công!");
-                    await LoadStudentsAsync();
-                }
-                else
-                {
-                    _dialogService.ShowError(result.Message, "Lỗi");
-                }
-            }
-            catch (Exception ex)
+            if (result.IsSuccess)
             {
-                IsBusy = false;
-                _dialogService.ShowError($"Lỗi khi xóa sinh viên: {ex.Message}", "Lỗi");
+                _dialogService.ShowInformation(result.Message, "Đã xóa");
+                await LoadStudentsAsync();
+            }
+            else
+            {
+                _dialogService.ShowError(result.Message, "Không thể xóa");
             }
         }
 
+        /* =====================================================
+           CHECK-IN / CHECK-OUT
+           ===================================================== */
+
         private void ExecuteCheckIn()
         {
-            if (SelectedStudent == null)
+            if (SelectedStudent == null || _currentUser == null) return;
+
+            var checkInVm = new CheckInViewModel(_studentService, SelectedStudent, _currentUser.UserId);
+            var window = new CheckInWindow(checkInVm);
+
+            if (window.ShowDialog() == true)
             {
-                _dialogService.ShowInformation("Vui lòng chọn sinh viên cần Check-in.", "Thông báo");
-                return;
+                _dialogService.ShowInformation(checkInVm.ResultMessage, "Check-in thành công");
+                _ = LoadStudentsAsync();
             }
-
-            if (SelectedStudent.RoomNumber != "Chưa nhận phòng")
-            {
-                _dialogService.ShowInformation("Sinh viên này đã có phòng ở. Vui lòng Check-out trước.", "Thông báo");
-                return;
-            }
-
-            var checkInVm = new CheckInViewModel(_studentService, _context, _dialogService, SelectedStudent, _currentUser);
-            var dialog = new CheckInWindow
-            {
-                DataContext = checkInVm,
-                Owner = System.Windows.Application.Current?.MainWindow
-            };
-
-            checkInVm.RequestClose += async (success) =>
-            {
-                dialog.Close();
-                if (success)
-                {
-                    _dialogService.ShowInformation("Nhận phòng (Check-in) thành công!");
-                    await LoadStudentsAsync();
-                }
-            };
-
-            dialog.ShowDialog();
         }
 
         private async Task ExecuteCheckOutAsync()
         {
-            if (SelectedStudent == null)
-            {
-                _dialogService.ShowInformation("Vui lòng chọn sinh viên cần Check-out.", "Thông báo");
-                return;
-            }
+            if (SelectedStudent == null || _currentUser == null) return;
 
-            if (SelectedStudent.RoomNumber == "Chưa nhận phòng")
-            {
-                _dialogService.ShowInformation("Sinh viên này hiện tại chưa nhận phòng.", "Thông báo");
-                return;
-            }
+            var confirmed = _dialogService.ShowConfirmation(
+                $"Check-out sinh viên '{SelectedStudent.FullName}' khỏi {SelectedStudent.RoomDisplay} (giường {SelectedStudent.BedNumber})?",
+                "Xác nhận Check-out");
 
-            var confirmed = _dialogService.ShowConfirmation($"Bạn có chắc chắn muốn Check-out (trả phòng) cho sinh viên {SelectedStudent.FullName} ra khỏi phòng {SelectedStudent.RoomNumber}?", "Xác nhận Check-out");
             if (!confirmed) return;
 
             IsBusy = true;
-            try
-            {
-                var result = await _studentService.CheckOutStudentAsync(SelectedStudent.Id);
-                IsBusy = false;
+            var result = await _studentService.CheckOutAsync(SelectedStudent.Id, _currentUser.UserId);
+            IsBusy = false;
 
-                if (result.IsSuccess)
-                {
-                    _dialogService.ShowInformation("Trả phòng (Check-out) thành công!");
-                    await LoadStudentsAsync();
-                }
-                else
-                {
-                    _dialogService.ShowError(result.Message, "Lỗi");
-                }
-            }
-            catch (Exception ex)
+            if (result.IsSuccess)
             {
-                IsBusy = false;
-                _dialogService.ShowError($"Lỗi khi Check-out: {ex.Message}", "Lỗi");
+                _dialogService.ShowInformation(result.Message, "Check-out thành công");
+                await LoadStudentsAsync();
+            }
+            else
+            {
+                _dialogService.ShowError(result.Message, "Không thể check-out");
             }
         }
     }

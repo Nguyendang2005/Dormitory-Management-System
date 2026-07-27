@@ -11,6 +11,40 @@
 
     <Window.Resources>
         <conv:BoolToVisibilityConverter x:Key="BoolToVisConverter"/>
+<<<<<<< HEAD
+=======
+
+        <DataTemplate DataType="{x:Type vm:StudentDashboardViewModel}">
+            <studentViews:StudentDashboard/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:BuildingViewModel}">
+            <managerViews:BuildingManagement/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:RoomViewModel}">
+            <managerViews:RoomManagement/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:BedViewModel}">
+            <managerViews:BedManagement/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:StudentViewModel}">
+            <managerViews:StudentManagement/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:ApplicationViewModel}">
+            <managerViews:ApplicationManagement/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:InvoiceViewModel}">
+            <managerViews:InvoiceManagement/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:MaintenanceViewModel}">
+            <managerViews:MaintenanceManagement/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:AvailableRoomViewModel}">
+            <managerViews:AvailableRoomsView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:OccupancyStatisticsViewModel}">
+            <managerViews:OccupancyStatisticsView/>
+        </DataTemplate>
+>>>>>>> origin/feature/student
     </Window.Resources>
 
     <Grid Background="#F3F5F7">
