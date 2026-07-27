@@ -23,7 +23,8 @@
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
                     <Button Content="👤 Thông tin cá nhân" Style="{StaticResource SecondaryButton}" Command="{Binding NavigateProfileCommand}" Margin="0,0,8,0"/>
                     <Button Content="📝 Đăng ký phòng" Style="{StaticResource SecondaryButton}" Command="{Binding NavigateRoomRegistrationCommand}" Margin="0,0,8,0"/>
-                    <Button Content="💳 Hóa Đơn &amp; Thanh Toán" Style="{StaticResource PrimaryButton}" Command="{Binding NavigateInvoiceCommand}"/>
+                    <Button Content="💳 Hóa Đơn &amp; Thanh Toán" Style="{StaticResource PrimaryButton}" Command="{Binding NavigateInvoiceCommand}" Margin="0,0,8,0"/>
+                    <Button Content="🚪 Đăng Xuất" Style="{StaticResource SmallDangerButton}" Height="36" Padding="12,0" Command="{Binding LogoutCommand}" ToolTip="Đăng xuất khỏi hệ thống"/>
                 </StackPanel>
             </DockPanel>
         </Border>

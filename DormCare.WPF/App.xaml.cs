@@ -209,6 +209,11 @@ namespace DormCare.WPF
                     Width = 1200,
                     Height = 750
                 };
+                studentVm.RequestLogout += () =>
+                {
+                    studentWindow.Close();
+                    ShowLoginWindow();
+                };
                 studentWindow.Closed += (s, e) =>
                 {
                     Shutdown();

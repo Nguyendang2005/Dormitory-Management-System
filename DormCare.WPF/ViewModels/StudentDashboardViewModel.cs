@@ -70,6 +70,9 @@ namespace DormCare.WPF.ViewModels
         public ICommand NavigateRoomRegistrationCommand { get; }
         public ICommand NavigateInvoiceCommand { get; }
         public ICommand RefreshCommand { get; }
+        public ICommand LogoutCommand { get; }
+
+        public event System.Action? RequestLogout;
 
         public StudentDashboardViewModel(
             StudentService studentService,
@@ -88,6 +91,8 @@ namespace DormCare.WPF.ViewModels
             _paymentService = paymentService;
             _dialogService = dialogService;
             _currentUser = currentUser;
+
+            LogoutCommand = new RelayCommand(() => RequestLogout?.Invoke());
 
             NavigateProfileCommand = new RelayCommand(() =>
             {

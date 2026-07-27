@@ -118,10 +118,6 @@
         <Setter Property="FontSize" Value="12" />
     </Style>
 
-    <Style x:Key="DangerButton" TargetType="Button" BasedOn="{StaticResource PrimaryButton}">
-        <Setter Property="Background" Value="#B91C1C" />
-    </Style>
-
     <!-- Circle Icon Action Button Style -->
     <Style x:Key="IconButton" TargetType="Button">
         <Setter Property="Background" Value="#E2E8F0" />

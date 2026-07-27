@@ -31,7 +31,7 @@
                 <!-- Current User Profile Footer -->
                 <Border DockPanel.Dock="Bottom" Background="#1E293B" CornerRadius="10" Padding="12" Margin="0,16,0,0">
                     <DockPanel>
-                        <Button DockPanel.Dock="Right" Content="🚪" Command="{Binding LogoutCommand}" ToolTip="Đăng xuất" Style="{StaticResource NavButton}" Width="36" Height="36" Padding="0"/>
+                        <Button DockPanel.Dock="Right" Content="🚪 Đăng Xuất" Command="{Binding LogoutCommand}" ToolTip="Đăng xuất khỏi hệ thống" Style="{StaticResource SmallDangerButton}" Height="32" Padding="10,0" VerticalAlignment="Center"/>
                         <StackPanel VerticalAlignment="Center">
                             <TextBlock Text="{Binding CurrentUser.Username}" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" FontSize="13"/>
                             <TextBlock Text="{Binding CurrentUser.Role}" Foreground="{StaticResource KinpakuGoldBrush}" FontSize="11"/>
