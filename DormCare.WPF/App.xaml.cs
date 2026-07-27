@@ -186,24 +186,35 @@ namespace DormCare.WPF
         {
             var loginVm = ServiceProvider.GetRequiredService<LoginViewModel>();
             var loginWindow = new LoginWindow { DataContext = loginVm };
+            bool isLoggedIn = false;
 
             loginVm.LoginSuccess += (user) =>
             {
+                isLoggedIn = true;
+                loginWindow.Close();
                 try
                 {
-                    OpenMainWindow(user, loginWindow);
+                    OpenMainWindow(user);
                 }
                 catch (Exception ex)
                 {
                     MessageBox.Show($"Lỗi khi mở giao diện chính: {ex.Message}\n{ex.InnerException?.Message}", "Lỗi Hệ Thống", MessageBoxButton.OK, MessageBoxImage.Error);
-                    loginWindow.Show();
+                    ShowLoginWindow();
+                }
+            };
+
+            loginWindow.Closed += (s, e) =>
+            {
+                if (!isLoggedIn)
+                {
+                    Shutdown();
                 }
             };
 
             loginWindow.Show();
         }
 
-        private void OpenMainWindow(User user, Window loginWindow)
+        private void OpenMainWindow(User user)
         {
             if (user.Role == "Student")
             {
@@ -224,17 +235,22 @@ namespace DormCare.WPF
                     Width = 1200,
                     Height = 750
                 };
+
+                bool isLoggingOut = false;
                 studentVm.RequestLogout += () =>
                 {
+                    isLoggingOut = true;
                     studentWindow.Close();
                     ShowLoginWindow();
                 };
                 studentWindow.Closed += (s, e) =>
                 {
-                    Shutdown();
+                    if (!isLoggingOut)
+                    {
+                        Shutdown();
+                    }
                 };
 
-                loginWindow.Hide();
                 studentWindow.Show();
             }
             else
@@ -255,17 +271,22 @@ namespace DormCare.WPF
                 );
 
                 var mainWindow = new MainWindow { DataContext = mainVm };
+
+                bool isLoggingOut = false;
                 mainVm.RequestLogout += () =>
                 {
+                    isLoggingOut = true;
                     mainWindow.Close();
                     ShowLoginWindow();
                 };
                 mainWindow.Closed += (s, e) =>
                 {
-                    Shutdown();
+                    if (!isLoggingOut)
+                    {
+                        Shutdown();
+                    }
                 };
 
-                loginWindow.Hide();
                 mainWindow.Show();
             }
         }
