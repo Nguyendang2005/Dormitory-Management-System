@@ -231,11 +231,7 @@
         <Setter Property="FontSize" Value="13" />
     </Style>
 
-    <!-- Search TextBox Style -->
-    <Style x:Key="SearchTextBox" TargetType="TextBox" BasedOn="{StaticResource FormTextBox}">
-        <Setter Property="Padding" Value="10,6" />
-        <Setter Property="FontSize" Value="13" />
-    </Style>   <!-- Global ComboBox & ComboBoxItem Styles -->
+    <!-- Global ComboBox & ComboBoxItem Styles -->
     <Style TargetType="ComboBox">
         <Setter Property="SnapsToDevicePixels" Value="True"/>
         <Setter Property="OverridesDefaultStyle" Value="True"/>
@@ -339,8 +335,6 @@
             </Setter.Value>
         </Setter>
     </Style>
-
-    <Style x:Key="ModernComboBox" TargetType="ComboBox" BasedOn="{StaticResource {x:Type ComboBox}}"/>
 
     <Style TargetType="ComboBoxItem">
         <Setter Property="SnapsToDevicePixels" Value="True"/>
