@@ -100,8 +100,18 @@ namespace DormCare.WPF.ViewModels
         public int TotalInvoiceCount
         {
             get => _totalInvoiceCount;
-            set => SetProperty(ref _totalInvoiceCount, value);
+            set
+            {
+                if (SetProperty(ref _totalInvoiceCount, value))
+                {
+                    OnPropertyChanged(nameof(TotalInvoicesCount));
+                }
+            }
         }
+
+        public int TotalInvoicesCount => TotalInvoiceCount;
+
+        public int UnpaidInvoicesCount => _allInvoices != null ? _allInvoices.Count(i => i.RemainingBalance > 0) : 0;
 
         private decimal _totalAmountSum;
         public decimal TotalAmountSum
@@ -232,6 +242,8 @@ namespace DormCare.WPF.ViewModels
             PaidAmountSum = _allInvoices.Sum(i => i.TotalPaid);
             UnpaidAmountSum = _allInvoices.Sum(i => i.RemainingBalance);
 
+            OnPropertyChanged(nameof(TotalInvoicesCount));
+            OnPropertyChanged(nameof(UnpaidInvoicesCount));
             OnPropertyChanged(nameof(NearestDueDate));
             OnPropertyChanged(nameof(HasUnpaidInvoices));
             OnPropertyChanged(nameof(StudentFullName));

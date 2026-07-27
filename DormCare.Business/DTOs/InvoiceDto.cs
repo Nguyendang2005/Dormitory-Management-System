@@ -22,7 +22,9 @@ namespace DormCare.Business.DTOs
         public decimal DiscountAmount { get; set; }
         public decimal TotalAmount { get; set; }
         public decimal TotalPaid { get; set; }
+        public decimal PaidAmount => TotalPaid;
         public decimal RemainingBalance => Math.Max(0, TotalAmount - TotalPaid);
+        public decimal RemainingAmount => RemainingBalance;
         public DateTime DueDate { get; set; }
         public DateTime? PaidAt { get; set; }
         public string Status { get; set; } = "Unpaid";
