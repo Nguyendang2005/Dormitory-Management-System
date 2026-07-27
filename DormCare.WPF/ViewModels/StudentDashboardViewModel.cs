@@ -300,10 +300,10 @@ namespace DormCare.WPF.ViewModels
             var activeAssignment = Student?.RoomAssignments.FirstOrDefault(a => a.Status == "Active");
             if (activeAssignment?.Room != null && activeAssignment.Bed != null)
             {
-                return $"Ban hien dang o phong {activeAssignment.Room.RoomNumber}, giuong {activeAssignment.Bed.BedCode}. Vui long check-out phong hien tai truoc khi dang ky phong moi.";
+                return $"Bạn hiện đang ở phòng {activeAssignment.Room.RoomNumber}, giường {activeAssignment.Bed.BedCode}. Vui lòng check-out phòng hiện tại trước khi đăng ký phòng mới.";
             }
 
-            return "Ban dang co phong trong ky tuc xa. Vui long hoan thanh thu tuc tra phong truoc khi dang ky phong moi.";
+            return "Bạn đang có phòng trong ký túc xá. Vui lòng hoàn thành thủ tục trả phòng trước khi đăng ký phòng mới.";
         }
 
         private async Task LoadNotificationsCountAsync()

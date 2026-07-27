@@ -115,7 +115,7 @@ namespace DormCare.Business.Services
 
             if (!IsBuildingActive(room.Building))
             {
-                return ServiceResult<bool>.Failure("Toa nha cua phong da chon hien khong hoat dong. Vui long chon phong khac.");
+                return ServiceResult<bool>.Failure("Tòa nhà của phòng đã chọn hiện không hoạt động. Vui lòng chọn phòng khác.");
             }
 
             if (room.GenderType != "Mixed" && !room.GenderType.Equals(student.Gender, StringComparison.OrdinalIgnoreCase))
@@ -216,7 +216,7 @@ namespace DormCare.Business.Services
 
                     if (!IsBuildingActive(app.Room.Building))
                     {
-                        return ServiceResult<bool>.Failure("Khong the duyet don vi toa nha hien khong hoat dong.");
+                        return ServiceResult<bool>.Failure("Không thể duyệt đơn vì tòa nhà hiện không hoạt động.");
                     }
 
                     if (app.Room.GenderType != "Mixed" && !app.Room.GenderType.Equals(app.Student.Gender, StringComparison.OrdinalIgnoreCase))
@@ -361,10 +361,10 @@ namespace DormCare.Business.Services
         {
             if (assignment.Room != null && assignment.Bed != null)
             {
-                return $"Ban hien dang o phong {assignment.Room.RoomNumber}, giuong {assignment.Bed.BedCode}. Vui long check-out phong hien tai truoc khi dang ky phong moi.";
+                return $"Bạn hiện đang ở phòng {assignment.Room.RoomNumber}, giường {assignment.Bed.BedCode}. Vui lòng check-out phòng hiện tại trước khi đăng ký phòng mới.";
             }
 
-            return "Ban dang co phong trong ky tuc xa. Vui long hoan thanh thu tuc tra phong truoc khi dang ky phong moi.";
+            return "Bạn đang có phòng trong ký túc xá. Vui lòng hoàn thành thủ tục trả phòng trước khi đăng ký phòng mới.";
         }
 
         private static bool IsBuildingActive(Building? building)

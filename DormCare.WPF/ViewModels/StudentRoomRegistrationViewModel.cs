@@ -111,7 +111,7 @@ namespace DormCare.WPF.ViewModels
             if (!_initialRoomId.HasValue)
             {
                 SelectedRoom = null;
-                Message = "Ban chua chon phong. Vui long tim va chon mot phong con cho truoc khi dang ky.";
+                Message = "Bạn chưa chọn phòng. Vui lòng tìm và chọn một phòng còn chỗ trước khi đăng ký.";
                 SetWarning(Message);
                 OnPropertyChanged(nameof(AvailableBeds));
                 return;
@@ -123,7 +123,7 @@ namespace DormCare.WPF.ViewModels
 
             if (SelectedRoom == null)
             {
-                Message = "Phong da chon khong con san sang dang ky. Vui long chon phong khac.";
+                Message = "Phòng đã chọn không còn sẵn sàng đăng ký. Vui lòng chọn phòng khác.";
                 SetWarning(Message);
                 OnPropertyChanged(nameof(AvailableBeds));
                 return;
@@ -176,8 +176,8 @@ namespace DormCare.WPF.ViewModels
         {
             if (!CanSubmit())
             {
-                SetError("Vui long chon giuong con trong va nhap ly do dang ky.");
-                _dialogService.ShowError("Vui long chon giuong con trong va nhap ly do dang ky.");
+                SetError("Vui lòng chọn giường còn trống và nhập lý do đăng ký.");
+                _dialogService.ShowError("Vui lòng chọn giường còn trống và nhập lý do đăng ký.");
                 return;
             }
 
