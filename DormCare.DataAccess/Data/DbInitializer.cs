@@ -80,6 +80,14 @@ namespace DormCare.DataAccess.Data
                         END
                     ");
 
+                    // Ensure missing columns on Invoices table are automatically added if missing
+                    await context.Database.ExecuteSqlRawAsync(@"
+                        IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID(N'Invoices') AND name = N'IsDueReminderSent')
+                            ALTER TABLE Invoices ADD IsDueReminderSent BIT NOT NULL DEFAULT 0;
+                        IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID(N'Invoices') AND name = N'IsOverdueReminderSent')
+                            ALTER TABLE Invoices ADD IsOverdueReminderSent BIT NOT NULL DEFAULT 0;
+                    ");
+
                     // Fix invalid RoomType values violating CK_Rooms_Type
                     await context.Database.ExecuteSqlRawAsync(
                         "UPDATE Rooms SET RoomType = 'Premium' WHERE RoomType NOT IN ('Standard', 'Premium', 'Accessible');");
