@@ -21,11 +21,27 @@
                 <TextBlock Text="{Binding ErrorMessage}" Foreground="#FCA5A5" FontSize="13" TextWrapping="Wrap"/>
             </Border>
 
-            <TextBlock Text="Giường trống *" FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,4"/>
-            <ComboBox ItemsSource="{Binding AvailableBeds}"
-                      SelectedItem="{Binding SelectedBed}"
-                      DisplayMemberPath="Display"
-                      FontSize="14" Padding="10,8" Margin="0,0,0,14"/>
+            <!-- Tòa nhà & Số phòng (Được lấy tự động từ Đơn đăng ký) -->
+            <Grid Margin="0,0,0,14">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="16"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="🏢 Tòa nhà" FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,4"/>
+                    <TextBox Style="{StaticResource ModernTextBox}" Text="{Binding BuildingName}" IsReadOnly="True" Background="#1E293B" Foreground="#94A3B8" Height="38" Padding="10,8"/>
+                </StackPanel>
+                
+                <StackPanel Grid.Column="2">
+                    <TextBlock Text="🔑 Số phòng" FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,4"/>
+                    <TextBox Style="{StaticResource ModernTextBox}" Text="{Binding RoomNumber}" IsReadOnly="True" Background="#1E293B" Foreground="#94A3B8" Height="38" Padding="10,8"/>
+                </StackPanel>
+            </Grid>
+
+            <TextBlock Text="🛏️ Giường" FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,4"/>
+            <TextBox Style="{StaticResource ModernTextBox}" Text="{Binding BedCode}" IsReadOnly="True" Background="#1E293B" Foreground="#94A3B8" Height="38" Padding="10,8" Margin="0,0,0,14"/>
 
             <TextBlock Text="Ghi chú" FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,4"/>
             <TextBox Style="{StaticResource ModernTextBox}" Text="{Binding Note, UpdateSourceTrigger=PropertyChanged}" MinHeight="60" TextWrapping="Wrap" AcceptsReturn="True"/>

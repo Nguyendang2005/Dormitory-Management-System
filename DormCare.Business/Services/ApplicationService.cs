@@ -250,20 +250,7 @@ namespace DormCare.Business.Services
                     app.ReviewedAt = now;
                     app.ReviewNote = string.IsNullOrWhiteSpace(reviewNote) ? "Đã duyệt yêu cầu đăng ký phòng." : reviewNote.Trim();
 
-                    // 1. Tạo RoomAssignment hoạt động (Active) cho sinh viên
-                    var assignment = new RoomAssignment
-                    {
-                        StudentId = app.StudentId,
-                        RoomId = app.RoomId,
-                        BedId = bed.BedId,
-                        StartDate = now.Date,
-                        AssignmentType = "InitialAssignment",
-                        Status = "Active",
-                        AssignedBy = reviewerId,
-                        Note = $"Check-in xếp phòng theo đơn đăng ký #{app.ApplicationCode}",
-                        CreatedAt = now
-                    };
-                    _context.RoomAssignments.Add(assignment);
+                    // RoomAssignment will be created during Check-in, not here.
 
                     // 2. Cập nhật trạng thái phòng nếu không còn giường trống
                     if (!app.Room.Beds.Any(b => b.BedId != bed.BedId && b.Status == "Available"))

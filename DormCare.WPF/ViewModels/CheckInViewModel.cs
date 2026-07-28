@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using DormCare.Business.DTOs;
 using DormCare.Business.Services;
+using DormCare.Domain.Entities;
 using DormCare.WPF.Commands;
 
 namespace DormCare.WPF.ViewModels
@@ -12,7 +13,7 @@ namespace DormCare.WPF.ViewModels
     public class BedOption
     {
         public BedDto Bed { get; }
-        public string Display => $"{Bed.BuildingName} — Phòng {Bed.RoomNumber} — Giường {Bed.BedNumber} ({Bed.BedCode})";
+        public string Display => $"Giường {Bed.BedNumber} ({Bed.BedCode})";
 
         public BedOption(BedDto bed)
         {
@@ -29,18 +30,38 @@ namespace DormCare.WPF.ViewModels
         public string HeaderText => $"✅ Check-in: {Student.FullName}";
         public string SubHeaderText => $"Mã SV: {Student.StudentCode} · Giới tính: {Student.Gender} · Chọn giường trống để xếp phòng";
 
-        private ObservableCollection<BedOption> _availableBeds = new();
-        public ObservableCollection<BedOption> AvailableBeds
+        private string _buildingName = "N/A";
+        public string BuildingName
         {
-            get => _availableBeds;
-            set => SetProperty(ref _availableBeds, value);
+            get => _buildingName;
+            set => SetProperty(ref _buildingName, value);
+        }
+
+        private string _roomNumber = "Chưa đăng ký";
+        public string RoomNumber
+        {
+            get => _roomNumber;
+            set => SetProperty(ref _roomNumber, value);
+        }
+
+        private string _bedCode = "Chưa gán";
+        public string BedCode
+        {
+            get => _bedCode;
+            set => SetProperty(ref _bedCode, value);
         }
 
         private BedOption? _selectedBed;
         public BedOption? SelectedBed
         {
             get => _selectedBed;
-            set => SetProperty(ref _selectedBed, value);
+            set
+            {
+                if (SetProperty(ref _selectedBed, value))
+                {
+                    System.Windows.Input.CommandManager.InvalidateRequerySuggested();
+                }
+            }
         }
 
         private string _note = string.Empty;
@@ -88,13 +109,50 @@ namespace DormCare.WPF.ViewModels
         private async Task LoadBedsAsync()
         {
             IsBusy = true;
-            var beds = await _studentService.GetAvailableBedsAsync();
-            AvailableBeds = new ObservableCollection<BedOption>(beds.Select(b => new BedOption(b)));
-            IsBusy = false;
+            ErrorMessage = string.Empty;
 
-            if (AvailableBeds.Count == 0)
+            try
             {
-                ErrorMessage = "Hiện không còn giường trống nào trong ký túc xá.";
+                var app = await _studentService.GetLatestApplicationByStudentIdAsync(Student.Id);
+                if (app == null)
+                {
+                    ErrorMessage = "Sinh viên chưa có đơn đăng ký phòng hoặc đơn đã bị hủy/từ chối.";
+                    SelectedBed = null;
+                    return;
+                }
+
+                if (app.PreferredBed == null)
+                {
+                    ErrorMessage = "Đơn đăng ký phòng chưa được xếp giường.";
+                    SelectedBed = null;
+                    return;
+                }
+
+                BuildingName = app.Room.Building.BuildingName;
+                RoomNumber = app.Room.RoomNumber;
+                BedCode = $"Giường {app.PreferredBed.BedNumber} ({app.PreferredBed.BedCode})";
+
+                var bedDto = new BedDto
+                {
+                    BedId = app.PreferredBed.BedId,
+                    RoomId = app.RoomId,
+                    RoomNumber = app.Room.RoomNumber,
+                    BuildingName = app.Room.Building.BuildingName,
+                    BedNumber = app.PreferredBed.BedNumber,
+                    BedCode = app.PreferredBed.BedCode,
+                    Status = app.PreferredBed.Status,
+                    Description = app.PreferredBed.Description ?? string.Empty
+                };
+
+                SelectedBed = new BedOption(bedDto);
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"Lỗi tải dữ liệu check-in: {ex.Message}";
+            }
+            finally
+            {
+                IsBusy = false;
             }
         }
 

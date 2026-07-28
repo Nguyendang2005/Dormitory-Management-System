@@ -96,7 +96,7 @@ namespace DormCare.Business.Services
             var student = new Student
             {
                 User = user,
-                StudentCode = dto.StudentCode.Trim(),
+                StudentCode = dto.StudentCode.Trim().ToUpperInvariant(),
                 FullName = dto.FullName.Trim(),
                 DateOfBirth = dto.DateOfBirth,
                 Gender = dto.Gender,
@@ -144,7 +144,7 @@ namespace DormCare.Business.Services
                 await _context.Users.AnyAsync(u => u.Email == dto.Email && u.UserId != student.UserId))
                 return ServiceResult<StudentDto>.Failure($"Email '{dto.Email}' đã được sử dụng.");
 
-            student.StudentCode = dto.StudentCode.Trim();
+            student.StudentCode = dto.StudentCode.Trim().ToUpperInvariant();
             student.FullName = dto.FullName.Trim();
             student.DateOfBirth = dto.DateOfBirth;
             student.Gender = dto.Gender;
@@ -266,7 +266,15 @@ namespace DormCare.Business.Services
                 return ServiceResult<bool>.Failure("Không tìm thấy giường.");
 
             if (bed.Status != "Available")
-                return ServiceResult<bool>.Failure($"Giường {bed.BedCode} không còn trống.");
+            {
+                var isReservedForThisStudent = await _context.RoomApplications
+                    .AnyAsync(a => a.StudentId == studentId && a.PreferredBedId == bedId && a.Status == "Approved");
+
+                if (!isReservedForThisStudent)
+                {
+                    return ServiceResult<bool>.Failure($"Giường {bed.BedCode} không còn trống.");
+                }
+            }
 
             if (bed.Room.Status == "Maintenance" || bed.Room.Status == "Inactive")
                 return ServiceResult<bool>.Failure($"Phòng {bed.Room.RoomNumber} đang bảo trì / ngừng hoạt động.");
@@ -360,17 +368,62 @@ namespace DormCare.Business.Services
            VALIDATION
            ===================================================== */
 
+        public async Task<RoomApplication?> GetLatestApplicationByStudentIdAsync(int studentId)
+        {
+            return await _context.RoomApplications
+                .AsNoTracking()
+                .Include(a => a.Room)
+                    .ThenInclude(r => r.Building)
+                .Include(a => a.PreferredBed)
+                .Where(a => a.StudentId == studentId && (a.Status == "Pending" || a.Status == "Approved"))
+                .OrderByDescending(a => a.ApplicationDate)
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task<IEnumerable<BedDto>> GetAvailableBedsByRoomAsync(int roomId)
+        {
+            var beds = await _context.Beds
+                .Include(b => b.Room)
+                    .ThenInclude(r => r.Building)
+                .Where(b => b.RoomId == roomId && b.Status == "Available")
+                .OrderBy(b => b.BedNumber)
+                .ToListAsync();
+
+            return beds.Select(b => new BedDto
+            {
+                BedId = b.BedId,
+                RoomId = b.RoomId,
+                RoomNumber = b.Room.RoomNumber,
+                BuildingName = b.Room.Building.BuildingName,
+                BedNumber = b.BedNumber,
+                BedCode = b.BedCode,
+                Status = b.Status,
+                Description = b.Description ?? string.Empty
+            }).ToList();
+        }
+
         private static string? Validate(StudentDto dto)
         {
             if (string.IsNullOrWhiteSpace(dto.StudentCode)) return "Vui lòng nhập Mã sinh viên.";
+            if (!System.Text.RegularExpressions.Regex.IsMatch(dto.StudentCode.Trim(), @"^[sS][eE]\d+$"))
+                return "Mã sinh viên phải bắt đầu bằng 'SE' và theo sau là các chữ số.";
+
             if (string.IsNullOrWhiteSpace(dto.FullName)) return "Vui lòng nhập Họ và tên.";
             if (string.IsNullOrWhiteSpace(dto.Email)) return "Vui lòng nhập Email.";
             if (!dto.Email.Contains('@')) return "Email không hợp lệ.";
+
             if (string.IsNullOrWhiteSpace(dto.PhoneNumber)) return "Vui lòng nhập Số điện thoại.";
+            if (!System.Text.RegularExpressions.Regex.IsMatch(dto.PhoneNumber.Trim(), @"^0\d{9}$"))
+                return "Số điện thoại phải bắt đầu bằng số 0 và gồm 10 chữ số.";
+
             if (string.IsNullOrWhiteSpace(dto.Major)) return "Vui lòng nhập Ngành học.";
             if (string.IsNullOrWhiteSpace(dto.ClassName)) return "Vui lòng nhập Lớp.";
             if (string.IsNullOrWhiteSpace(dto.Campus)) return "Vui lòng nhập Cơ sở (Campus).";
             if (dto.DateOfBirth > DateTime.Today.AddYears(-15)) return "Ngày sinh không hợp lệ (sinh viên phải từ 15 tuổi).";
+
+            if (!string.IsNullOrWhiteSpace(dto.EmergencyContactPhone) && !System.Text.RegularExpressions.Regex.IsMatch(dto.EmergencyContactPhone.Trim(), @"^0\d{9}$"))
+                return "SĐT liên hệ khẩn cấp phải bắt đầu bằng số 0 và gồm 10 chữ số.";
+
             return null;
         }
     }

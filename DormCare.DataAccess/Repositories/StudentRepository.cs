@@ -13,6 +13,7 @@ namespace DormCare.DataAccess.Repositories
         public async Task<IEnumerable<Student>> GetStudentsWithDetailsAsync()
         {
             return await _dbSet
+                .AsNoTracking()
                 .Include(s => s.User)
                 .Include(s => s.RoomAssignments)
                     .ThenInclude(ra => ra.Room)
@@ -25,6 +26,7 @@ namespace DormCare.DataAccess.Repositories
         public async Task<Student?> GetStudentByUserIdAsync(int userId)
         {
             return await _dbSet
+                .AsNoTracking()
                 .Include(s => s.User)
                 .Include(s => s.RoomAssignments)
                     .ThenInclude(ra => ra.Room)

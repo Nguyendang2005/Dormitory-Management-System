@@ -205,7 +205,8 @@ namespace DormCare.WPF.ViewModels
 
             if (SelectedGenderFilter != "Tất cả giới tính")
             {
-                query = query.Where(s => string.Equals(s.Gender, SelectedGenderFilter, StringComparison.OrdinalIgnoreCase));
+                string dbGender = string.Equals(SelectedGenderFilter, "Nam", StringComparison.OrdinalIgnoreCase) ? "Male" : "Female";
+                query = query.Where(s => string.Equals(s.Gender, dbGender, StringComparison.OrdinalIgnoreCase));
             }
 
             if (SelectedStatusFilter != "Tất cả trạng thái")
@@ -225,28 +226,48 @@ namespace DormCare.WPF.ViewModels
 
         private void ExecuteAdd()
         {
-            var editorVm = new StudentEditorViewModel(_studentService);
-            var window = new StudentEditorWindow(editorVm);
-
-            if (window.ShowDialog() == true)
+            var detailVm = new StudentDetailViewModel(_studentService);
+            var dialog = new StudentDetailWindow
             {
-                _dialogService.ShowInformation(editorVm.ResultMessage, "Thành công");
-                _ = LoadStudentsAsync();
-            }
+                DataContext = detailVm,
+                Owner = System.Windows.Application.Current?.MainWindow
+            };
+
+            detailVm.RequestClose += async (success) =>
+            {
+                dialog.Close();
+                if (success)
+                {
+                    _dialogService.ShowInformation("Thêm sinh viên mới thành công!", "Thành công");
+                    await LoadStudentsAsync();
+                }
+            };
+
+            dialog.ShowDialog();
         }
 
         private void ExecuteEdit()
         {
             if (SelectedStudent == null) return;
 
-            var editorVm = new StudentEditorViewModel(_studentService, SelectedStudent);
-            var window = new StudentEditorWindow(editorVm);
-
-            if (window.ShowDialog() == true)
+            var detailVm = new StudentDetailViewModel(_studentService, SelectedStudent);
+            var dialog = new StudentDetailWindow
             {
-                _dialogService.ShowInformation(editorVm.ResultMessage, "Thành công");
-                _ = LoadStudentsAsync();
-            }
+                DataContext = detailVm,
+                Owner = System.Windows.Application.Current?.MainWindow
+            };
+
+            detailVm.RequestClose += async (success) =>
+            {
+                dialog.Close();
+                if (success)
+                {
+                    _dialogService.ShowInformation("Cập nhật thông tin sinh viên thành công!", "Thành công");
+                    await LoadStudentsAsync();
+                }
+            };
+
+            dialog.ShowDialog();
         }
 
         private async Task ExecuteDeleteAsync()
