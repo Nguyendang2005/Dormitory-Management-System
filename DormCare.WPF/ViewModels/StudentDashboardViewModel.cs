@@ -184,6 +184,8 @@ namespace DormCare.WPF.ViewModels
                 IsAvailableRoomsVisible = false;
                 IsRoomRegistrationVisible = false;
                 IsInvoiceVisible = false;
+                IsMaintenanceVisible = false;
+                IsNotificationsVisible = false;
             });
 
             NavigateAvailableRoomsCommand = new AsyncRelayCommand(ShowAvailableRoomsAsync);

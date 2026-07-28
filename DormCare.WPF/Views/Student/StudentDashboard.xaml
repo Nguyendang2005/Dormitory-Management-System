@@ -19,12 +19,11 @@
             <DockPanel>
                 <StackPanel DockPanel.Dock="Left" VerticalAlignment="Center">
                     <TextBlock Text="🎓 CỔNG THÔNG TIN SINH VIÊN KÝ TÚC XÁ" FontSize="20" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}"/>
-                    <TextBlock Text="Thông tin cá nhân, đăng ký phòng và xem hóa đơn KTX" FontSize="13" Foreground="{StaticResource TextMutedBrush}" Margin="0,4,0,0"/>
+                    <TextBlock Text="Thông tin cá nhân, xem phòng còn chỗ và hóa đơn KTX" FontSize="13" Foreground="{StaticResource TextMutedBrush}" Margin="0,4,0,0"/>
                 </StackPanel>
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
                     <Button Content="👤 Thông tin cá nhân" Style="{StaticResource SecondaryButton}" Command="{Binding NavigateProfileCommand}" Margin="0,0,8,0"/>
                     <Button Content="🔍 Tìm phòng còn chỗ" Style="{StaticResource SecondaryButton}" Command="{Binding NavigateAvailableRoomsCommand}" Margin="0,0,8,0"/>
-                    <Button Content="📝 Đăng ký phòng" Style="{StaticResource SecondaryButton}" Command="{Binding NavigateRoomRegistrationCommand}" Margin="0,0,8,0"/>
                     <Button Content="💳 Hóa Đơn &amp; Thanh Toán" Style="{StaticResource SecondaryButton}" Command="{Binding NavigateInvoiceCommand}" Margin="0,0,8,0"/>
                     <Button Content="🛠️ Báo Cáo Sự Cố" Style="{StaticResource SecondaryButton}" Command="{Binding NavigateMaintenanceCommand}" Margin="0,0,8,0"/>
                     <Grid Margin="0,0,8,0">

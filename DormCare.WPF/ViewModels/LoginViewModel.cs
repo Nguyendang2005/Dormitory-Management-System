@@ -123,6 +123,36 @@ namespace DormCare.WPF.ViewModels
             set => SetProperty(ref _regClassName, value);
         }
 
+        private string _regEmergencyContactName = string.Empty;
+        public string RegEmergencyContactName
+        {
+            get => _regEmergencyContactName;
+            set => SetProperty(ref _regEmergencyContactName, value);
+        }
+
+        private string _regEmergencyContactPhone = string.Empty;
+        public string RegEmergencyContactPhone
+        {
+            get => _regEmergencyContactPhone;
+            set => SetProperty(ref _regEmergencyContactPhone, value);
+        }
+
+        public System.Collections.ObjectModel.ObservableCollection<string> RegGenderOptions { get; } = new() { "Nam", "Nữ" };
+
+        private string _regGender = "Nam";
+        public string RegGender
+        {
+            get => _regGender;
+            set => SetProperty(ref _regGender, value);
+        }
+
+        private string _regAddress = string.Empty;
+        public string RegAddress
+        {
+            get => _regAddress;
+            set => SetProperty(ref _regAddress, value);
+        }
+
         // --- MESSAGES ---
         private string _errorMessage = string.Empty;
         public string ErrorMessage
@@ -182,6 +212,21 @@ namespace DormCare.WPF.ViewModels
         {
             ErrorMessage = string.Empty;
             SuccessMessage = string.Empty;
+
+            if (string.IsNullOrWhiteSpace(Username))
+            {
+                ErrorMessage = "Vui lòng nhập tên đăng nhập.";
+                _dialogService.ShowError(ErrorMessage, "Đăng nhập thất bại");
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(Password))
+            {
+                ErrorMessage = "Vui lòng nhập mật khẩu.";
+                _dialogService.ShowError(ErrorMessage, "Đăng nhập thất bại");
+                return;
+            }
+
             IsBusy = true;
 
             try
@@ -196,12 +241,14 @@ namespace DormCare.WPF.ViewModels
                 else
                 {
                     ErrorMessage = result.Message;
+                    _dialogService.ShowError(ErrorMessage, "Đăng nhập thất bại");
                 }
             }
             catch (System.Exception ex)
             {
                 IsBusy = false;
                 ErrorMessage = $"Lỗi kết nối cơ sở dữ liệu: {ex.Message}";
+                _dialogService.ShowError(ErrorMessage, "Lỗi kết nối DB");
             }
         }
 
@@ -210,22 +257,106 @@ namespace DormCare.WPF.ViewModels
             ErrorMessage = string.Empty;
             SuccessMessage = string.Empty;
 
-            if (string.IsNullOrWhiteSpace(RegUsername) || string.IsNullOrWhiteSpace(RegPassword))
+            if (string.IsNullOrWhiteSpace(RegUsername))
             {
-                ErrorMessage = "Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu.";
+                ErrorMessage = "Vui lòng nhập tên đăng nhập.";
+                _dialogService.ShowError(ErrorMessage, "Lỗi đăng ký");
+                return;
+            }
+
+            if (RegUsername.Trim().Length < 3)
+            {
+                ErrorMessage = "Tên đăng nhập phải có ít nhất 3 ký tự.";
+                _dialogService.ShowError(ErrorMessage, "Lỗi đăng ký");
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(RegStudentCode))
+            {
+                ErrorMessage = "Vui lòng nhập mã sinh viên.";
+                _dialogService.ShowError(ErrorMessage, "Lỗi đăng ký");
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(RegFullName))
+            {
+                ErrorMessage = "Vui lòng nhập họ và tên sinh viên.";
+                _dialogService.ShowError(ErrorMessage, "Lỗi đăng ký");
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(RegEmail))
+            {
+                ErrorMessage = "Vui lòng nhập địa chỉ Email.";
+                _dialogService.ShowError(ErrorMessage, "Lỗi đăng ký");
+                return;
+            }
+
+            if (!RegEmail.Contains("@") || !RegEmail.Contains("."))
+            {
+                ErrorMessage = "Địa chỉ Email không đúng định dạng (VD: student@fpt.edu.vn).";
+                _dialogService.ShowError(ErrorMessage, "Lỗi đăng ký");
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(RegPassword))
+            {
+                ErrorMessage = "Vui lòng nhập mật khẩu.";
+                _dialogService.ShowError(ErrorMessage, "Lỗi đăng ký");
+                return;
+            }
+
+            if (RegPassword.Length < 6)
+            {
+                ErrorMessage = "Mật khẩu phải có ít nhất 6 ký tự.";
+                _dialogService.ShowError(ErrorMessage, "Lỗi đăng ký");
                 return;
             }
 
             if (RegPassword != RegConfirmPassword)
             {
-                ErrorMessage = "Mật khẩu xác nhận không trùng khớp.";
+                ErrorMessage = "Mật khẩu xác nhận không trùng khớp với mật khẩu đã nhập.";
+                _dialogService.ShowError(ErrorMessage, "Lỗi đăng ký");
                 return;
             }
+
+            if (!string.IsNullOrWhiteSpace(RegPhone) && !System.Text.RegularExpressions.Regex.IsMatch(RegPhone.Trim(), @"^\d{9,11}$"))
+            {
+                ErrorMessage = "Số điện thoại phải chứa từ 9 đến 11 chữ số.";
+                _dialogService.ShowError(ErrorMessage, "Lỗi đăng ký");
+                return;
+            }
+
+            if (!string.IsNullOrWhiteSpace(RegEmergencyContactPhone) && !System.Text.RegularExpressions.Regex.IsMatch(RegEmergencyContactPhone.Trim(), @"^\d{9,11}$"))
+            {
+                ErrorMessage = "SĐT liên hệ khẩn cấp phải chứa từ 9 đến 11 chữ số.";
+                _dialogService.ShowError(ErrorMessage, "Lỗi đăng ký");
+                return;
+            }
+
+            if (!string.IsNullOrWhiteSpace(RegPhone) && !string.IsNullOrWhiteSpace(RegEmergencyContactPhone) &&
+                string.Equals(RegPhone.Trim(), RegEmergencyContactPhone.Trim(), StringComparison.OrdinalIgnoreCase))
+            {
+                ErrorMessage = "Số điện thoại cá nhân không được trùng với số điện thoại liên hệ khẩn cấp.";
+                _dialogService.ShowError(ErrorMessage, "Lỗi đăng ký");
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(RegAddress))
+            {
+                ErrorMessage = "Vui lòng nhập địa chỉ thường trú.";
+                _dialogService.ShowError(ErrorMessage, "Lỗi đăng ký");
+                return;
+            }
+
+            string dbGender = string.Equals(RegGender, "Nữ", StringComparison.OrdinalIgnoreCase) ? "Female" : "Male";
 
             IsBusy = true;
             var result = await _authService.RegisterStudentAsync(
                 RegUsername, RegPassword, RegEmail, RegPhone, 
-                RegFullName, RegStudentCode, RegMajor, RegClassName);
+                RegFullName, RegStudentCode, RegMajor, RegClassName,
+                RegEmergencyContactName, RegEmergencyContactPhone,
+                dbGender, RegAddress);
             IsBusy = false;
 
             if (result.IsSuccess)
@@ -242,6 +373,7 @@ namespace DormCare.WPF.ViewModels
             else
             {
                 ErrorMessage = result.Message;
+                _dialogService.ShowError(ErrorMessage, "Lỗi đăng ký");
             }
         }
     }

@@ -81,7 +81,11 @@ namespace DormCare.Business.Services
             string fullName, 
             string studentCode, 
             string major, 
-            string className)
+            string className,
+            string? emergencyContactName = null,
+            string? emergencyContactPhone = null,
+            string? gender = null,
+            string? address = null)
         {
             if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password) ||
                 string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(fullName) ||
@@ -106,6 +110,25 @@ namespace DormCare.Business.Services
             if (existingEmail)
             {
                 return ServiceResult<User>.Failure("Địa chỉ Email này đã được đăng ký.");
+            }
+
+            // Check duplicate phone in SQL Server
+            if (!string.IsNullOrWhiteSpace(phone))
+            {
+                string cleanPhone = phone.Trim();
+                var existingPhoneUsers = await _dbContext.Users.AnyAsync(u => u.Phone == cleanPhone);
+                var existingPhoneStudents = await _dbContext.Students.AnyAsync(s => s.Phone == cleanPhone);
+                if (existingPhoneUsers || existingPhoneStudents)
+                {
+                    return ServiceResult<User>.Failure("Số điện thoại này đã được đăng ký trong hệ thống.");
+                }
+            }
+
+            // Check phone != emergencyContactPhone
+            if (!string.IsNullOrWhiteSpace(phone) && !string.IsNullOrWhiteSpace(emergencyContactPhone) &&
+                string.Equals(phone.Trim(), emergencyContactPhone.Trim(), StringComparison.OrdinalIgnoreCase))
+            {
+                return ServiceResult<User>.Failure("Số điện thoại cá nhân không được trùng với số điện thoại liên hệ khẩn cấp.");
             }
 
             // Check duplicate student code
@@ -137,13 +160,15 @@ namespace DormCare.Business.Services
                 StudentCode = studentCode,
                 FullName = fullName,
                 DateOfBirth = DateTime.UtcNow.AddYears(-20),
-                Gender = "Male",
+                Gender = string.IsNullOrWhiteSpace(gender) ? "Male" : gender,
                 Email = email,
-                Phone = phone ?? "0900000000",
+                Phone = phone ?? string.Empty,
                 Major = string.IsNullOrWhiteSpace(major) ? "Software Engineering" : major,
                 ClassName = string.IsNullOrWhiteSpace(className) ? "SE1801" : className,
                 Campus = "FPT University Da Nang",
-                Address = "Đà Nẵng",
+                EmergencyContactName = emergencyContactName,
+                EmergencyContactPhone = emergencyContactPhone,
+                Address = string.IsNullOrWhiteSpace(address) ? "Đà Nẵng" : address.Trim(),
                 Status = "Active",
                 CreatedAt = DateTime.UtcNow
             };

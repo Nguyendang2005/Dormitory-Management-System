@@ -17,7 +17,7 @@
                 <TextBlock Text="Thêm, sửa, xóa, tìm kiếm sinh viên và quản lý Check-in / Check-out" FontSize="14" Foreground="{StaticResource TextMutedBrush}" Margin="0,4,0,0"/>
             </StackPanel>
             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Right">
-                <Button Content="➕ Thêm SV" Style="{StaticResource PrimaryButton}" Command="{Binding AddCommand}" Margin="0,0,8,0"/>
+                <Button Content="👁️ Chi tiết" Style="{StaticResource PrimaryButton}" Command="{Binding ViewDetailCommand}" Margin="0,0,8,0"/>
                 <Button Content="✏️ Sửa" Style="{StaticResource PrimaryButton}" Command="{Binding EditCommand}" Margin="0,0,8,0"/>
                 <Button Content="🗑️ Xóa" Style="{StaticResource DangerButton}" Command="{Binding DeleteCommand}" Margin="0,0,8,0"/>
                 <Border Width="1" Background="{StaticResource CardBorderBrush}" Margin="4,4,12,4"/>

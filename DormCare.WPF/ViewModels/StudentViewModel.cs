@@ -108,6 +108,7 @@ namespace DormCare.WPF.ViewModels
         public ICommand RefreshCommand { get; }
         public ICommand ClearFiltersCommand { get; }
         public ICommand AddCommand { get; }
+        public ICommand ViewDetailCommand { get; }
         public ICommand EditCommand { get; }
         public ICommand DeleteCommand { get; }
         public ICommand CheckInCommand { get; }
@@ -123,6 +124,7 @@ namespace DormCare.WPF.ViewModels
             RefreshCommand = new AsyncRelayCommand(LoadStudentsAsync);
             ClearFiltersCommand = new RelayCommand(_ => ExecuteClearFilters());
             AddCommand = new RelayCommand(ExecuteAdd);
+            ViewDetailCommand = new RelayCommand(ExecuteViewDetail, () => SelectedStudent != null);
             EditCommand = new RelayCommand(ExecuteEdit, () => SelectedStudent != null);
             DeleteCommand = new AsyncRelayCommand(ExecuteDeleteAsync, () => SelectedStudent != null);
             CheckInCommand = new RelayCommand(ExecuteCheckIn, () => SelectedStudent is { HasRoom: false });
@@ -239,6 +241,29 @@ namespace DormCare.WPF.ViewModels
                 if (success)
                 {
                     _dialogService.ShowInformation("Thêm sinh viên mới thành công!", "Thành công");
+                    await LoadStudentsAsync();
+                }
+            };
+
+            dialog.ShowDialog();
+        }
+
+        private void ExecuteViewDetail()
+        {
+            if (SelectedStudent == null) return;
+
+            var detailVm = new StudentDetailViewModel(_studentService, SelectedStudent);
+            var dialog = new StudentDetailWindow
+            {
+                DataContext = detailVm,
+                Owner = System.Windows.Application.Current?.MainWindow
+            };
+
+            detailVm.RequestClose += async (success) =>
+            {
+                dialog.Close();
+                if (success)
+                {
                     await LoadStudentsAsync();
                 }
             };

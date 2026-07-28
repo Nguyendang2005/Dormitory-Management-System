@@ -424,6 +424,10 @@ namespace DormCare.Business.Services
             if (!string.IsNullOrWhiteSpace(dto.EmergencyContactPhone) && !System.Text.RegularExpressions.Regex.IsMatch(dto.EmergencyContactPhone.Trim(), @"^0\d{9}$"))
                 return "SĐT liên hệ khẩn cấp phải bắt đầu bằng số 0 và gồm 10 chữ số.";
 
+            if (!string.IsNullOrWhiteSpace(dto.PhoneNumber) && !string.IsNullOrWhiteSpace(dto.EmergencyContactPhone) &&
+                string.Equals(dto.PhoneNumber.Trim(), dto.EmergencyContactPhone.Trim(), StringComparison.OrdinalIgnoreCase))
+                return "Số điện thoại cá nhân không được trùng với số điện thoại liên hệ khẩn cấp.";
+
             return null;
         }
     }

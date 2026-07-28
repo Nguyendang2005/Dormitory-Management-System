@@ -205,13 +205,36 @@ namespace DormCare.WPF.ViewModels
             SelectedPriorityFilter = "All";
         }
 
+        private bool _hasNoActiveRoom;
+        public bool HasNoActiveRoom
+        {
+            get => _hasNoActiveRoom;
+            set => SetProperty(ref _hasNoActiveRoom, value);
+        }
+
         public async Task LoadRequestsAsync()
         {
             IsBusy = true;
-            if (_currentUser != null && _currentUser.Role == "Student" && _currentUser.StudentProfile != null)
+            if (_currentUser != null && _currentUser.Role == "Student")
             {
-                var reqs = await _maintenanceService.GetRequestsByStudentIdAsync(_currentUser.StudentProfile.StudentId);
-                _allRequests = new ObservableCollection<MaintenanceRequest>(reqs);
+                var student = await _studentService.GetStudentByUserIdAsync(_currentUser.UserId);
+                if (student != null)
+                {
+                    var reqs = await _maintenanceService.GetRequestsByStudentIdAsync(student.StudentId);
+                    _allRequests = new ObservableCollection<MaintenanceRequest>(reqs);
+
+                    var activeAssignment = student.RoomAssignments.FirstOrDefault(ra => ra.Status == "Active");
+                    if (activeAssignment == null || activeAssignment.Room == null)
+                    {
+                        HasNoActiveRoom = true;
+                        ValidationMessage = "⚠️ Bạn chưa nhận phòng trong ký túc xá nên không thể gửi báo cáo sự cố.";
+                        HasValidationError = true;
+                    }
+                    else
+                    {
+                        HasNoActiveRoom = false;
+                    }
+                }
             }
             else
             {
@@ -250,6 +273,13 @@ namespace DormCare.WPF.ViewModels
 
         private bool ValidateInput()
         {
+            if (HasNoActiveRoom)
+            {
+                ValidationMessage = "⚠️ Bạn chưa nhận phòng trong ký túc xá nên không thể gửi báo cáo sự cố.";
+                HasValidationError = true;
+                return false;
+            }
+
             if (string.IsNullOrWhiteSpace(NewTitle))
             {
                 ValidationMessage = "⚠️ Tiêu đề sự cố không được để trống.";
@@ -271,6 +301,20 @@ namespace DormCare.WPF.ViewModels
 
         private async Task ExecuteCreateRequestAsync()
         {
+            if (_currentUser != null && _currentUser.Role == "Student")
+            {
+                var student = await _studentService.GetStudentByUserIdAsync(_currentUser.UserId);
+                var activeAssignment = student?.RoomAssignments.FirstOrDefault(ra => ra.Status == "Active");
+                if (student == null || activeAssignment == null || activeAssignment.Room == null)
+                {
+                    HasNoActiveRoom = true;
+                    ValidationMessage = "⚠️ Bạn chưa nhận phòng trong ký túc xá nên không thể gửi báo cáo sự cố.";
+                    HasValidationError = true;
+                    _dialogService.ShowError("Bạn chưa nhận phòng trong ký túc xá nên không thể gửi báo cáo sự cố.", "Chưa Có Phòng Ở");
+                    return;
+                }
+            }
+
             if (!ValidateInput())
             {
                 _dialogService.ShowError(ValidationMessage, "Lỗi Nhập Liệu");
@@ -280,9 +324,12 @@ namespace DormCare.WPF.ViewModels
             int studentId = 1; // Default fallback
             int roomId = SelectedNewRoomId ?? 1;
 
-            if (_currentUser != null && _currentUser.StudentProfile != null)
+            if (_currentUser != null && _currentUser.Role == "Student")
             {
-                studentId = _currentUser.StudentProfile.StudentId;
+                var student = await _studentService.GetStudentByUserIdAsync(_currentUser.UserId);
+                var activeAssignment = student!.RoomAssignments.First(ra => ra.Status == "Active");
+                studentId = student.StudentId;
+                roomId = activeAssignment.RoomId;
             }
             else
             {
