@@ -412,7 +412,7 @@ namespace DormCare.WPF.ViewModels
             if (result.IsSuccess)
             {
                 _dialogService.ShowInformation(result.Message);
-                await LoadRequestsAsync();
+                await LoadRequestsAsync(); //Fix here  
             }
             else
             {

@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using DormCare.DataAccess.Data;
 using DormCare.Domain.Entities;
+using System.Runtime.InteropServices;
 
 namespace DormCare.DataAccess.Repositories
 {
@@ -32,11 +33,7 @@ namespace DormCare.DataAccess.Repositories
                 .Include(m => m.Room)
                     .ThenInclude(r => r.Building)
                 .Where(m => m.StudentId == studentId)
-                .OrderBy(m => m.Status == "Closed" || m.Status == "Resolved" ? 1 : 0)
-                .ThenBy(m => m.Priority == "Urgent" ? 1 :
-                             m.Priority == "High" ? 2 :
-                             m.Priority == "Medium" ? 3 : 4)
-                .ThenBy(m => m.CreatedAt) // FIFO: Đơn gửi từ lâu chưa xử lý được ưu tiên nổi lên trước
+                .OrderByDescending (m=>m.CreatedAt)
                 .ToListAsync();
         }
 
