@@ -39,5 +39,12 @@ namespace DormCare.DataAccess.Repositories
                     .ThenInclude(a => a.Room)
                 .FirstOrDefaultAsync(s => s.UserId == userId);
         }
+
+        public async Task<Student?> GetByIdWithAssignmentsAsync(int studentId)
+        {
+            return await _dbSet
+                .Include(s => s.RoomAssignments)
+                .FirstOrDefaultAsync(s => s.StudentId == studentId);
+        }
     }
 }

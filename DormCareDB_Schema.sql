@@ -214,9 +214,7 @@ CREATE TABLE Invoices
     PaidAt DATETIME2 NULL,
     Status VARCHAR(20) NOT NULL CONSTRAINT DF_Invoices_Status DEFAULT 'Unpaid',
     Note NVARCHAR(500) NULL,
-    CreatedAt DATETIME2 NOT NULL CONSTRAINT DF_Invoices_CreatedAt DEFAULT SYSUTCDATETIME(),
     CONSTRAINT UQ_Invoices_Code UNIQUE (InvoiceCode),
-    CONSTRAINT UQ_Invoices_Student_Month UNIQUE (StudentId, BillingMonth),
     CONSTRAINT CK_Invoices_Fee CHECK (RoomFee >= 0 AND ServiceFee >= 0 AND OtherFee >= 0 AND DiscountAmount >= 0),
     CONSTRAINT CK_Invoices_Status CHECK (Status IN ('Draft', 'Unpaid', 'PartiallyPaid', 'Paid', 'Overdue', 'Cancelled')),
     CONSTRAINT FK_Invoices_Student FOREIGN KEY (StudentId) REFERENCES Students(StudentId),
@@ -327,6 +325,7 @@ CREATE INDEX IX_Applications_Status ON RoomApplications(Status);
 CREATE INDEX IX_Applications_Student ON RoomApplications(StudentId);
 CREATE INDEX IX_Invoices_Status ON Invoices(Status);
 CREATE INDEX IX_Invoices_DueDate ON Invoices(DueDate);
+CREATE UNIQUE NONCLUSTERED INDEX UQ_Invoices_Student_Month ON Invoices(StudentId, BillingMonth) WHERE Status <> 'Cancelled';
 CREATE INDEX IX_Payments_Invoice ON Payments(InvoiceId);
 CREATE INDEX IX_Maintenance_Status_Priority ON MaintenanceRequests(Status, Priority);
 CREATE INDEX IX_Notifications_User_Read ON Notifications(UserId, IsRead);

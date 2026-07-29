@@ -88,6 +88,18 @@ namespace DormCare.DataAccess.Data
                             ALTER TABLE Invoices ADD IsOverdueReminderSent BIT NOT NULL DEFAULT 0;
                     ");
 
+                    // Convert UQ_Invoices_Student_Month to a filtered unique index ignoring Cancelled status
+                    await context.Database.ExecuteSqlRawAsync(@"
+                        IF EXISTS (SELECT * FROM sys.key_constraints WHERE name = 'UQ_Invoices_Student_Month')
+                            ALTER TABLE Invoices DROP CONSTRAINT UQ_Invoices_Student_Month;
+
+                        IF EXISTS (SELECT * FROM sys.indexes WHERE name = 'UQ_Invoices_Student_Month' AND object_id = OBJECT_ID('Invoices') AND filter_definition IS NULL)
+                            DROP INDEX UQ_Invoices_Student_Month ON Invoices;
+
+                        IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'UQ_Invoices_Student_Month' AND object_id = OBJECT_ID('Invoices'))
+                            CREATE UNIQUE NONCLUSTERED INDEX UQ_Invoices_Student_Month ON Invoices(StudentId, BillingMonth) WHERE Status <> 'Cancelled';
+                    ");
+
                     // Fix invalid RoomType values violating CK_Rooms_Type
                     await context.Database.ExecuteSqlRawAsync(
                         "UPDATE Rooms SET RoomType = 'Premium' WHERE RoomType NOT IN ('Standard', 'Premium', 'Accessible');");

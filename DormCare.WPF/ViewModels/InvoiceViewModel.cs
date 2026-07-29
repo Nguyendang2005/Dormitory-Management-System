@@ -139,6 +139,7 @@ namespace DormCare.WPF.ViewModels
         public ICommand ViewInvoiceDetailsCommand { get; }
         public ICommand UpdatePaymentCommand { get; }
         public ICommand DeleteInvoiceCommand { get; }
+        public ICommand CancelInvoiceCommand { get; }
         public ICommand FilterUnpaidCommand { get; }
         public ICommand FilterAllCommand { get; }
 
@@ -161,8 +162,9 @@ namespace DormCare.WPF.ViewModels
             RefreshCommand = new AsyncRelayCommand(LoadInvoicesAsync);
             CreateInvoiceCommand = new RelayCommand(ExecuteCreateInvoice);
             ViewInvoiceDetailsCommand = new RelayCommand(ExecuteViewInvoiceDetails, () => SelectedInvoice != null);
-            UpdatePaymentCommand = new RelayCommand(ExecuteUpdatePayment, () => SelectedInvoice != null && SelectedInvoice.Status != "Paid");
-            DeleteInvoiceCommand = new AsyncRelayCommand(ExecuteDeleteInvoiceAsync, () => SelectedInvoice != null && SelectedInvoice.Status != "Paid" && SelectedInvoice.Status != "Overdue");
+            UpdatePaymentCommand = new RelayCommand(ExecuteUpdatePayment, () => SelectedInvoice != null && SelectedInvoice.Status != "Paid" && SelectedInvoice.Status != "Cancelled");
+            CancelInvoiceCommand = new AsyncRelayCommand(ExecuteCancelInvoiceAsync, () => SelectedInvoice != null && SelectedInvoice.Status != "Paid" && SelectedInvoice.Status != "Cancelled");
+            DeleteInvoiceCommand = new AsyncRelayCommand(ExecuteDeleteInvoiceAsync, () => SelectedInvoice != null && SelectedInvoice.Status == "Draft");
             FilterUnpaidCommand = new RelayCommand(() => SelectedStatusFilter = "Unpaid");
             FilterAllCommand = new RelayCommand(() => SelectedStatusFilter = "All");
             ClearDateFilterCommand = new RelayCommand(() =>
@@ -366,11 +368,33 @@ namespace DormCare.WPF.ViewModels
             dialog.ShowDialog();
         }
 
+        private async Task ExecuteCancelInvoiceAsync()
+        {
+            if (SelectedInvoice == null) return;
+
+            bool confirm = _dialogService.ShowConfirmation($"Bạn có chắc chắn muốn HỦY hóa đơn '{SelectedInvoice.InvoiceCode}' của sinh viên {SelectedInvoice.StudentName}?\n(Sau khi hủy, hóa đơn sẽ chuyển trạng thái Cancelled và không thể thanh toán - BR-INV-05 & BR-PAY-04)");
+            if (!confirm) return;
+
+            IsBusy = true;
+            var result = await _invoiceService.CancelInvoiceAsync(SelectedInvoice.Id, "Hủy theo yêu cầu của Quản lý");
+            IsBusy = false;
+
+            if (result.IsSuccess)
+            {
+                _dialogService.ShowInformation(result.Message);
+                await LoadInvoicesAsync();
+            }
+            else
+            {
+                _dialogService.ShowError(result.Message);
+            }
+        }
+
         private async Task ExecuteDeleteInvoiceAsync()
         {
             if (SelectedInvoice == null) return;
 
-            bool confirm = _dialogService.ShowConfirmation($"Bạn có chắc chắn muốn xóa hóa đơn '{SelectedInvoice.InvoiceCode}' của sinh viên {SelectedInvoice.StudentName}?");
+            bool confirm = _dialogService.ShowConfirmation($"Bạn có chắc chắn muốn xóa hóa đơn nháp '{SelectedInvoice.InvoiceCode}' của sinh viên {SelectedInvoice.StudentName}?");
             if (!confirm) return;
 
             IsBusy = true;

@@ -34,9 +34,15 @@ namespace DormCare.Business.Services
 
         public async Task<ServiceResult<InvoiceDto>> CreateInvoiceAsync(CreateInvoiceDto dto)
         {
-            var student = await _studentRepository.GetByIdAsync(dto.StudentId);
+            var student = await _studentRepository.GetByIdWithAssignmentsAsync(dto.StudentId);
             if (student == null)
                 return ServiceResult<InvoiceDto>.Failure("Không tìm thấy sinh viên đã chọn.");
+
+            // BR-INV-07: Không phát sinh hóa đơn cho sinh viên đã Checkout / không có hợp đồng ở active
+            if (student.RoomAssignments == null || !student.RoomAssignments.Any(ra => ra.Status.Equals("Active", StringComparison.OrdinalIgnoreCase)))
+            {
+                return ServiceResult<InvoiceDto>.Failure("Sinh viên không còn hợp đồng lưu trú (đã Checkout hoặc chưa nhận phòng), không thể phát sinh hóa đơn (BR-INV-07).");
+            }
 
             var room = await _roomRepository.GetByIdAsync(dto.RoomId);
             if (room == null)
@@ -44,13 +50,15 @@ namespace DormCare.Business.Services
 
             DateTime billingMonth = new DateTime(dto.BillingMonth.Year, dto.BillingMonth.Month, 1);
 
+            // BR-INV-08: Không tạo trùng BillingMonth cho cùng 1 sinh viên (bỏ qua hóa đơn đã hủy)
             var existingInvoices = await _invoiceRepository.FindAsync(
                 i => i.StudentId == dto.StudentId &&
                      i.BillingMonth.Month == dto.BillingMonth.Month &&
-                     i.BillingMonth.Year == dto.BillingMonth.Year);
+                     i.BillingMonth.Year == dto.BillingMonth.Year &&
+                     i.Status != "Cancelled");
             if (existingInvoices.Any())
             {
-                return ServiceResult<InvoiceDto>.Failure($"Sinh viên {student.FullName} đã có hóa đơn cho tháng {dto.BillingMonth:MM/yyyy} rồi!");
+                return ServiceResult<InvoiceDto>.Failure($"Sinh viên {student.FullName} đã có hóa đơn đang hiệu lực cho kỳ {dto.BillingMonth:MM/yyyy} rồi (BR-INV-08). Không thể tạo trùng kỳ thanh toán!");
             }
 
             string invoiceCode = await _invoiceRepository.GenerateNextInvoiceCodeAsync();
@@ -81,6 +89,10 @@ namespace DormCare.Business.Services
             catch (Exception ex)
             {
                 var realError = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
+                if (realError.Contains("UQ_Invoices_Student_Month") || realError.Contains("UNIQUE KEY") || realError.Contains("duplicate key"))
+                {
+                    return ServiceResult<InvoiceDto>.Failure($"Sinh viên {student.FullName} đã có hóa đơn cho kỳ {dto.BillingMonth:MM/yyyy} rồi (BR-INV-08). Không thể tạo trùng kỳ thanh toán!");
+                }
                 return ServiceResult<InvoiceDto>.Failure($"Lỗi lưu hóa đơn: {realError}");
             }
 
@@ -114,6 +126,9 @@ namespace DormCare.Business.Services
             bool hasChanges = false;
             foreach (var i in invoices)
             {
+                // BR-INV-05: Hóa đơn đã Hủy thì giữ nguyên trạng thái Cancelled
+                if (i.Status.Equals("Cancelled", StringComparison.OrdinalIgnoreCase)) continue;
+
                 decimal totalPaid = i.Payments != null
                     ? i.Payments.Where(p => p.Status == "Completed").Sum(p => p.Amount)
                     : 0;
@@ -235,6 +250,17 @@ namespace DormCare.Business.Services
             var invoice = await _invoiceRepository.GetByIdAsync(invoiceId);
             if (invoice == null) return ServiceResult<bool>.Failure("Không tìm thấy hóa đơn.");
 
+            // BR-INV-04 & BR-PAY-04: Cấm thanh toán hóa đơn Cancelled
+            if (invoice.Status.Equals("Cancelled", StringComparison.OrdinalIgnoreCase))
+            {
+                return ServiceResult<bool>.Failure("Không thể thanh toán cho hóa đơn đã bị hủy (BR-PAY-04).");
+            }
+
+            if (invoice.Status.Equals("Paid", StringComparison.OrdinalIgnoreCase))
+            {
+                return ServiceResult<bool>.Failure("Hóa đơn này đã ở trạng thái Paid trước đó (BR-INV-04).");
+            }
+
             invoice.Status = "Paid";
             invoice.PaidAt = DateTime.UtcNow;
 
@@ -244,36 +270,81 @@ namespace DormCare.Business.Services
             return ServiceResult<bool>.Success(true, "Xác nhận thanh toán hóa đơn thành công!");
         }
 
+        // BR-INV-04 & BR-INV-06: Cập nhật hóa đơn - không sửa hóa đơn Paid / Cancelled
+        public async Task<ServiceResult<InvoiceDto>> UpdateInvoiceAsync(int invoiceId, decimal roomFee, decimal electricityFee, decimal waterFee, decimal discountAmount, string note)
+        {
+            var invoice = await _invoiceRepository.GetByIdWithDetailsAsync(invoiceId);
+            if (invoice == null)
+                return ServiceResult<InvoiceDto>.Failure("Không tìm thấy hóa đơn cần cập nhật.");
+
+            if (invoice.Status.Equals("Paid", StringComparison.OrdinalIgnoreCase))
+                return ServiceResult<InvoiceDto>.Failure("Hóa đơn đã ở trạng thái Paid (Đã thanh toán) là Read-Only, không được phép sửa (BR-INV-04 & BR-INV-06).");
+
+            if (invoice.Status.Equals("Cancelled", StringComparison.OrdinalIgnoreCase))
+                return ServiceResult<InvoiceDto>.Failure("Hóa đơn đã ở trạng thái Cancelled (Đã hủy), không được phép sửa (BR-INV-06).");
+
+            invoice.RoomFee = roomFee;
+            invoice.ServiceFee = electricityFee;
+            invoice.OtherFee = waterFee;
+            invoice.DiscountAmount = discountAmount;
+            invoice.TotalAmount = CalculateTotalFee(roomFee, electricityFee, waterFee, discountAmount);
+            if (!string.IsNullOrEmpty(note)) invoice.Note = note;
+
+            await _invoiceRepository.UpdateAsync(invoice);
+            await _invoiceRepository.SaveChangesAsync();
+
+            var updated = await _invoiceRepository.GetByIdWithDetailsAsync(invoiceId);
+            return ServiceResult<InvoiceDto>.Success(MapToDto(updated!), "Cập nhật hóa đơn thành công!");
+        }
+
+        // BR-INV-05: Hủy hóa đơn (Cancelled) thay vì xóa cứng
+        public async Task<ServiceResult<bool>> CancelInvoiceAsync(int invoiceId, string reason = "")
+        {
+            var invoice = await _invoiceRepository.GetByIdWithDetailsAsync(invoiceId);
+            if (invoice == null)
+                return ServiceResult<bool>.Failure("Không tìm thấy hóa đơn cần hủy.");
+
+            if (invoice.Status.Equals("Paid", StringComparison.OrdinalIgnoreCase))
+                return ServiceResult<bool>.Failure("Không thể hủy hóa đơn đã ở trạng thái Paid (BR-INV-04).");
+
+            if (invoice.Status.Equals("Cancelled", StringComparison.OrdinalIgnoreCase))
+                return ServiceResult<bool>.Failure("Hóa đơn này đã được hủy từ trước.");
+
+            if (invoice.Payments != null && invoice.Payments.Any(p => p.Status.Equals("Completed", StringComparison.OrdinalIgnoreCase)))
+                return ServiceResult<bool>.Failure("Không thể hủy hóa đơn đã có giao dịch thanh toán thành công.");
+
+            invoice.Status = "Cancelled";
+            if (!string.IsNullOrWhiteSpace(reason))
+            {
+                invoice.Note = string.IsNullOrWhiteSpace(invoice.Note) ? $"[Đã hủy]: {reason}" : $"[Đã hủy]: {reason} | {invoice.Note}";
+            }
+
+            await _invoiceRepository.UpdateAsync(invoice);
+            await _invoiceRepository.SaveChangesAsync();
+            return ServiceResult<bool>.Success(true, "Hủy hóa đơn thành công (BR-INV-05)!");
+        }
+
+        // BR-INV-05: Không được xóa hóa đơn đã phát hành (chỉ xóa Draft nếu có)
         public async Task<ServiceResult<bool>> DeleteInvoiceAsync(int invoiceId)
         {
             var invoice = await _invoiceRepository.GetByIdWithDetailsAsync(invoiceId);
             if (invoice == null)
-                return ServiceResult<bool>.Failure("Không tìm thấy hóa đơn cần xóa.");
+                return ServiceResult<bool>.Failure("Không tìm thấy hóa đơn.");
 
-            if (invoice.Status.Equals("Paid", StringComparison.OrdinalIgnoreCase))
+            if (!invoice.Status.Equals("Draft", StringComparison.OrdinalIgnoreCase))
             {
-                return ServiceResult<bool>.Failure("Không thể xóa hóa đơn đã thanh toán.");
-            }
-
-            if (invoice.Status.Equals("Overdue", StringComparison.OrdinalIgnoreCase))
-            {
-                return ServiceResult<bool>.Failure("Không thể xóa hóa đơn đang trong trạng thái quá hạn.");
-            }
-
-            if (invoice.Payments != null && invoice.Payments.Any())
-            {
-                return ServiceResult<bool>.Failure("Không thể xóa hóa đơn này vì đã có giao dịch thanh toán.");
+                return ServiceResult<bool>.Failure("Không được phép xóa hóa đơn đã phát hành. Vui lòng sử dụng tính năng Hủy hóa đơn (Cancel) (BR-INV-05).");
             }
 
             try
             {
                 await _invoiceRepository.DeleteAsync(invoice);
                 await _invoiceRepository.SaveChangesAsync();
-                return ServiceResult<bool>.Success(true, "Xóa hóa đơn thành công!");
+                return ServiceResult<bool>.Success(true, "Xóa hóa đơn nháp thành công!");
             }
             catch (Exception)
             {
-                return ServiceResult<bool>.Failure("Không thể xóa hóa đơn này vì đã có dữ liệu liên quan.");
+                return ServiceResult<bool>.Failure("Không thể xóa hóa đơn nháp này.");
             }
         }
 
@@ -284,17 +355,20 @@ namespace DormCare.Business.Services
                 : 0;
 
             string status = i.Status;
-            if (totalPaid >= i.TotalAmount)
+            if (!status.Equals("Cancelled", StringComparison.OrdinalIgnoreCase))
             {
-                status = "Paid";
-            }
-            else if (totalPaid > 0)
-            {
-                status = "PartiallyPaid";
-            }
-            else if (i.DueDate.Date < DateTime.Today.Date)
-            {
-                status = "Overdue";
+                if (totalPaid >= i.TotalAmount)
+                {
+                    status = "Paid";
+                }
+                else if (totalPaid > 0)
+                {
+                    status = "PartiallyPaid";
+                }
+                else if (i.DueDate.Date < DateTime.Today.Date)
+                {
+                    status = "Overdue";
+                }
             }
 
             return new InvoiceDto

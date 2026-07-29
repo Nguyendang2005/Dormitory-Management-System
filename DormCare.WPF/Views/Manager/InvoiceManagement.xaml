@@ -22,7 +22,7 @@
                     <Button Content="➕ Tạo Hóa Đơn" Style="{StaticResource PrimaryButton}" Command="{Binding CreateInvoiceCommand}" Margin="0,0,8,0"/>
                     <Button Content="👁️ Xem Chi Tiết" Style="{StaticResource SecondaryButton}" Command="{Binding ViewInvoiceDetailsCommand}" Margin="0,0,8,0"/>
                     <Button Content="💳 Cập Nhật Thanh Toán" Style="{StaticResource SecondaryButton}" Command="{Binding UpdatePaymentCommand}" Margin="0,0,8,0"/>
-                    <Button Content="🗑️ Xóa Hóa Đơn" Style="{StaticResource SmallDangerButton}" Command="{Binding DeleteInvoiceCommand}" Height="36" Padding="12,0" Margin="0,0,8,0"/>
+                    <Button Content="🚫 Hủy Hóa Đơn" Style="{StaticResource SmallDangerButton}" Command="{Binding CancelInvoiceCommand}" Height="36" Padding="12,0" Margin="0,0,8,0"/>
                     <Button Content="🔄 Tải Lại Dữ Liệu" Style="{StaticResource SecondaryButton}" Command="{Binding RefreshCommand}"/>
                 </StackPanel>
                 <StackPanel VerticalAlignment="Center">
@@ -98,6 +98,7 @@
                         <ComboBoxItem Content="⏳ Thanh toán 1 phần (PartiallyPaid)" Tag="PartiallyPaid"/>
                         <ComboBoxItem Content="✅ Đã thanh toán (Paid)" Tag="Paid"/>
                         <ComboBoxItem Content="🛑 Quá hạn (Overdue)" Tag="Overdue"/>
+                        <ComboBoxItem Content="🚫 Đã hủy (Cancelled)" Tag="Cancelled"/>
                     </ComboBox>
                 </StackPanel>
 

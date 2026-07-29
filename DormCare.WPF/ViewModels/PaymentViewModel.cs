@@ -135,13 +135,13 @@ namespace DormCare.WPF.ViewModels
         {
             if (AmountToPay <= 0)
             {
-                ErrorMessage = "Số tiền nhập vào phải lớn hơn 0.";
+                ErrorMessage = "Số tiền nhập vào phải lớn hơn 0 (BR-PAY-01).";
                 return;
             }
 
             if (AmountToPay > TotalStudentDebt)
             {
-                ErrorMessage = $"Số tiền vượt quá tổng dư nợ của sinh viên ({TotalStudentDebt:N0} VNĐ).";
+                ErrorMessage = $"Số tiền thanh toán ({AmountToPay:N0} VNĐ) không được vượt quá tổng dư nợ của sinh viên ({TotalStudentDebt:N0} VNĐ) (BR-PAY-03).";
                 return;
             }
 

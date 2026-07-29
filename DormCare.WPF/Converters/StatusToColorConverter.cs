@@ -17,7 +17,7 @@ namespace DormCare.WPF.Converters
                 "Pending" or "InProgress" => new SolidColorBrush((Color)ColorConverter.ConvertFromString("#EAB308")), // Gold Yellow
                 "Full" or "Unpaid" or "Rejected" or "Occupied" => new SolidColorBrush((Color)ColorConverter.ConvertFromString("#EF4444")), // Crimson Red
                 "Overdue" or "Maintenance" => new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F59E0B")), // Amber Orange
-                "Inactive" or "Disabled" => new SolidColorBrush((Color)ColorConverter.ConvertFromString("#94A3B8")), // Muted Slate Gray
+                "Inactive" or "Disabled" or "Cancelled" => new SolidColorBrush((Color)ColorConverter.ConvertFromString("#94A3B8")), // Muted Slate Gray
                 _ => new SolidColorBrush((Color)ColorConverter.ConvertFromString("#64748B"))
             };
         }

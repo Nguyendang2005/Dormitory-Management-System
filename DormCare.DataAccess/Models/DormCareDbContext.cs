@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 
@@ -126,7 +126,9 @@ public partial class DormCareDbContext : DbContext
 
             entity.HasIndex(e => e.InvoiceCode, "UQ_Invoices_Code").IsUnique();
 
-            entity.HasIndex(e => new { e.StudentId, e.BillingMonth }, "UQ_Invoices_Student_Month").IsUnique();
+            entity.HasIndex(e => new { e.StudentId, e.BillingMonth }, "UQ_Invoices_Student_Month")
+                .IsUnique()
+                .HasFilter("[Status] <> 'Cancelled'");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())", "DF_Invoices_CreatedAt");
             entity.Property(e => e.DiscountAmount).HasColumnType("decimal(18, 2)");
